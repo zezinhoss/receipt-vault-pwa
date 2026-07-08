@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
+<title>Vault Scanner</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  body{font-family:'Inter',sans-serif;background:#0a0a0a;background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%);color:#fff;padding:20px;display:flex;justify-content:center;align-items:center;min-height:90vh;margin:0}
+  .glass-panel{background:rgba(30,30,30,0.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:40px 30px;border-radius:24px;border:1px solid rgba(250,204,21,0.15);box-shadow:0 25px 50px rgba(0,0,0,0.5);width:100%;max-width:360px;text-align:center;box-sizing:border-box}
+  h3{color:#facc15;font-size:16px;font-weight:600;letter-spacing:2px;margin-top:0;margin-bottom:6px}
+  p{color:#888;font-size:13px;font-weight:300;margin-bottom:30px}
+  .pin-container{display:flex;gap:12px;justify-content:center;margin-bottom:10px}
+  .pin-box{width:50px;height:60px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#facc15;font-size:24px;text-align:center;outline:none;transition:all 0.3s ease}
+  .pin-box:focus{border-color:#facc15;box-shadow:0 0 15px rgba(250,204,21,0.2);background:rgba(0,0,0,0.6)}
+  .input-group{display:flex;gap:10px;margin-bottom:15px}
+  select{flex:1;appearance:none;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#ddd;padding:14px 12px;font-size:13px;outline:none;text-align:center}
+  .toggle-btn{flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px 10px; color:#888; font-size:14px; text-align:center; cursor:pointer; user-select:none;}
+  .toggle-btn.active{border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2);}
+  .toggle-btn.active .t-text{color:#facc15; font-weight:600;}
+  .btn{display:block;width:100%;background:transparent;color:#ddd;padding:16px;border-radius:12px;font-size:13px;font-weight:400;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);margin-bottom:12px;text-transform:uppercase}
+  .btn-primary{background:rgba(250,204,21,0.9);color:#000;border:none;font-weight:600}
+  input[type='file']{display:none;}
+  #status{margin-top:20px;font-size:13px;color:#888;}
+  .error-text{color:#ef4444!important;} .success-text{color:#22c55e!important;} .loading-text{color:#facc15!important;}
+</style>
+</head>
+<body>
+<div class='glass-panel'>
+  <div id='login-view'>
+    <h3>SECURE VAULT</h3><p>Restricted Access</p>
+    <div class="pin-container" id="pin-container">
+      <input type="password" class="pin-box" inputmode="numeric" maxlength="1">
+      <input type="password" class="pin-box" inputmode="numeric" maxlength="1">
+      <input type="password" class="pin-box" inputmode="numeric" maxlength="1">
+      <input type="password" class="pin-box" inputmode="numeric" maxlength="1">
+    </div>
+    <div id='login-status' style='margin-top:15px;color:#ef4444;font-size:13px;'></div>
+  </div>
+
+  <div id='app-view' style='display:none;'>
+    <h3>EXPENSE SCAN</h3><p id="sub-title">Document Ingestion</p>
+    <div class="input-group">
+      <select id='monthOverride'>
+        <option value='auto'>Auto Month</option><option value='1'>January</option><option value='2'>February</option><option value='3'>March</option><option value='4'>April</option><option value='5'>May</option><option value='6'>June</option><option value='7'>July</option><option value='8'>August</option><option value='9'>September</option><option value='10'>October</option><option value='11'>November</option><option value='12'>December</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-bottom:25px;">
+      <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()"><span class="t-text" id="text-digital">Digital?</span></div>
+      <div class="toggle-btn" id="btn-cash" onclick="toggleCash()"><span class="t-text" id="text-cash">In Cash?</span></div>
+    </div>
+    <div id='inputContainer'>
+      <label class='btn'>Open Gallery / Camera<input type='file' accept='image/*,application/pdf' onchange='handleFile(this.files[0])'></label>
+    </div>
+    <button id='processBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Upload to Vault</button>
+    <div id='status'>Awaiting Document...</div>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5KXjXC2DyS7bzalY7Sei_3lTiwiDdR9MHoe-tYqjRtdXASO-6S9soHNUHWPTKXJdG/exec";
+  
+  let cachedBase64 = "", cachedMimeType = "", cachedPin = "", isDigital = false, isCash = false;
+
+  // Pin Logic
+  const pinBoxes = document.querySelectorAll('.pin-box');
+  let rawPin = ['','','',''];
+  pinBoxes.forEach((box, index) => {
+    box.addEventListener('input', () => {
+      rawPin[index] = box.value;
+      if(box.value && index < 3) pinBoxes[index+1].focus();
+      else if(index === 3) unlockApp();
+    });
+  });
+
+  function unlockApp() {
+    cachedPin = rawPin.join('');
+    if(cachedPin.length === 4) {
+      // In this decoupled version, we trust the 4 digits locally and let Google verify it on upload.
+      document.getElementById('login-view').style.display = 'none';
+      document.getElementById('app-view').style.display = 'block';
+    }
+  }
+
+  function toggleDigital() { isDigital = !isDigital; document.getElementById('btn-digital').classList.toggle('active'); document.getElementById('text-digital').innerText = isDigital ? 'Digital ✓' : 'Digital?'; }
+  function toggleCash() { isCash = !isCash; document.getElementById('btn-cash').classList.toggle('active'); document.getElementById('text-cash').innerText = isCash ? 'In Cash ✓' : 'In Cash?'; }
+  function setStatus(msg, type) { const el = document.getElementById('status'); el.innerHTML = msg; el.className = type + '-text'; }
+
+  // Service Worker & Native Share Target Interception
+  if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (new URL(window.location).searchParams.has('shared_file')) {
+      navigator.serviceWorker.ready.then(reg => reg.active.postMessage({action: 'get-shared-file'}));
+    }
+  });
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data && event.data.file) { handleFile(event.data.file); }
+  });
+
+  function handleFile(file) {
+    if(!file) return;
+    setStatus('Reading file...', 'loading');
+    cachedMimeType = file.type;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      cachedBase64 = e.target.result.split(',')[1];
+      document.getElementById('inputContainer').style.display = 'none';
+      document.getElementById('processBtn').style.display = 'block';
+      setStatus(`File loaded: ${file.name}. Ready to upload.`, 'success');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function runAPI() {
+    setStatus('Transmitting to Google Vault...', 'loading');
+    document.getElementById('processBtn').style.display = 'none';
+
+    const payload = {
+      fileData: cachedBase64,
+      mimeType: cachedMimeType,
+      pin: cachedPin,
+      month: document.getElementById('monthOverride').value,
+      isCash: isCash,
+      isDigital: isDigital
+    };
+
+    // Use text/plain to avoid CORS preflight blocks on Google Scripts
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "text/plain;charset=utf-8" }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if(data.status === 'success') {
+        setStatus('✓ Saved Successfully!<br>' + data.file, 'success');
+      } else {
+        setStatus('Error: ' + data.error, 'error');
+        document.getElementById('processBtn').style.display = 'block';
+      }
+    }).catch(err => {
+      setStatus('Network Error: ' + err.message, 'error');
+      document.getElementById('processBtn').style.display = 'block';
+    });
+  }
+</script>
+</body>
+</html>
