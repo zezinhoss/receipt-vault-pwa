@@ -1,24 +1,29 @@
 {
-  "name": "RCexs Receipt Vault PWA",
+  "name": "Receipt Vault",
   "short_name": "Vault",
-  "start_url": "./index.html",
+  "start_url": "https://zezinhoss.github.io/receipt-vault-pwa/index.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#facc15",
   "icons": [
     {
-      "src": "./icon.png",
+      "src": "https://zezinhoss.github.io/receipt-vault-pwa/icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "share_target": {
-    "action": "./index.html",
-    "method": "GET",
+    "action": "https://zezinhoss.github.io/receipt-vault-pwa/_share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
     "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
+      "files": [
+        {
+          "name": "receipt_file",
+          "accept": ["application/pdf", "image/*"]
+        }
+      ]
     }
   }
 }
