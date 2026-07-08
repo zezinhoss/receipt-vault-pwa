@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
     <title>Vault Scanner</title>
     
-    <!-- MANDATORY PWA LINKS -->
+    <!-- PWA MANIFEST LINK -->
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png">
     <meta name="theme-color" content="#facc15">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
@@ -131,8 +130,7 @@
             document.getElementById('login-status').innerText='Verifying...';
             document.getElementById('login-status').style.color='#facc15';
             
-            // Bypass GAS run logic for testing UI / Share Target in GH Pages. 
-            // Real authentication happens when payload is sent to GAS backend.
+            // Bypass GAS run logic for testing UI / Share Target in GH Pages.
             cachedPin=pin;
             document.getElementById('login-view').style.display='none';
             document.getElementById('app-view').style.display='block';
@@ -243,8 +241,6 @@
 
         function runAPI(){
             setStatus('Payload intercepted successfully! Connect to GAS API here. 🚀','success');
-            // This is where you will point a fetch() call to your Google Apps Script Web App URL later
-            // since google.script.run is disconnected when hosted externally.
         }
 
         function resetForm(){
