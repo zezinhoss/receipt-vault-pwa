@@ -5,7 +5,6 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
     <title>Vault Scanner</title>
     
-    <!-- PWA MANIFEST LINK -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#facc15">
     
@@ -33,7 +32,7 @@
         .error-text {color: #ef4444!important;}
         .success-text {color: #22c55e!important;}
         .loading-text {color: #facc15!important;}
-        .preview-zone img {max-width: 100%;max-height: 160px;margin-top: 15px;border-radius: 8px;display: none;border: 1px solid rgba(255,255,255,0.1);}
+        .preview-zone img {max-width: 100%;max-height: 160px;margin-top: 15px;margin-bottom: 15px;border-radius: 8px;display: none;border: 1px solid rgba(255,255,255,0.1);}
     </style>
 </head>
 <body>
@@ -86,11 +85,15 @@
                     <input type='file' accept='image/jpeg,image/png,image/tiff,image/webp,application/pdf' onchange='handleFile(this)'>
                 </label>
             </div>
-            <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Try Again</button>
-            <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
+            
             <div class='preview-zone'>
                 <img id='preview' src='' alt='Preview'>
             </div>
+
+            <button id='uploadBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Upload to Vault</button>
+            <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Try Again</button>
+            <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
+            
             <div id='status'>Awaiting Document...</div>
         </div>
     </div>
@@ -130,7 +133,6 @@
             document.getElementById('login-status').innerText='Verifying...';
             document.getElementById('login-status').style.color='#facc15';
             
-            // Bypass GAS run logic for testing UI / Share Target in GH Pages.
             cachedPin=pin;
             document.getElementById('login-view').style.display='none';
             document.getElementById('app-view').style.display='block';
@@ -168,29 +170,9 @@
             el.className=type+'-text';
         }
 
-        function disableButtons(){
-            var btn=document.getElementById('newBtn');
-            if(btn){
-                btn.style.display='block';
-                btn.disabled=true;
-                btn.style.opacity='0.4';
-            }
-        }
-
-        function enableButtons(){
-            var btn=document.getElementById('newBtn');
-            if(btn){
-                btn.style.display='block';
-                btn.disabled=false;
-                btn.style.opacity='1';
-            }
-        }
-
         function handleFile(inputEl){
             if(!inputEl.files.length)return;
-            cachedForcedMonth=document.getElementById('monthOverride').value;
             document.getElementById('inputContainer').style.display='none';
-            disableButtons();
             var file=inputEl.files[0];
             var mimeType=file.type;
             setStatus('Compacting asset...','loading');
@@ -202,7 +184,7 @@
                     cachedFullImgSrc=e.target.result;
                     cachedMimeType=mimeType;
                     document.getElementById('preview').style.display='none';
-                    runAPI();
+                    showUploadState();
                 };
                 reader.readAsDataURL(file);
             }else{
@@ -225,13 +207,13 @@
                         cachedMimeType='image/jpeg';
                         document.getElementById('preview').src=dataUrl;
                         document.getElementById('preview').style.display='inline-block';
-                        runAPI();
+                        showUploadState();
                     };
                     img.onerror=function(){
                         cachedBase64=e.target.result.split(',')[1];
                         cachedFullImgSrc=e.target.result;
                         cachedMimeType=mimeType;
-                        runAPI();
+                        showUploadState();
                     };
                     img.src=e.target.result;
                 };
@@ -239,8 +221,56 @@
             }
         }
 
-        function runAPI(){
-            setStatus('Payload intercepted successfully! Connect to GAS API here. 🚀','success');
+        function showUploadState() {
+            setStatus('Asset ready. Tag month and hit Upload.', 'success');
+            document.getElementById('uploadBtn').style.display = 'block';
+            document.getElementById('retryBtn').style.display = 'none';
+        }
+
+        // --- NEW UPLOAD LOGIC ---
+        function triggerUpload() {
+            // Grab final user inputs right before sending
+            cachedForcedMonth = document.getElementById('monthOverride').value;
+            
+            document.getElementById('uploadBtn').style.display = 'none';
+            document.getElementById('retryBtn').style.display = 'none';
+            setStatus('Transmitting to Ledger...', 'loading');
+            
+            // Package the data
+            const payload = {
+                base64: cachedBase64,
+                mimeType: cachedMimeType,
+                fileName: 'Shared_Receipt',
+                pin: cachedPin,
+                month: cachedForcedMonth,
+                isDigital: isDigital,
+                isCash: isCash
+            };
+
+            // !!! IMPORTANT: PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE !!!
+            const GAS_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+            if (GAS_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
+                setStatus('Error: You need to paste your GAS Web App URL into the code!', 'error');
+                document.getElementById('uploadBtn').style.display = 'block';
+                return;
+            }
+
+            // Fire the payload to Google Apps Script
+            fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.text())
+            .then(result => {
+                setStatus('Upload Complete! Vault Secured.', 'success');
+                document.getElementById('newBtn').style.display = 'block';
+            })
+            .catch(err => {
+                console.error(err);
+                setStatus('Transmission failed. Check connection.', 'error');
+                document.getElementById('retryBtn').style.display = 'block';
+            });
         }
 
         function resetForm(){
@@ -248,37 +278,29 @@
             document.getElementById('preview').style.display='none';
             document.getElementById('preview').src='';
             document.querySelectorAll('input[type=file]').forEach(i=>i.value='');
+            document.getElementById('uploadBtn').style.display='none';
             document.getElementById('retryBtn').style.display='none';
             document.getElementById('newBtn').style.display='none';
             document.getElementById('inputContainer').style.display='block';
         }
 
-        // --- PWA SERVICE WORKER & SHARE TARGET RECEIVER ---
+        // PWA SERVICE WORKER & SHARE TARGET RECEIVER
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then(reg => {
                     console.log('Vault Service Worker Shield Activated');
-                }).catch(err => {
-                    console.log('SW Registration Failed:', err);
-                });
+                }).catch(err => console.log('SW Registration Failed:', err));
             });
             
-            // Listen for the file coming from the OS Share Sheet via Service Worker
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data && event.data.file) {
                     const sharedFile = event.data.file;
-                    
-                    // Simulate a physical file input selection to trigger your compaction engine
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(sharedFile);
-                    const mockInput = { files: dataTransfer.files };
-                    
-                    // Route directly into the app's standard flow
-                    handleFile(mockInput);
+                    handleFile({ files: dataTransfer.files });
                 }
             });
 
-            // If the URL contains ?shared=true, demand the file from the Service Worker cache
             if (window.location.search.includes('shared=true')) {
                 navigator.serviceWorker.ready.then(reg => {
                     if (navigator.serviceWorker.controller) {
