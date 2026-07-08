@@ -11,14 +11,18 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Catch the native POST payload from Android Share Sheet
-  if (event.request.method === 'POST' && url.searchParams.has('shared_file')) {
+  // Catch the native POST payload from Android Share Sheet BEFORE GitHub rejects it
+  if (event.request.method === 'POST' && url.pathname.endsWith('/_share')) {
     event.respondWith((async () => {
-      const formData = await event.request.formData();
-      sharedFile = formData.get('receipt_file'); // Catch the file
-      
-      // Redirect to the UI page
-      return Response.redirect('/?shared_file=1', 303);
+      try {
+        const formData = await event.request.formData();
+        sharedFile = formData.get('receipt_file'); 
+        
+        // Redirect to the UI page using a safe GET request
+        return Response.redirect('https://zezinhoss.github.io/receipt-vault-pwa/index.html?shared=true', 303);
+      } catch (e) {
+        return Response.redirect('https://zezinhoss.github.io/receipt-vault-pwa/index.html', 303);
+      }
     })());
   }
 });
@@ -27,5 +31,6 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.action === 'get-shared-file') {
     event.source.postMessage({ file: sharedFile });
+    sharedFile = null; // Clear memory
   }
 });
