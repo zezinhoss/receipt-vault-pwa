@@ -233,10 +233,10 @@
             document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             
+            // FIXED: Using "fileData" to strictly match your existing Code.gs expectations
             const payload = {
-                base64: cachedBase64,
+                fileData: cachedBase64, 
                 mimeType: cachedMimeType,
-                fileName: 'Shared_Receipt',
                 pin: cachedPin,
                 month: cachedForcedMonth,
                 isDigital: isDigital,
@@ -247,15 +247,18 @@
 
             fetch(GAS_URL, {
                 method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.text())
+            .then(response => response.json()) // Force parse the Google JSON response
             .then(result => {
-                if (result.includes("Error")) {
-                    setStatus(result, 'error');
+                // FIXED: Explicitly checking the real status code returned by your backend
+                if (result.status === "error") {
+                    setStatus('Error: ' + result.error, 'error');
                     document.getElementById('retryBtn').style.display = 'block';
                 } else {
-                    setStatus('Upload Complete! Vault Secured.', 'success');
+                    // Brings back the original dynamic filename success message
+                    setStatus('Success!<br>' + result.file, 'success');
                     document.getElementById('newBtn').style.display = 'block';
                 }
             })
