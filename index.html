@@ -94,7 +94,6 @@
 
     <script>
         var cachedBase64='',cachedFullImgSrc='',cachedMimeType='',cachedPin='',cachedForcedMonth='auto',cachedPayMethod='auto';
-        var isDigital=false,isCash=false;
         const pinBoxes=document.querySelectorAll('.pin-box');
         
         pinBoxes.forEach((box,index)=>{
@@ -120,7 +119,6 @@
             document.getElementById('login-status').innerText='Verifying...';
             document.getElementById('login-status').style.color='#facc15';
             
-            // Bypass GAS run logic for testing UI / Share Target in GH Pages.
             cachedPin=pin;
             document.getElementById('login-view').style.display='none';
             document.getElementById('app-view').style.display='block';
@@ -193,23 +191,19 @@
             cachedForcedMonth = document.getElementById('monthOverride').value;
             cachedPayMethod = document.getElementById('payMethod').value;
             
-            // Map the dropdown payload to the booleans expected by your backend AI function
-            isCash = (cachedPayMethod === 'cash');
-            
             document.getElementById('uploadBtn').style.display = 'none';
             document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             
+            // STRICTLY SENDING payMethod to match your 6.0 code
             const payload = {
                 fileData: cachedBase64, 
                 mimeType: cachedMimeType,
                 pin: cachedPin,
                 month: cachedForcedMonth,
-                isDigital: isDigital,
-                isCash: isCash
+                payMethod: cachedPayMethod
             };
 
-            // YOUR NEW GOOGLE APPS SCRIPT DEPLOYMENT LINK
             const GAS_URL = "https://script.google.com/macros/s/AKfycbxCFSIfJMvsGWJDAUITlACmmDEFJ8zNRubhN8IzH301isnGWbXa8cGSQZs2zVn-t6Ktog/exec";
 
             fetch(GAS_URL, {
@@ -245,12 +239,9 @@
             document.getElementById('inputContainer').style.display='block';
         }
 
-        // PWA SERVICE WORKER & SHARE TARGET RECEIVER
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('Vault Service Worker Shield Activated');
-                }).catch(err => console.log('SW Registration Failed:', err));
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Failed:', err));
             });
             
             navigator.serviceWorker.addEventListener('message', (event) => {
