@@ -86,8 +86,8 @@
                 <label class='btn btn-primary'>Open Camera
                     <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
                 </label>
-                <label class='btn'>Open Gallery
-                    <input type='file' accept='image/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document' onchange='handleFile(this)'>
+                <label class='btn'>Open Gallery / Folder
+                    <input type='file' accept='*/*' onchange='handleFile(this)'>
                 </label>
             </div>
             
@@ -244,7 +244,7 @@
                 payMethod: mappedPayMethod
             };
 
-            const GAS_URL = "https://script.google.com/macros/s/AKfycbyt-jCHPsvWWqeUhbBIRQtprr3TratHe9EkgHId3dYlLMqYEn_qWflyn6Um9b2IhG5YiQ/exec";
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbwWcxMCm2Xk-8Gia7w63SuNFTCvndMcZwNgeYC5eaoWvw4-WoHKNHKQDeUsBuNaeAAPmg/exec";
 
             fetch(GAS_URL, {
                 method: 'POST',
