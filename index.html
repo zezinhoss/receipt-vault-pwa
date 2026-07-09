@@ -17,12 +17,9 @@
         .pin-container{display:flex;gap:12px;justify-content:center;margin-bottom:10px}
         .pin-box{width:50px;height:60px;background:rgba(0, 0, 0, 0.4);border:1px solid rgba(255, 255, 255, 0.1);border-radius:12px;color:#facc15;font-size:24px;text-align:center;outline:none;transition:all 0.3s ease}
         .pin-box:focus{border-color:#facc15;box-shadow:0 0 15px rgba(250, 204, 21, 0.2);background:rgba(0, 0, 0, 0.6)}
-        .input-group{display:flex;gap:10px;margin-bottom:15px}
+        .input-group{display:flex;gap:10px;margin-bottom:25px}
         select{flex:1;appearance:none;background:rgba(0, 0, 0, 0.4);border:1px solid rgba(255, 255, 255, 0.1);border-radius:10px;color:#ddd;padding:14px 12px;font-size:13px;outline:none;transition:border 0.3s ease;text-align:center}
         select:focus{border-color:#facc15;color:#fff}
-        .toggle-btn{flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px 10px; color:#888; font-size:14px; text-align:center; cursor:pointer; transition:all 0.3s; box-sizing:border-box; user-select:none;}
-        .toggle-btn.active{border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2);}
-        .toggle-btn.active .t-text{color:#facc15; font-weight:600; text-shadow:0 0 5px rgba(250,204,21,0.4);}
         .btn{display:block;width:100%;background:transparent;color:#ddd;padding:16px;border-radius:12px;font-size:13px;font-weight:400;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255, 255, 255, 0.1);transition:all 0.3s ease;margin-bottom:12px;box-sizing:border-box;text-transform:uppercase}
         .btn-primary{background:rgba(250, 204, 21, 0.9);color:#000;border:none;font-weight:600}
         .btn:hover {background:rgba(255, 255, 255, 0.05);}
@@ -32,7 +29,7 @@
         .error-text {color: #ef4444!important;}
         .success-text {color: #22c55e!important;}
         .loading-text {color: #facc15!important;}
-        .preview-zone img {max-width: 100%;max-height: 160px;margin-top: 15px;margin-bottom: 15px;border-radius: 8px;display: none;border: 1px solid rgba(255,255,255,0.1);}
+        .preview-zone img {max-width: 100%;max-height: 160px;margin-top: 15px;border-radius: 8px;display: none;border: 1px solid rgba(255,255,255,0.1);}
     </style>
 </head>
 <body>
@@ -41,10 +38,10 @@
             <h3>SECURE VAULT</h3>
             <p>Restricted Access</p>
             <div class="pin-container" id="pin-container">
-                <input type="text" class="pin-box" inputmode="numeric" maxlength="1" autocomplete="off">
-                <input type="text" class="pin-box" inputmode="numeric" maxlength="1" autocomplete="off">
-                <input type="text" class="pin-box" inputmode="numeric" maxlength="1" autocomplete="off">
-                <input type="text" class="pin-box" inputmode="numeric" maxlength="1" autocomplete="off">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off">
             </div>
             <div id='login-status' style='margin-top:15px;color:#ef4444;font-size:13px;'></div>
         </div>
@@ -68,21 +65,18 @@
                     <option value='11'>November</option>
                     <option value='12'>December</option>
                 </select>
-            </div>
-            <div class="input-group" style="margin-bottom:25px;">
-                <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()">
-                    <span class="t-text" id="text-digital">Digital?</span>
-                </div>
-                <div class="toggle-btn" id="btn-cash" onclick="toggleCash()">
-                    <span class="t-text" id="text-cash">In Cash?</span>
-                </div>
+                <select id='payMethod'>
+                    <option value='auto'>Auto Routing</option>
+                    <option value='bank'>Bank Transfer</option>
+                    <option value='cash'>Cash Payment</option>
+                </select>
             </div>
             <div id='inputContainer'>
                 <label class='btn btn-primary'>Open Camera
-                    <input type='file' accept='image/jpeg,image/png,image/tiff' capture='environment' onchange='handleFile(this)'>
+                    <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
                 </label>
                 <label class='btn'>Open Gallery
-                    <input type='file' accept='image/jpeg,image/png,image/tiff,image/webp,application/pdf' onchange='handleFile(this)'>
+                    <input type='file' accept='image/*' onchange='handleFile(this)'>
                 </label>
             </div>
             
@@ -99,69 +93,37 @@
     </div>
 
     <script>
-        var cachedBase64='',cachedFullImgSrc='',cachedMimeType='',cachedPin='',cachedForcedMonth='auto',isDigital=false,isCash=false;
+        var cachedBase64='',cachedFullImgSrc='',cachedMimeType='',cachedPin='',cachedForcedMonth='auto',cachedPayMethod='auto';
+        var isDigital=false,isCash=false;
         const pinBoxes=document.querySelectorAll('.pin-box');
-        var rawPin=['','','',''];
         
         pinBoxes.forEach((box,index)=>{
             box.addEventListener('input',(e)=>{
-                var val=box.value.replace(/•/g,'');
-                if(val.length>0){
-                    rawPin[index]=val.charAt(val.length-1);
-                    box.value='•';
+                if(box.value.length===1){
                     if(index<pinBoxes.length-1){
                         pinBoxes[index+1].focus();
                     }else{
                         unlockApp();
                     }
-                }else{
-                    rawPin[index]='';
                 }
             });
             box.addEventListener('keydown',(e)=>{
                 if(e.key==='Backspace'&&box.value===''&&index>0){
-                    rawPin[index-1]='';
-                    pinBoxes[index-1].value='';
                     pinBoxes[index-1].focus();
                 }
             });
         });
 
         function unlockApp(){
-            var pin=rawPin.join('');
+            var pin=Array.from(pinBoxes).map(b=>b.value).join('');
             if(pin.length<4)return;
             document.getElementById('login-status').innerText='Verifying...';
             document.getElementById('login-status').style.color='#facc15';
             
+            // Bypass GAS run logic for testing UI / Share Target in GH Pages.
             cachedPin=pin;
             document.getElementById('login-view').style.display='none';
             document.getElementById('app-view').style.display='block';
-        }
-
-        function toggleDigital(){
-            isDigital=!isDigital;
-            var btn=document.getElementById('btn-digital');
-            var txt=document.getElementById('text-digital');
-            if(isDigital){
-                btn.classList.add('active');
-                txt.innerText='Digital ✓';
-            }else{
-                btn.classList.remove('active');
-                txt.innerText='Digital?';
-            }
-        }
-
-        function toggleCash(){
-            isCash=!isCash;
-            var btn=document.getElementById('btn-cash');
-            var txt=document.getElementById('text-cash');
-            if(isCash){
-                btn.classList.add('active');
-                txt.innerText='In Cash ✓';
-            }else{
-                btn.classList.remove('active');
-                txt.innerText='In Cash?';
-            }
         }
 
         function setStatus(msg,type){
@@ -229,11 +191,15 @@
 
         function triggerUpload() {
             cachedForcedMonth = document.getElementById('monthOverride').value;
+            cachedPayMethod = document.getElementById('payMethod').value;
+            
+            // Map the dropdown payload to the booleans expected by your backend AI function
+            isCash = (cachedPayMethod === 'cash');
+            
             document.getElementById('uploadBtn').style.display = 'none';
             document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             
-            // FIXED: Using "fileData" to strictly match your existing Code.gs expectations
             const payload = {
                 fileData: cachedBase64, 
                 mimeType: cachedMimeType,
@@ -243,21 +209,20 @@
                 isCash: isCash
             };
 
-            const GAS_URL = "https://script.google.com/macros/s/AKfycby5KXjXC2DyS7bzalY7Sei_3lTiwiDdR9MHoe-tYqjRtdXASO-6S9soHNUHWPTKXJdG/exec";
+            // YOUR NEW GOOGLE APPS SCRIPT DEPLOYMENT LINK
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbwOe50QLqPXQdOglTT5OcT1Y5brzkulfZOZvMH2GPl-TIjFtM3cPTE70tx8rd2qkKrWpw/exec";
 
             fetch(GAS_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json()) // Force parse the Google JSON response
+            .then(response => response.json()) 
             .then(result => {
-                // FIXED: Explicitly checking the real status code returned by your backend
                 if (result.status === "error") {
                     setStatus('Error: ' + result.error, 'error');
                     document.getElementById('retryBtn').style.display = 'block';
                 } else {
-                    // Brings back the original dynamic filename success message
                     setStatus('Success!<br>' + result.file, 'success');
                     document.getElementById('newBtn').style.display = 'block';
                 }
