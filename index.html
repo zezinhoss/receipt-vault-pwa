@@ -68,6 +68,11 @@
                     <option value='11'>November</option>
                     <option value='12'>December</option>
                 </select>
+                <select id='payMethod'>
+                    <option value='auto'>Auto Routing</option>
+                    <option value='bank'>Bank Transfer</option>
+                    <option value='cash'>Cash Payment</option>
+                </select>
             </div>
             <div class="input-group" style="margin-bottom:25px;">
                 <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()">
@@ -82,7 +87,7 @@
                     <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
                 </label>
                 <label class='btn'>Open Gallery
-                    <input type='file' accept='image/*' onchange='handleFile(this)'>
+                    <input type='file' accept='image/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document' onchange='handleFile(this)'>
                 </label>
             </div>
             
@@ -99,7 +104,7 @@
     </div>
 
     <script>
-        var cachedBase64='',cachedFullImgSrc='',cachedMimeType='',cachedPin='',cachedForcedMonth='auto';
+        var cachedBase64='',cachedFullImgSrc='',cachedMimeType='',cachedPin='',cachedForcedMonth='auto',cachedPayMethod='auto';
         var isDigital=false,isCash=false;
         const pinBoxes=document.querySelectorAll('.pin-box');
         
@@ -170,7 +175,7 @@
             var mimeType=file.type;
             setStatus('Compacting asset...','loading');
             
-            if(mimeType==='application/pdf'){
+            if(mimeType==='application/pdf' || mimeType.includes('word') || mimeType.includes('officedocument')){
                 var reader=new FileReader();
                 reader.onload=function(e){
                     cachedBase64=e.target.result.split(',')[1];
@@ -222,12 +227,13 @@
 
         function triggerUpload() {
             cachedForcedMonth = document.getElementById('monthOverride').value;
+            cachedPayMethod = document.getElementById('payMethod').value;
             
             document.getElementById('uploadBtn').style.display = 'none';
             document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             
-            var mappedPayMethod = isCash ? "cash" : "auto";
+            var mappedPayMethod = isCash ? "cash" : (cachedPayMethod === 'cash' ? 'cash' : 'auto');
             
             const payload = {
                 fileData: cachedBase64, 
@@ -238,7 +244,7 @@
                 payMethod: mappedPayMethod
             };
 
-            const GAS_URL = "https://script.google.com/macros/s/AKfycbydQ0sd9j4KshvqKWICV0-FhX5wzM0VR6aVssxtAz3_GJi8eyTrXbm7Xeq0o-HAF0tIKQ/exec";
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbyt-jCHPsvWWqeUhbBIRQtprr3TratHe9EkgHId3dYlLMqYEn_qWflyn6Um9b2IhG5YiQ/exec";
 
             fetch(GAS_URL, {
                 method: 'POST',
