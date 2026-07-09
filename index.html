@@ -5,7 +5,6 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
     <title>Vault Scanner</title>
     
-    <!-- PWA MANIFEST LINK -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#facc15">
     
@@ -70,7 +69,6 @@
                     <option value='12'>December</option>
                 </select>
             </div>
-            <!-- RESTORED: Your original glowing toggle buttons -->
             <div class="input-group" style="margin-bottom:25px;">
                 <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()">
                     <span class="t-text" id="text-digital">Digital?</span>
@@ -133,7 +131,6 @@
             document.getElementById('app-view').style.display='block';
         }
 
-        // RESTORED: Visual Toggle Logic
         function toggleDigital(){
             isDigital=!isDigital;
             var btn=document.getElementById('btn-digital');
@@ -230,7 +227,6 @@
             document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             
-            // Translating the toggle state into the text your 6.0 backend expects
             var mappedPayMethod = isCash ? "cash" : "auto";
             
             const payload = {
@@ -242,7 +238,7 @@
                 payMethod: mappedPayMethod
             };
 
-            const GAS_URL = "https://script.google.com/macros/s/AKfycbypEgzooCzS41I7O3CpgOHkNAzkLpDmVKHBdJvFGLa25qKiD7vY0v5eXgeIsBfihF9Dhg/exec";
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbwSHOoOVeCffPtPjLgL-zy2v7CW3dL6BxazYsFcmeIFL-bin5oxfpuf9Lvv_ApVHX3w0w/exec";
 
             fetch(GAS_URL, {
                 method: 'POST',
@@ -276,7 +272,6 @@
             document.getElementById('newBtn').style.display='none';
             document.getElementById('inputContainer').style.display='block';
             
-            // Reset toggles visually and programmatically
             isDigital = false;
             document.getElementById('btn-digital').classList.remove('active');
             document.getElementById('text-digital').innerText='Digital?';
