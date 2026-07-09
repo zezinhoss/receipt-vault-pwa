@@ -5,6 +5,7 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
     <title>Vault Scanner</title>
     
+    <!-- PWA MANIFEST LINK -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#facc15">
     
@@ -20,6 +21,9 @@
         .input-group{display:flex;gap:10px;margin-bottom:25px}
         select{flex:1;appearance:none;background:rgba(0, 0, 0, 0.4);border:1px solid rgba(255, 255, 255, 0.1);border-radius:10px;color:#ddd;padding:14px 12px;font-size:13px;outline:none;transition:border 0.3s ease;text-align:center}
         select:focus{border-color:#facc15;color:#fff}
+        .toggle-btn{flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px 10px; color:#888; font-size:14px; text-align:center; cursor:pointer; transition:all 0.3s; box-sizing:border-box; user-select:none;}
+        .toggle-btn.active{border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2);}
+        .toggle-btn.active .t-text{color:#facc15; font-weight:600; text-shadow:0 0 5px rgba(250,204,21,0.4);}
         .btn{display:block;width:100%;background:transparent;color:#ddd;padding:16px;border-radius:12px;font-size:13px;font-weight:400;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255, 255, 255, 0.1);transition:all 0.3s ease;margin-bottom:12px;box-sizing:border-box;text-transform:uppercase}
         .btn-primary{background:rgba(250, 204, 21, 0.9);color:#000;border:none;font-weight:600}
         .btn:hover {background:rgba(255, 255, 255, 0.05);}
@@ -65,11 +69,15 @@
                     <option value='11'>November</option>
                     <option value='12'>December</option>
                 </select>
-                <select id='payMethod'>
-                    <option value='auto'>Auto Routing</option>
-                    <option value='bank'>Bank Transfer</option>
-                    <option value='cash'>Cash Payment</option>
-                </select>
+            </div>
+            <!-- RESTORED: Your original glowing toggle buttons -->
+            <div class="input-group" style="margin-bottom:25px;">
+                <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()">
+                    <span class="t-text" id="text-digital">Digital?</span>
+                </div>
+                <div class="toggle-btn" id="btn-cash" onclick="toggleCash()">
+                    <span class="t-text" id="text-cash">In Cash?</span>
+                </div>
             </div>
             <div id='inputContainer'>
                 <label class='btn btn-primary'>Open Camera
@@ -93,7 +101,7 @@
     </div>
 
     <script>
-        var cachedBase64='',cachedFullImgSrc='',cachedMimeType='',cachedPin='',cachedForcedMonth='auto',cachedPayMethod='auto';
+        var cachedBase64='',cachedFullImgSrc='',cachedMimeType='',cachedPin='',cachedForcedMonth='auto';
         var isDigital=false,isCash=false;
         const pinBoxes=document.querySelectorAll('.pin-box');
         
@@ -120,10 +128,36 @@
             document.getElementById('login-status').innerText='Verifying...';
             document.getElementById('login-status').style.color='#facc15';
             
-            // Bypass GAS run logic for testing UI / Share Target in GH Pages.
             cachedPin=pin;
             document.getElementById('login-view').style.display='none';
             document.getElementById('app-view').style.display='block';
+        }
+
+        // RESTORED: Visual Toggle Logic
+        function toggleDigital(){
+            isDigital=!isDigital;
+            var btn=document.getElementById('btn-digital');
+            var txt=document.getElementById('text-digital');
+            if(isDigital){
+                btn.classList.add('active');
+                txt.innerText='Digital ✓';
+            }else{
+                btn.classList.remove('active');
+                txt.innerText='Digital?';
+            }
+        }
+
+        function toggleCash(){
+            isCash=!isCash;
+            var btn=document.getElementById('btn-cash');
+            var txt=document.getElementById('text-cash');
+            if(isCash){
+                btn.classList.add('active');
+                txt.innerText='In Cash ✓';
+            }else{
+                btn.classList.remove('active');
+                txt.innerText='In Cash?';
+            }
         }
 
         function setStatus(msg,type){
@@ -191,25 +225,23 @@
 
         function triggerUpload() {
             cachedForcedMonth = document.getElementById('monthOverride').value;
-            cachedPayMethod = document.getElementById('payMethod').value;
-            
-            // Map the dropdown payload to the booleans expected by your backend AI function
-            isCash = (cachedPayMethod === 'cash');
             
             document.getElementById('uploadBtn').style.display = 'none';
             document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             
-            // STRICTLY SENDING payMethod to match your 6.0 code
+            // Translating the toggle state into the text your 6.0 backend expects
+            var mappedPayMethod = isCash ? "cash" : "auto";
+            
             const payload = {
                 fileData: cachedBase64, 
                 mimeType: cachedMimeType,
                 pin: cachedPin,
                 month: cachedForcedMonth,
-                payMethod: cachedPayMethod
+                isDigital: isDigital,
+                payMethod: mappedPayMethod
             };
 
-            // NEW GOOGLE APPS SCRIPT DEPLOYMENT LINK INJECTED HERE
             const GAS_URL = "https://script.google.com/macros/s/AKfycbypEgzooCzS41I7O3CpgOHkNAzkLpDmVKHBdJvFGLa25qKiD7vY0v5eXgeIsBfihF9Dhg/exec";
 
             fetch(GAS_URL, {
@@ -243,6 +275,15 @@
             document.getElementById('retryBtn').style.display='none';
             document.getElementById('newBtn').style.display='none';
             document.getElementById('inputContainer').style.display='block';
+            
+            // Reset toggles visually and programmatically
+            isDigital = false;
+            document.getElementById('btn-digital').classList.remove('active');
+            document.getElementById('text-digital').innerText='Digital?';
+            
+            isCash = false;
+            document.getElementById('btn-cash').classList.remove('active');
+            document.getElementById('text-cash').innerText='In Cash?';
         }
 
         if ('serviceWorker' in navigator) {
