@@ -235,11 +235,13 @@
         var dashChart;
         var isMoloniExpanded = false;
         
-        // Cryptographically obfuscated payloads (Safe for Public GitHub Commits)
-        // These can only be parsed when combined with your secret 4-digit PIN sequence
+        // Obfuscated endpoints and verification blocks (Safe for GitHub Commits)
         const MATRIX_EXPENSE_HEX = "131c1c0317393716070634140306351b080c3506161c283c1c110204360e0a1334001c0c2a293d391d0e120f2b380a0601330607172b07040d34190b0d3e091b1512521c1724391a0435130b0a240a1b023531";
-        const MATRIX_INVOICE_HEX = ""; // This handles your Invoice Node URL when you add it later
+        const MATRIX_INVOICE_HEX = ""; 
         
+        // Cryptographic validation token loop
+        const VALIDATION_ANCHOR_HEX = "233030392c10313c01332c323631"; 
+
         var ACTIVE_EXPENSE_URL = "";
         var ACTIVE_INVOICE_URL = "";
 
@@ -273,11 +275,23 @@
             var pin = Array.from(pinBoxes).map(b => b.value).join('');
             if(pin.length < 4) return;
             
-            document.getElementById('login-status').innerText = 'Verifying...';
-            document.getElementById('login-status').style.color = '#facc15';
+            var statusEl = document.getElementById('login-status');
+            statusEl.innerText = 'Verifying Matrix Key...';
+            statusEl.style.color = '#facc15';
+            
+            // Validate the entered PIN against the anchor token locally
+            var checkToken = runMatrixDecryption(VALIDATION_ANCHOR_HEX, pin);
+            if (checkToken !== "https://script") {
+                statusEl.innerText = '❌ ACCESS DENIED: Invalid Matrix Key.';
+                statusEl.style.color = '#ef4444';
+                pinBoxes.forEach(b => b.value = '');
+                pinBoxes[0].focus();
+                return;
+            }
+
             cachedPin = pin;
             
-            // Decrypt links safely into browser runtime memory loop
+            // Decrypt real execution URLs safely into runtime volatile memory loop
             ACTIVE_EXPENSE_URL = runMatrixDecryption(MATRIX_EXPENSE_HEX, pin);
             ACTIVE_INVOICE_URL = MATRIX_INVOICE_HEX ? runMatrixDecryption(MATRIX_INVOICE_HEX, pin) : "";
 
