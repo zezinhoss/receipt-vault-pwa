@@ -235,23 +235,9 @@
         var dashChart;
         var isMoloniExpanded = false;
         
-        // Obfuscated execution variables targeting your workspace endpoint
-        const MATRIX_EXPENSE_HEX = "131c1c0317393716070634140306351b080c3506161c283c1c110204360e0a1334001c0c2a293d391d0e120f2b380a0601330607172b07040d34190b0d3e091b1512521c1724391a0435130b0a240a1b023531";
-        const MATRIX_INVOICE_HEX = "131c1c0317393716070634140306351b080c3506161c283d1c1c2831343f2922111b2b36283c1800293d0c2e35323d3810131413243d1a0c0a37350711100f243003051b2e2d071c142c11521c1724391a0435130b0a240a1b023530"; 
-
-        var ACTIVE_EXPENSE_URL = "";
-        var ACTIVE_INVOICE_URL = "";
-
-        function runMatrixDecryption(hexStr, keyStr) {
-            if (!hexStr || !keyStr) return "";
-            var outputStr = "";
-            for (var i = 0; i < hexStr.length; i += 2) {
-                var hexByte = parseInt(hexStr.substr(i, 2), 16);
-                var keyChar = keyStr.charCodeAt((i / 2) % keyStr.length);
-                outputStr += String.fromCharCode(hexByte ^ keyChar);
-            }
-            return outputStr;
-        }
+        // Plaintext Active URLs bypassing the matrix requirement temporarily
+        var ACTIVE_EXPENSE_URL = "https://script.google.com/macros/s/AKfycbznM7pBh1ctry_HxPgFP7dgh0eS5cFu5k_Fhs8pdnhZhhTnEg8JJtb0-vDYL8mIyk0HNw/exec";
+        var ACTIVE_INVOICE_URL = "https://script.google.com/a/macros/rcinput.com/s/AKfycbxTU-PbIlbFgd5xq9Q_WZkcw2ujswH5_nw3kg5WuaFFGnHlqfXeRarK-stzLnzCb3UXZw/exec";
 
         // --- PIN LOGIC ---
         const pinBoxes = document.querySelectorAll('.pin-box');
@@ -275,11 +261,8 @@
             statusEl.innerText = 'Verifying Key Alignment...';
             statusEl.style.color = '#facc15';
             
-            var testExpenseUrl = runMatrixDecryption(MATRIX_EXPENSE_HEX, pin);
-            var testInvoiceUrl = runMatrixDecryption(MATRIX_INVOICE_HEX, pin);
-            
             // Handshake route validation directly through the live workspace node link
-            fetch(testInvoiceUrl + "?action=verifyLoginHandshake&pin=" + encodeURIComponent(pin))
+            fetch(ACTIVE_INVOICE_URL + "?action=verifyLoginHandshake&pin=" + encodeURIComponent(pin))
             .then(res => res.json())
             .then(result => {
                 if (result && result.status === "error") {
@@ -287,16 +270,13 @@
                 }
                 
                 cachedPin = pin;
-                ACTIVE_EXPENSE_URL = testExpenseUrl;
-                ACTIVE_INVOICE_URL = testInvoiceUrl;
-
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('app-view').style.display = 'flex';
                 document.body.style.alignItems = 'flex-start';
                 initPlaceholderGraph();
             })
             .catch(err => {
-                statusEl.innerText = '❌ ACCESS DENIED: Invalid Key Matrix.';
+                statusEl.innerText = '❌ ACCESS DENIED: Invalid Server Handshake.';
                 statusEl.style.color = '#ef4444';
                 pinBoxes.forEach(b => b.value = '');
                 pinBoxes[0].focus();
