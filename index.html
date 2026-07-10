@@ -235,14 +235,13 @@
         var dashChart;
         var isMoloniExpanded = false;
         
-        // Cryptographically obscured execution arrays (Safe for Public GitHub Commits)
-        const MATRIX_EXPENSE_HEX = "1d1010070624231b1411211e031b2d1314152d11161d2b291d1e1f132e0114002b1f0b1f24252e391302190036320516101c2317181c2e0e010b271d07011d134d131a293617182218171d3c011603223f";
-        const MATRIX_INVOICE_HEX = "1d1010070624231b1411211e031b2d072a2432292f2a36371c1b2b36283c1800293d0c2e35323d3810131413243d1a0c0a37350711100f243003051b2e2d071c142c114d131a293617182218171d3c011603223e"; 
+        // Obfuscated execution variables targeting your workspace endpoint
+        const MATRIX_EXPENSE_HEX = "131c1c0317393716070634140306351b080c3506161c283c1c110204360e0a1334001c0c2a293d391d0e120f2b380a0601330607172b07040d34190b0d3e091b1512521c1724391a0435130b0a240a1b023531";
+        const MATRIX_INVOICE_HEX = "131c1c0317393716070634140306351b080c3506161c283d1c1c2831343f2922111b2b36283c1800293d0c2e35323d3810131413243d1a0c0a37350711100f243003051b2e2d071c142c11521c1724391a0435130b0a240a1b023530"; 
 
         var ACTIVE_EXPENSE_URL = "";
         var ACTIVE_INVOICE_URL = "";
 
-        // Matrix Decoding Handshake Transform Loop
         function runMatrixDecryption(hexStr, keyStr) {
             if (!hexStr || !keyStr) return "";
             var outputStr = "";
@@ -276,19 +275,17 @@
             statusEl.innerText = 'Verifying Key Alignment...';
             statusEl.style.color = '#facc15';
             
-            // Decrypt links safely into browser runtime memory loop
             var testExpenseUrl = runMatrixDecryption(MATRIX_EXPENSE_HEX, pin);
             var testInvoiceUrl = runMatrixDecryption(MATRIX_INVOICE_HEX, pin);
             
-            // Execute Remote Verification Handshake to the App Script backend
-            fetch(testExpenseUrl + "?action=verifyLoginHandshake&pin=" + encodeURIComponent(pin))
+            // Handshake route validation directly through the live workspace node link
+            fetch(testInvoiceUrl + "?action=verifyLoginHandshake&pin=" + encodeURIComponent(pin))
             .then(res => res.json())
             .then(result => {
                 if (result && result.status === "error") {
-                    throw new Error("Rejected by node ledger");
+                    throw new Error("Rejected by ledger gateway");
                 }
                 
-                // Handshake confirmed by backend. Elevate app context metrics.
                 cachedPin = pin;
                 ACTIVE_EXPENSE_URL = testExpenseUrl;
                 ACTIVE_INVOICE_URL = testInvoiceUrl;
@@ -377,7 +374,7 @@
                 }
             }
 
-            if (!ACTIVE_EXPENSE_URL) return;
+            if (!ACTIVE_EXPENSE_URL || !ACTIVE_INVOICE_URL) return;
 
             refreshBtn.classList.add('spin');
             document.getElementById('dash-red-count').innerText = "...";
@@ -393,19 +390,26 @@
                 localStorage.setItem('vault_cache_expenses', JSON.stringify(data.expenses));
                 localStorage.setItem('vault_cache_redcount', data.redCount.toString());
                 
-                refreshBtn.classList.remove('spin');
+                if (!refreshBtn.classList.contains('processing-earnings')) refreshBtn.classList.remove('spin');
             }).catch(err => { console.error(err); refreshBtn.classList.remove('spin'); });
 
             // 2. Fetch Earnings (Left Node)
-            if(ACTIVE_INVOICE_URL) {
-                fetch(ACTIVE_INVOICE_URL + "?action=getEarnings&pin=" + encodeURIComponent(cachedPin))
-                .then(res => res.json())
-                .then(data => {
+            refreshBtn.classList.add('processing-earnings');
+            fetch(ACTIVE_INVOICE_URL + "?action=getEarnings&pin=" + encodeURIComponent(cachedPin))
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.earnings) {
                     dashChart.data.datasets[0].data = data.earnings;
                     dashChart.update();
                     localStorage.setItem('vault_cache_earnings', JSON.stringify(data.earnings));
-                }).catch(console.error);
-            }
+                }
+                refreshBtn.classList.remove('processing-earnings');
+                refreshBtn.classList.remove('spin');
+            }).catch(err => { 
+                console.error(err); 
+                refreshBtn.classList.remove('processing-earnings');
+                refreshBtn.classList.remove('spin');
+            });
         }
 
         function toggleDigital(){ isDigital = !isDigital; var btn = document.getElementById('btn-digital'), txt = document.getElementById('text-digital'); if(isDigital){ btn.classList.add('active'); txt.innerText = 'Digital ✓'; } else{ btn.classList.remove('active'); txt.innerText = 'Digital?'; } }
