@@ -9,37 +9,27 @@
     <meta name="theme-color" content="#facc15">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         body { font-family:'Inter',sans-serif; background:#0a0a0a; background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%); color:#fff; padding:20px; display:flex; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; }
         
-        /* Base Glass Panel Component */
         .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(250,204,21,0.15); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; }
         
-        /* Lock Screen Constraints */
         #login-wrapper { width:100%; max-width:360px; }
         
-        /* Typography */
         h3 { color:#facc15; font-size:16px; font-weight:600; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; justify-content:center; align-items:center; gap:8px;}
         p { color:#888; font-size:13px; font-weight:300; margin-bottom:25px; }
         
-        /* PIN Controls */
         .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
         .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color:#facc15; font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; }
         .pin-box:focus { border-color:#facc15; box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
         
-        /* Workspace 3-Pane Layout */
         #app-view { width:100%; max-width:1200px; flex-direction:column; gap:20px; display:none; }
-        .pane-top { max-width:100%; display:flex; flex-direction:column; height:30vh; min-height:200px; justify-content:center; position:relative; }
-        .bottom-grid { display:flex; gap:20px; width:100%; height:50vh; min-height:450px; }
-        .pane-left, .pane-right { max-width:100%; flex:1; display:flex; flex-direction:column; }
+        .pane-top { max-width:100%; display:flex; flex-direction:column; height:35vh; min-height:250px; justify-content:center; position:relative; }
+        .bottom-grid { display:flex; gap:20px; width:100%; height:45vh; min-height:400px; }
+        .pane-left, .pane-right { max-width:100%; flex:1; display:flex; flex-direction:column; justify-content: center; }
         
-        /* Embedded Moloni Frame */
-        .moloni-frame { width:100%; height:100%; border:none; border-radius:12px; margin-top:15px; background:#fff; flex-grow:1; }
-
-        /* Dashboard Placeholder Elements */
-        .dash-line { width:100%; height:2px; background:linear-gradient(90deg, rgba(250,204,21,0) 0%, rgba(250,204,21,0.5) 50%, rgba(250,204,21,0) 100%); margin:20px 0; }
-        
-        /* Inputs & Toggles */
         .input-group { display:flex; gap:10px; margin-bottom:20px; }
         select { flex:1; appearance:none; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:10px; color:#ddd; padding:14px 12px; font-size:13px; outline:none; transition:border 0.3s ease; text-align:center; }
         select:focus { border-color:#facc15; color:#fff; }
@@ -48,23 +38,22 @@
         .toggle-btn.active { border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2); }
         .toggle-btn.active .t-text { color:#facc15; font-weight:600; text-shadow:0 0 5px rgba(250,204,21,0.4); }
         
-        /* Buttons */
         .btn { display:block; width:100%; background:transparent; color:#ddd; padding:16px; border-radius:12px; font-size:13px; font-weight:400; letter-spacing:1px; cursor:pointer; border:1px solid rgba(255, 255, 255, 0.1); transition:all 0.3s ease; margin-bottom:12px; box-sizing:border-box; text-transform:uppercase; }
         .btn-primary { background:rgba(250, 204, 21, 0.9); color:#000; border:none; font-weight:600; }
         .btn:hover { background:rgba(255, 255, 255, 0.05); }
         .btn-primary:hover { background:#facc15; box-shadow:0 0 20px rgba(250, 204, 21, 0.4); }
         
+        /* Moloni Launch Button styling */
+        .moloni-launch { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 25px; border-radius: 16px; font-size: 16px; font-weight: 600; margin-top: 20px; cursor: pointer; transition: all 0.3s ease; display:flex; flex-direction:column; align-items:center; gap:10px; text-decoration:none; }
+        .moloni-launch:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(30,58,138,0.5); border-color: #3b82f6; }
+
         input[type='file'] { display: none; }
-        
-        /* Status & Image Preview */
         #status { margin-top:20px; font-size:13px; color:#888; font-weight:400; line-height: 1.6; }
         .error-text { color:#ef4444!important; }
         .success-text { color:#22c55e!important; }
         .loading-text { color:#facc15!important; }
-        
         .preview-zone img { max-width:100%; max-height:140px; margin-top:10px; border-radius:8px; display:none; border:1px solid rgba(255,255,255,0.1); }
         
-        /* Mobile Breakpoint */
         @media (max-width: 768px) {
             body { align-items: flex-start; padding: 15px; }
             .bottom-grid { flex-direction: column; height: auto; min-height: unset; }
@@ -90,23 +79,28 @@
         
     <div id='app-view'>
         
-        <div class='glass-panel pane-top'>
+        <div class='glass-panel pane-top' style="padding: 20px;">
             <h3>FINANCIAL OASIS <span style="font-size:12px; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:8px; margin-left:10px;">🔴 <span id="dash-red-count">0</span> To Reconcile</span></h3>
-            <p style="margin-bottom:0;">Live Trajectory 2026</p>
-            <div class="dash-line"></div>
-            <p style="font-size:11px; opacity:0.5;">[ Fine-line graph engine overlay connects here ]</p>
+            <div style="position: relative; height: 100%; width: 100%;">
+                <canvas id="dashboardChart"></canvas>
+            </div>
         </div>
         
         <div class="bottom-grid">
             <div class='glass-panel pane-left'>
                 <h3>MOLONI BILLING</h3>
-                <iframe src="https://www.moloni.pt/login/" class="moloni-frame" title="Moloni Workspace"></iframe>
+                <p>Secure Portal Portal</p>
+                <a href="https://www.moloni.pt/login/" target="_blank" class="moloni-launch">
+                    <span style="font-size:24px;">💼</span>
+                    Launch Workspace Tab
+                </a>
+                <p style="font-size: 11px; margin-top: 20px; opacity: 0.5;">Browser autofill will handle your credentials securely in the new tab.</p>
             </div>
             
-            <div class='glass-panel pane-right'>
-                <div style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom: 25px;">
+            <div class='glass-panel pane-right' style="justify-content: flex-start;">
+                <div style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom: 25px; position: relative;">
                     <h3 style="margin:0;">EXPENSE SCAN</h3>
-                    <span style="cursor:pointer; font-size:20px; position:absolute; right:30px;" title="2026 Private Archive Viewer">📁</span>
+                    <span onclick="window.open('YOUR_DRIVE_FOLDER_LINK_HERE', '_blank')" style="cursor:pointer; font-size:20px; position:absolute; right:0;" title="2026 Private Archive Viewer">📁</span>
                 </div>
                 
                 <div class="input-group">
@@ -182,7 +176,7 @@
             });
         });
 
-        // Layout Transition
+        // Layout Transition & Graph Init
         function unlockApp(){
             var pin = Array.from(pinBoxes).map(b => b.value).join('');
             if(pin.length < 4) return;
@@ -194,8 +188,50 @@
             setTimeout(() => {
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('app-view').style.display = 'flex';
-                document.body.style.alignItems = 'flex-start'; // Push app to top of viewport
+                document.body.style.alignItems = 'flex-start';
+                
+                // Initialize the empty graph once the UI is visible
+                initPlaceholderGraph();
             }, 400);
+        }
+
+        function initPlaceholderGraph() {
+            const ctx = document.getElementById('dashboardChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Earnings (Moloni)',
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Empty for now
+                            borderColor: '#3b82f6', // Pastel Blue
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 1.5,
+                            pointBackgroundColor: '#3b82f6',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Expenses (Drive)',
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Empty for now
+                            borderColor: '#facc15', // Yellow
+                            backgroundColor: 'rgba(250, 204, 21, 0.1)',
+                            borderWidth: 1.5,
+                            pointBackgroundColor: '#facc15',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#888' } } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } }
+                    }
+                }
+            });
         }
 
         // Toggles
@@ -298,7 +334,6 @@
             document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             
-            // Replaced dropdown logic with streamlined toggle logic
             var mappedPayMethod = isCash ? "cash" : "bank";
             
             const payload = {
@@ -323,7 +358,6 @@
                     setStatus('Error: ' + result.error, 'error');
                     document.getElementById('retryBtn').style.display = 'block';
                 } else {
-                    // New Explicit Summary Card Output
                     setStatus(`✓ Folder: Receipts 2026<br>✓ Ledger: Row Created<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success');
                     document.getElementById('newBtn').style.display = 'block';
                 }
