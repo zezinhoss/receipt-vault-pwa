@@ -156,7 +156,11 @@
         var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto';
         var isDigital=false, isCash=false;
         var dashChart;
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzI6jnbSZvQZzpEeF0OwLiZ90N3fKrXn1veXWwgYshoPg2C4JoraRN2CY0fiqYlsmRopg/exec";
+        
+        // DECOUPLED ARCHITECTURE NODES
+        const EXPENSE_NODE_URL = "https://script.google.com/macros/s/AKfycbznM7pBh1ctry_HxPgFP7dgh0eS5cFu5k_Fhs8pdnhZhhTnEg8JJtb0-vDYL8mIyk0HNw/exec";
+        const INVOICE_NODE_URL = ""; // Reserved for Phase 2 Moloni API deployment
+
         const pinBoxes = document.querySelectorAll('.pin-box');
         
         pinBoxes.forEach((box,index) => {
@@ -235,11 +239,12 @@
 
         function fetchDashboardData() {
             document.getElementById('dash-red-count').innerText = "...";
-            fetch(GAS_URL + "?action=getChartData")
+            // Routing purely to the Expense Node for now
+            fetch(EXPENSE_NODE_URL + "?action=getChartData")
             .then(res => res.json())
             .then(data => {
                 document.getElementById('dash-red-count').innerText = data.redCount;
-                dashChart.data.datasets[0].data = data.earnings;
+                dashChart.data.datasets[0].data = data.earnings; // Returns [0]s until Node 2 is built
                 dashChart.data.datasets[1].data = data.expenses;
                 dashChart.update();
             })
@@ -337,7 +342,8 @@
                 month: cachedForcedMonth, isDigital: isDigital, payMethod: mappedPayMethod
             };
 
-            fetch(GAS_URL, {
+            // Routing payload explicitly to the Expense Node
+            fetch(EXPENSE_NODE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
