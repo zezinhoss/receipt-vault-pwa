@@ -8,17 +8,17 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#facc15">
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body { font-family:'Inter',sans-serif; background:#0a0a0a; background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%); color:#fff; padding:20px; display:flex; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; }
         
-        .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(250,204,21,0.15); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; }
+        .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(250,204,21,0.15); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; transition: all 0.4s ease; }
         
         #login-wrapper { width:100%; max-width:360px; }
         
-        h3 { color:#facc15; font-size:16px; font-weight:600; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; justify-content:center; align-items:center; gap:8px;}
+        h3 { color:#facc15; font-size:16px; font-weight:600; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
         p { color:#888; font-size:13px; font-weight:300; margin-bottom:25px; }
         
         .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
@@ -28,7 +28,7 @@
         #app-view { width:100%; max-width:1200px; flex-direction:column; gap:20px; display:none; }
         .pane-top { max-width:100%; display:flex; flex-direction:column; height:35vh; min-height:250px; justify-content:center; position:relative; }
         .bottom-grid { display:flex; gap:20px; width:100%; height:45vh; min-height:400px; }
-        .pane-left, .pane-right { max-width:100%; flex:1; display:flex; flex-direction:column; justify-content: center; }
+        .pane-left, .pane-right { max-width:100%; flex:1; display:flex; flex-direction:column; justify-content: flex-start; position: relative; overflow: hidden; }
         
         .input-group { display:flex; gap:10px; margin-bottom:20px; }
         select { flex:1; appearance:none; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:10px; color:#ddd; padding:14px 12px; font-size:13px; outline:none; transition:border 0.3s ease; text-align:center; }
@@ -43,9 +43,6 @@
         .btn:hover { background:rgba(255, 255, 255, 0.05); }
         .btn-primary:hover { background:#facc15; box-shadow:0 0 20px rgba(250, 204, 21, 0.4); }
         
-        .moloni-launch { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 25px; border-radius: 16px; font-size: 16px; font-weight: 600; margin-top: 20px; cursor: pointer; transition: all 0.3s ease; display:flex; flex-direction:column; align-items:center; gap:10px; text-decoration:none; }
-        .moloni-launch:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(30,58,138,0.5); border-color: #3b82f6; }
-
         input[type='file'] { display: none; }
         #status { margin-top:20px; font-size:13px; color:#888; font-weight:400; line-height: 1.6; }
         .error-text { color:#ef4444!important; }
@@ -53,18 +50,48 @@
         .loading-text { color:#facc15!important; }
         .preview-zone img { max-width:100%; max-height:140px; margin-top:10px; border-radius:8px; display:none; border:1px solid rgba(255,255,255,0.1); }
         
+        /* --- MOLONI INVOICE UI STYLES --- */
+        .moloni-header { display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 1px solid rgba(59, 130, 246, 0.3); padding-bottom: 15px; margin-bottom: 15px; }
+        .moloni-header h3 { color: #3b82f6; margin: 0; justify-content: flex-start; }
+        
+        .moloni-expand-btn { background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .moloni-expand-btn:hover { background: #3b82f6; }
+
+        .moloni-nav { display: none; width: 100%; justify-content: space-around; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .m-nav-item { position: relative; padding: 10px 0; font-size: 13px; font-weight: 500; color: #ccc; cursor: pointer; }
+        .m-nav-item:hover { color: #3b82f6; }
+        
+        .m-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #1a1a1a; min-width: 200px; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 100; text-align: left; }
+        .m-nav-item:hover .m-dropdown { display: block; }
+        .m-dropdown a { display: block; padding: 12px 16px; color: #fff; text-decoration: none; border-left: 2px solid transparent; transition: all 0.2s; }
+        .m-dropdown a:hover { background: rgba(255,255,255,0.05); border-left: 2px solid #3b82f6; }
+        .m-dropdown-title { color: #888; font-size: 10px; text-transform: uppercase; padding: 8px 16px 4px 16px; pointer-events: none; }
+
+        #moloni-workspace { flex: 1; width: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        /* EXPANDED MODE OVERRIDES: Keeps Top Graph, Hides Right Pane */
+        .expanded-moloni .pane-right { display: none !important; }
+        .expanded-moloni .bottom-grid { height: 60vh; min-height: 500px; }
+        .expanded-moloni .pane-left { border-color: rgba(59, 130, 246, 0.4); }
+        .expanded-moloni .moloni-nav { display: flex; }
+
         @media (max-width: 768px) {
             body { align-items: flex-start; padding: 15px; }
             .bottom-grid { flex-direction: column; height: auto; min-height: unset; }
             .pane-left, .pane-right { height: auto; min-height: 400px; }
+            .expanded-moloni .bottom-grid { height: auto; min-height: 85vh; }
         }
+
+        /* Refresh Button Animation */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
     </style>
 </head>
 <body>
     
     <div class='glass-panel' id='login-wrapper'>
         <div id='login-view'>
-            <h3>SECURE VAULT</h3>
+            <h3 style="justify-content: center;">SECURE VAULT</h3>
             <p>Restricted Access</p>
             <div class="pin-container" id="pin-container">
                 <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off">
@@ -78,27 +105,77 @@
         
     <div id='app-view'>
         
+        <!-- TOP PANE: ALWAYS VISIBLE -->
         <div class='glass-panel pane-top' style="padding: 20px;">
-            <h3>FINANCIAL OASIS <span style="font-size:12px; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:8px; margin-left:10px;">🔴 <span id="dash-red-count">0</span> To Reconcile</span></h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:10px;">
+                <h3 style="margin:0;">
+                    FINANCIAL OASIS 
+                    <span style="font-size:12px; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:8px; margin-left:10px;">🔴 <span id="dash-red-count">0</span> To Reconcile</span>
+                </h3>
+                <button id="refresh-graph-btn" onclick="fetchDashboardData()" style="background:transparent; border:none; font-size:18px; cursor:pointer; opacity:0.7; transition:opacity 0.3s;" title="Refresh Data">🔄</button>
+            </div>
             <div style="position: relative; height: 100%; width: 100%;">
                 <canvas id="dashboardChart"></canvas>
             </div>
         </div>
         
         <div class="bottom-grid">
-            <div class='glass-panel pane-left'>
-                <h3>MOLONI BILLING</h3>
-                <p>Secure Portal Portal</p>
-                <a href="https://www.moloni.pt/login/" target="_blank" class="moloni-launch">
-                    <span style="font-size:24px;">💼</span>
-                    Launch Workspace Tab
-                </a>
-                <p style="font-size: 11px; margin-top: 20px; opacity: 0.5;">Browser autofill will handle your credentials securely in the new tab.</p>
+            
+            <!-- LEFT PANE: INVOICE UI -->
+            <div class='glass-panel pane-left' id="moloni-pane">
+                <div class="moloni-header">
+                    <h3>MOLONI BILLING</h3>
+                    <button class="moloni-expand-btn" id="m-toggle-btn" onclick="toggleMoloniMode()">Expand</button>
+                </div>
+
+                <div class="moloni-nav" id="m-nav">
+                    <div class="m-nav-item">Create ▾
+                        <div class="m-dropdown">
+                            <a onclick="loadMoloniView('Invoice')">Invoice</a>
+                            <a onclick="loadMoloniView('Estimate')">Estimate</a>
+                            <a onclick="loadMoloniView('Pro Forma')">Pro Forma Invoices</a>
+                            <a onclick="loadMoloniView('Receipts')">Receipts</a>
+                            <a onclick="loadMoloniView('Expense')">Expense</a>
+                        </div>
+                    </div>
+                    <div class="m-nav-item">Queries ▾
+                        <div class="m-dropdown">
+                            <div class="m-dropdown-title">Sales</div>
+                            <a onclick="loadMoloniView('Sales Report')">Sales Report</a>
+                            <a onclick="loadMoloniView('Sales VAT')">VAT Reports</a>
+                            <a onclick="loadMoloniView('VAT Maps')">VATs Reconciliation Maps</a>
+                            <div class="m-dropdown-title" style="border-top:1px solid #333; margin-top:5px;">Purchases</div>
+                            <a onclick="loadMoloniView('Purchase Report')">Purchase Report</a>
+                            <a onclick="loadMoloniView('Purchase VAT')">VAT Reports</a>
+                        </div>
+                    </div>
+                    <div class="m-nav-item">CRM ▾
+                        <div class="m-dropdown">
+                            <a onclick="loadMoloniView('Clients')">Clients</a>
+                            <a onclick="loadMoloniView('Suppliers')">Suppliers</a>
+                            <a onclick="loadMoloniView('Products')">Categories & Products</a>
+                        </div>
+                    </div>
+                    <div class="m-nav-item">TAX ▾
+                        <div class="m-dropdown">
+                            <a onclick="loadMoloniView('SAFT')">SAF-T(PT) File</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="moloni-workspace">
+                    <div id="m-dash-info" style="text-align: center;">
+                        <span style="font-size:32px; display:block; margin-bottom:10px;">💼</span>
+                        <div class="success-text" style="font-weight:600; margin-bottom:5px;">API STANDBY</div>
+                        <p style="font-size: 12px; margin-top:0;">Expand to access workspace UI.</p>
+                    </div>
+                </div>
             </div>
             
-            <div class='glass-panel pane-right' style="justify-content: flex-start;">
+            <!-- RIGHT PANE: EXPENSE SCANNER -->
+            <div class='glass-panel pane-right' id="expense-pane" style="justify-content: flex-start; text-align: center;">
                 <div style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom: 25px; position: relative;">
-                    <h3 style="margin:0;">EXPENSE SCAN</h3>
+                    <h3 style="margin:0; justify-content: center;">EXPENSE SCAN</h3>
                     <span onclick="window.open('YOUR_DRIVE_FOLDER_LINK_HERE', '_blank')" style="cursor:pointer; font-size:20px; position:absolute; right:0;" title="2026 Private Archive Viewer">📁</span>
                 </div>
                 
@@ -156,27 +233,23 @@
         var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto';
         var isDigital=false, isCash=false;
         var dashChart;
+        var isMoloniExpanded = false;
         
-        // DECOUPLED ARCHITECTURE NODES
+        // DECOUPLED ARCHITECTURE NODES (Both endpoints isolated)
         const EXPENSE_NODE_URL = "https://script.google.com/macros/s/AKfycbznM7pBh1ctry_HxPgFP7dgh0eS5cFu5k_Fhs8pdnhZhhTnEg8JJtb0-vDYL8mIyk0HNw/exec";
-        const INVOICE_NODE_URL = ""; // Reserved for Phase 2 Moloni API deployment
+        const INVOICE_NODE_URL = ""; // Waiting for your final deployment URL
 
+        // --- PIN LOGIC ---
         const pinBoxes = document.querySelectorAll('.pin-box');
-        
         pinBoxes.forEach((box,index) => {
             box.addEventListener('input', (e) => {
                 if(box.value.length === 1){
-                    if(index < pinBoxes.length - 1){
-                        pinBoxes[index+1].focus();
-                    } else {
-                        unlockApp();
-                    }
+                    if(index < pinBoxes.length - 1) pinBoxes[index+1].focus();
+                    else unlockApp();
                 }
             });
             box.addEventListener('keydown', (e) => {
-                if(e.key === 'Backspace' && box.value === '' && index > 0){
-                    pinBoxes[index-1].focus();
-                }
+                if(e.key === 'Backspace' && box.value === '' && index > 0) pinBoxes[index-1].focus();
             });
         });
 
@@ -192,11 +265,47 @@
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('app-view').style.display = 'flex';
                 document.body.style.alignItems = 'flex-start';
-                
                 initPlaceholderGraph();
             }, 400);
         }
 
+        // --- MOLONI UI LOGIC ---
+        function toggleMoloniMode() {
+            var appView = document.getElementById('app-view');
+            var btn = document.getElementById('m-toggle-btn');
+            var dashInfo = document.getElementById('m-dash-info');
+
+            isMoloniExpanded = !isMoloniExpanded;
+
+            if (isMoloniExpanded) {
+                appView.classList.add('expanded-moloni');
+                btn.innerText = "Collapse";
+                dashInfo.style.display = 'none';
+                loadMoloniView('Clients'); 
+            } else {
+                appView.classList.remove('expanded-moloni');
+                btn.innerText = "Expand";
+                document.getElementById('moloni-workspace').innerHTML = dashInfo.outerHTML;
+                document.getElementById('m-dash-info').style.display = 'block';
+            }
+        }
+
+        function loadMoloniView(viewName) {
+            var ws = document.getElementById('moloni-workspace');
+            ws.innerHTML = `
+                <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
+                    <h2 style="color:#fff; font-weight:300; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-top:0;">${viewName}</h2>
+                    <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(59,130,246,0.3); padding: 40px; text-align: center; border-radius: 8px; color: #888;">
+                        <span style="font-size: 24px;">🚧</span><br><br>
+                        Interface for <b>${viewName}</b> ready.<br>
+                        Awaiting data binding from Invoice Node.
+                    </div>
+                </div>
+            `;
+            // E.g., fetch(INVOICE_NODE_URL + "?action=getView&view=" + viewName) will be routed here.
+        }
+
+        // --- DASHBOARD & UPLOAD LOGIC ---
         function initPlaceholderGraph() {
             const ctx = document.getElementById('dashboardChart').getContext('2d');
             dashChart = new Chart(ctx, {
@@ -204,197 +313,102 @@
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [
-                        {
-                            label: 'Earnings (Moloni)',
-                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                            borderColor: '#3b82f6', 
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 1.5,
-                            pointBackgroundColor: '#3b82f6',
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Expenses (Drive)',
-                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                            borderColor: '#facc15', 
-                            backgroundColor: 'rgba(250, 204, 21, 0.1)',
-                            borderWidth: 1.5,
-                            pointBackgroundColor: '#facc15',
-                            tension: 0.4
-                        }
+                        { label: 'Earnings (Moloni)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#3b82f6', tension: 0.4 },
+                        { label: 'Expenses (Drive)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#facc15', tension: 0.4 }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#888' } } },
-                    scales: {
-                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } } } }
             });
             fetchDashboardData();
         }
 
         function fetchDashboardData() {
+            var refreshBtn = document.getElementById('refresh-graph-btn');
+            refreshBtn.classList.add('spin'); // Spin icon while loading
+            
             document.getElementById('dash-red-count').innerText = "...";
-            // Routing purely to the Expense Node for now
+            
+            // 1. Fetch Expenses (Right Node)
             fetch(EXPENSE_NODE_URL + "?action=getChartData")
             .then(res => res.json())
             .then(data => {
                 document.getElementById('dash-red-count').innerText = data.redCount;
-                dashChart.data.datasets[0].data = data.earnings; // Returns [0]s until Node 2 is built
                 dashChart.data.datasets[1].data = data.expenses;
                 dashChart.update();
-            })
-            .catch(err => console.error("Dashboard Sync Error:", err));
+                refreshBtn.classList.remove('spin');
+            }).catch(err => { console.error(err); refreshBtn.classList.remove('spin'); });
+
+            // 2. Fetch Earnings (Left Node) - Ready to uncomment when URL is added
+            /*
+            if(INVOICE_NODE_URL) {
+                fetch(INVOICE_NODE_URL + "?action=getEarnings")
+                .then(res => res.json())
+                .then(data => {
+                    dashChart.data.datasets[0].data = data.earnings;
+                    dashChart.update();
+                }).catch(console.error);
+            }
+            */
         }
 
-        function toggleDigital(){
-            isDigital = !isDigital;
-            var btn = document.getElementById('btn-digital');
-            var txt = document.getElementById('text-digital');
-            if(isDigital){ btn.classList.add('active'); txt.innerText = 'Digital ✓'; }
-            else{ btn.classList.remove('active'); txt.innerText = 'Digital?'; }
-        }
-
-        function toggleCash(){
-            isCash = !isCash;
-            var btn = document.getElementById('btn-cash');
-            var txt = document.getElementById('text-cash');
-            if(isCash){ btn.classList.add('active'); txt.innerText = 'In Cash ✓'; }
-            else{ btn.classList.remove('active'); txt.innerText = 'In Cash?'; }
-        }
-
-        function setStatus(msg, type){
-            var el = document.getElementById('status');
-            el.innerHTML = msg; el.className = type + '-text';
-        }
+        function toggleDigital(){ isDigital = !isDigital; var btn = document.getElementById('btn-digital'), txt = document.getElementById('text-digital'); if(isDigital){ btn.classList.add('active'); txt.innerText = 'Digital ✓'; } else{ btn.classList.remove('active'); txt.innerText = 'Digital?'; } }
+        function toggleCash(){ isCash = !isCash; var btn = document.getElementById('btn-cash'), txt = document.getElementById('text-cash'); if(isCash){ btn.classList.add('active'); txt.innerText = 'In Cash ✓'; } else{ btn.classList.remove('active'); txt.innerText = 'In Cash?'; } }
+        function setStatus(msg, type){ var el = document.getElementById('status'); el.innerHTML = msg; el.className = type + '-text'; }
 
         function handleFile(inputEl){
             if(!inputEl.files.length) return;
             document.getElementById('inputContainer').style.display = 'none';
-            var file = inputEl.files[0];
-            var mimeType = file.type;
+            var file = inputEl.files[0], mimeType = file.type;
             setStatus('Compacting asset...', 'loading');
             
-            if(mimeType === 'application/pdf' || mimeType.includes('word') || mimeType.includes('officedocument')){
-                var reader = new FileReader();
-                reader.onload = function(e){
-                    cachedBase64 = e.target.result.split(',')[1];
-                    cachedFullImgSrc = e.target.result;
-                    cachedMimeType = mimeType;
-                    document.getElementById('preview').style.display = 'none';
-                    showUploadState();
-                };
-                reader.readAsDataURL(file);
-            } else {
-                var reader = new FileReader();
-                reader.onload = function(e){
+            var reader = new FileReader();
+            reader.onload = function(e){
+                if(mimeType === 'application/pdf' || mimeType.includes('word') || mimeType.includes('officedocument')){
+                    cachedBase64 = e.target.result.split(',')[1]; cachedFullImgSrc = e.target.result; cachedMimeType = mimeType;
+                    document.getElementById('preview').style.display = 'none'; showUploadState();
+                } else {
                     var img = new Image();
                     img.onload = function(){
                         var canvas = document.createElement('canvas');
                         var maxW = 2400, maxH = 2400, w = img.width, h = img.height;
-                        if(w > maxW || h > maxH){
-                            if(w > h){ h *= maxW/w; w = maxW; }
-                            else { w *= maxH/h; h = maxH; }
-                        }
-                        canvas.width = w; canvas.height = h;
-                        canvas.getContext('2d').drawImage(img,0,0,w,h);
+                        if(w > maxW || h > maxH){ if(w > h){ h *= maxW/w; w = maxW; } else { w *= maxH/h; h = maxH; } }
+                        canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img,0,0,w,h);
                         var dataUrl = canvas.toDataURL('image/jpeg', 0.90);
-                        
-                        cachedBase64 = dataUrl.split(',')[1];
-                        cachedFullImgSrc = dataUrl;
-                        cachedMimeType = 'image/jpeg';
-                        document.getElementById('preview').src = dataUrl;
-                        document.getElementById('preview').style.display = 'inline-block';
-                        showUploadState();
+                        cachedBase64 = dataUrl.split(',')[1]; cachedFullImgSrc = dataUrl; cachedMimeType = 'image/jpeg';
+                        document.getElementById('preview').src = dataUrl; document.getElementById('preview').style.display = 'inline-block'; showUploadState();
                     };
-                    img.onerror = function(){
-                        cachedBase64 = e.target.result.split(',')[1];
-                        cachedFullImgSrc = e.target.result;
-                        cachedMimeType = mimeType;
-                        showUploadState();
-                    };
+                    img.onerror = function(){ cachedBase64 = e.target.result.split(',')[1]; cachedFullImgSrc = e.target.result; cachedMimeType = mimeType; showUploadState(); };
                     img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
-        function showUploadState() {
-            setStatus('Asset ready. Tag month and hit Upload.', 'success');
-            document.getElementById('uploadBtn').style.display = 'block';
-            document.getElementById('retryBtn').style.display = 'none';
-        }
+        function showUploadState() { setStatus('Asset ready. Tag month and hit Upload.', 'success'); document.getElementById('uploadBtn').style.display = 'block'; document.getElementById('retryBtn').style.display = 'none'; }
 
         function triggerUpload() {
             cachedForcedMonth = document.getElementById('monthOverride').value;
-            document.getElementById('uploadBtn').style.display = 'none';
-            document.getElementById('retryBtn').style.display = 'none';
+            document.getElementById('uploadBtn').style.display = 'none'; document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
-            
             var mappedPayMethod = isCash ? "cash" : "bank";
-            
-            const payload = {
-                fileData: cachedBase64, mimeType: cachedMimeType, pin: cachedPin,
-                month: cachedForcedMonth, isDigital: isDigital, payMethod: mappedPayMethod
-            };
+            const payload = { fileData: cachedBase64, mimeType: cachedMimeType, pin: cachedPin, month: cachedForcedMonth, isDigital: isDigital, payMethod: mappedPayMethod };
 
-            // Routing payload explicitly to the Expense Node
-            fetch(EXPENSE_NODE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json()) 
+            fetch(EXPENSE_NODE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
+            .then(res => res.json()) 
             .then(result => {
-                if (result.status === "error") {
-                    setStatus('Error: ' + result.error, 'error');
-                    document.getElementById('retryBtn').style.display = 'block';
-                } else {
-                    setStatus(`✓ Folder: Receipts 2026<br>✓ Ledger: Row Created<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success');
-                    document.getElementById('newBtn').style.display = 'block';
-                    fetchDashboardData(); // Refresh graph on upload
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                setStatus('Transmission failed. Check connection.', 'error');
-                document.getElementById('retryBtn').style.display = 'block';
-            });
+                if (result.status === "error") { setStatus('Error: ' + result.error, 'error'); document.getElementById('retryBtn').style.display = 'block'; } 
+                else { setStatus(`✓ Vault Saved<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success'); document.getElementById('newBtn').style.display = 'block'; fetchDashboardData(); }
+            }).catch(err => { setStatus('Transmission failed.', 'error'); document.getElementById('retryBtn').style.display = 'block'; });
         }
 
         function resetForm(){
-            setStatus('Awaiting Document...','');
-            document.getElementById('preview').style.display = 'none';
-            document.getElementById('preview').src = '';
-            document.querySelectorAll('input[type=file]').forEach(i => i.value='');
-            document.getElementById('uploadBtn').style.display = 'none';
-            document.getElementById('retryBtn').style.display = 'none';
-            document.getElementById('newBtn').style.display = 'none';
-            document.getElementById('inputContainer').style.display = 'block';
-            
-            isDigital = false;
-            document.getElementById('btn-digital').classList.remove('active');
-            document.getElementById('text-digital').innerText = 'Digital?';
-            
-            isCash = false;
-            document.getElementById('btn-cash').classList.remove('active');
-            document.getElementById('text-cash').innerText = 'In Cash?';
+            setStatus('Awaiting Document...',''); document.getElementById('preview').style.display = 'none'; document.getElementById('preview').src = ''; document.querySelectorAll('input[type=file]').forEach(i => i.value='');
+            document.getElementById('uploadBtn').style.display = 'none'; document.getElementById('retryBtn').style.display = 'none'; document.getElementById('newBtn').style.display = 'none'; document.getElementById('inputContainer').style.display = 'block';
+            isDigital = false; document.getElementById('btn-digital').classList.remove('active'); document.getElementById('text-digital').innerText = 'Digital?';
+            isCash = false; document.getElementById('btn-cash').classList.remove('active'); document.getElementById('text-cash').innerText = 'In Cash?';
         }
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Failed:', err)); });
-            navigator.serviceWorker.addEventListener('message', (event) => {
-                if (event.data && event.data.file) {
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(event.data.file);
-                    handleFile({ files: dataTransfer.files });
-                }
-            });
-        }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Failed:', err)); }); }
     </script>
 </body>
 </html>
