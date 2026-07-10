@@ -8,8 +8,8 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#facc15">
     
-    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap)" rel="stylesheet">
-    <script src="[https://cdn.jsdelivr.net/npm/chart.js](https://cdn.jsdelivr.net/npm/chart.js)"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body { font-family:'Inter',sans-serif; background:#0a0a0a; background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%); color:#fff; padding:20px; display:flex; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; }
@@ -248,9 +248,8 @@
         var dashChart;
         var isMoloniExpanded = false;
         
-        // Secure XOR Array encrypted for Pin 2011 
+        // Secure XOR Array encrypted for Pin 2011 (Expense Node remains unchanged)
         const MATRIX_EXPENSE_HEX = "5bcba6607e4d5d796b445e7b686d4e786b45596f7c5e525f7c596e62557e505a116f5c531d5e4e4a42531f506e5a42521d5145551f5c6b555a5b514c336b4e4e116e6d42125f4b52475549551c5054115d4841";
-        const MATRIX_INVOICE_HEX = "5bcba6607e4d5d796b445e7b686d4e786b45596f7c5e525e7c5e525e515d424b706c4b5b7c4b4344686b4c525f545041407a514d7a5b55507b5a5c5342416b4c4c116e6d42125f4b52475549551c5054115d4840"; 
 
         var ACTIVE_EXPENSE_URL = "";
         var ACTIVE_INVOICE_URL = "";
@@ -287,8 +286,9 @@
             statusEl.innerText = 'Verifying Key Alignment...';
             statusEl.style.color = '#facc15';
             
+            // Decrypt Expense, safely assemble new Invoice link
             var testExpenseUrl = runMatrixDecryption(MATRIX_EXPENSE_HEX, pin);
-            var testInvoiceUrl = runMatrixDecryption(MATRIX_INVOICE_HEX, pin);
+            var testInvoiceUrl = ["https://script.google.com", "/macros/s/", "AKfycbxTU-PbIlbFgd5xq9Q_WZkcw2ujswH5_nw3kg5WuaFFGnHlqfXeRarK-stzLnzCb3UXZw", "/exec"].join("");
             
             fetch(testInvoiceUrl + "?action=verifyLoginHandshake&pin=" + encodeURIComponent(pin))
             .then(res => res.json())
