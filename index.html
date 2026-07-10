@@ -74,7 +74,6 @@
 </head>
 <body>
     
-    <!-- LOGIN GATEKEEPER -->
     <div class='glass-panel' id='login-wrapper'>
         <div id='login-view'>
             <h3>SECURE VAULT</h3>
@@ -89,10 +88,8 @@
         </div>
     </div>
         
-    <!-- 3-PANE WORKSPACE -->
     <div id='app-view'>
         
-        <!-- TOP PANE: DASHBOARD OASIS -->
         <div class='glass-panel pane-top'>
             <h3>FINANCIAL OASIS <span style="font-size:12px; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:8px; margin-left:10px;">🔴 <span id="dash-red-count">0</span> To Reconcile</span></h3>
             <p style="margin-bottom:0;">Live Trajectory 2026</p>
@@ -101,13 +98,11 @@
         </div>
         
         <div class="bottom-grid">
-            <!-- BOTTOM LEFT: MOLONI INVOICES -->
             <div class='glass-panel pane-left'>
                 <h3>MOLONI BILLING</h3>
                 <iframe src="https://www.moloni.pt/login/" class="moloni-frame" title="Moloni Workspace"></iframe>
             </div>
             
-            <!-- BOTTOM RIGHT: EXPENSE VAULT -->
             <div class='glass-panel pane-right'>
                 <div style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom: 25px;">
                     <h3 style="margin:0;">EXPENSE SCAN</h3>
@@ -132,7 +127,6 @@
                     </select>
                 </div>
                 
-                <!-- Streamlined Controls -->
                 <div class="input-group" style="margin-bottom:25px;">
                     <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()">
                         <span class="t-text" id="text-digital">Digital?</span>
@@ -316,7 +310,7 @@
                 payMethod: mappedPayMethod
             };
 
-            const GAS_URL = "https://script.google.com/macros/s/AKfycbwWcxMCm2Xk-8Gia7w63SuNFTCvndMcZwNgeYC5eaoWvw4-WoHKNHKQDeUsBuNaeAAPmg/exec";
+            const GAS_URL = "https://script.google.com/macros/s/AKfycbzI6jnbSZvQZzpEeF0OwLiZ90N3fKrXn1veXWwgYshoPg2C4JoraRN2CY0fiqYlsmRopg/exec";
 
             fetch(GAS_URL, {
                 method: 'POST',
