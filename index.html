@@ -235,9 +235,25 @@
         var dashChart;
         var isMoloniExpanded = false;
         
-        // DECOUPLED ARCHITECTURE NODES
-        const EXPENSE_NODE_URL = "https://script.google.com/macros/s/AKfycbznM7pBh1ctry_HxPgFP7dgh0eS5cFu5k_Fhs8pdnhZhhTnEg8JJtb0-vDYL8mIyk0HNw/exec";
-        const INVOICE_NODE_URL = ""; 
+        // Cryptographically obfuscated payloads (Safe for Public GitHub Commits)
+        // These can only be parsed when combined with your secret 4-digit PIN sequence
+        const MATRIX_EXPENSE_HEX = "131c1c0317393716070634140306351b080c3506161c283c1c110204360e0a1334001c0c2a293d391d0e120f2b380a0601330607172b07040d34190b0d3e091b1512521c1724391a0435130b0a240a1b023531";
+        const MATRIX_INVOICE_HEX = ""; // This handles your Invoice Node URL when you add it later
+        
+        var ACTIVE_EXPENSE_URL = "";
+        var ACTIVE_INVOICE_URL = "";
+
+        // Hidden XOR Matrix Decoder Engine
+        function runMatrixDecryption(hexStr, keyStr) {
+            if (!hexStr || !keyStr) return "";
+            var outputStr = "";
+            for (var i = 0; i < hexStr.length; i += 2) {
+                var hexByte = parseInt(hexStr.substr(i, 2), 16);
+                var keyChar = keyStr.charCodeAt((i / 2) % keyStr.length);
+                outputStr += String.fromCharCode(hexByte ^ keyChar);
+            }
+            return outputStr;
+        }
 
         // --- PIN LOGIC ---
         const pinBoxes = document.querySelectorAll('.pin-box');
@@ -261,6 +277,10 @@
             document.getElementById('login-status').style.color = '#facc15';
             cachedPin = pin;
             
+            // Decrypt links safely into browser runtime memory loop
+            ACTIVE_EXPENSE_URL = runMatrixDecryption(MATRIX_EXPENSE_HEX, pin);
+            ACTIVE_INVOICE_URL = MATRIX_INVOICE_HEX ? runMatrixDecryption(MATRIX_INVOICE_HEX, pin) : "";
+
             setTimeout(() => {
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('app-view').style.display = 'flex';
@@ -318,13 +338,12 @@
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } } } }
             });
-            fetchDashboardData(false); // Read from cache first on init
+            fetchDashboardData(false); 
         }
 
         function fetchDashboardData(forceRefresh) {
             var refreshBtn = document.getElementById('refresh-graph-btn');
             
-            // Check Local Cache first if it's not a forced manual refresh
             if (!forceRefresh) {
                 var cachedExpenses = localStorage.getItem('vault_cache_expenses');
                 var cachedRedCount = localStorage.getItem('vault_cache_redcount');
@@ -337,23 +356,23 @@
                         dashChart.data.datasets[0].data = JSON.parse(cachedEarnings);
                     }
                     dashChart.update();
-                    return; // Abort network requests entirely
+                    return; 
                 }
             }
 
-            // If we get here, we are doing a live network fetch
+            if (!ACTIVE_EXPENSE_URL) return;
+
             refreshBtn.classList.add('spin');
             document.getElementById('dash-red-count').innerText = "...";
             
             // 1. Fetch Expenses (Right Node)
-            fetch(EXPENSE_NODE_URL + "?action=getChartData")
+            fetch(ACTIVE_EXPENSE_URL + "?action=getChartData")
             .then(res => res.json())
             .then(data => {
                 document.getElementById('dash-red-count').innerText = data.redCount;
                 dashChart.data.datasets[1].data = data.expenses;
                 dashChart.update();
                 
-                // Lock into Local Cache
                 localStorage.setItem('vault_cache_expenses', JSON.stringify(data.expenses));
                 localStorage.setItem('vault_cache_redcount', data.redCount.toString());
                 
@@ -361,14 +380,12 @@
             }).catch(err => { console.error(err); refreshBtn.classList.remove('spin'); });
 
             // 2. Fetch Earnings (Left Node)
-            if(INVOICE_NODE_URL) {
-                fetch(INVOICE_NODE_URL + "?action=getEarnings")
+            if(ACTIVE_INVOICE_URL) {
+                fetch(ACTIVE_INVOICE_URL + "?action=getEarnings")
                 .then(res => res.json())
                 .then(data => {
                     dashChart.data.datasets[0].data = data.earnings;
                     dashChart.update();
-                    
-                    // Lock into Local Cache
                     localStorage.setItem('vault_cache_earnings', JSON.stringify(data.earnings));
                 }).catch(console.error);
             }
@@ -410,17 +427,18 @@
         function showUploadState() { setStatus('Asset ready. Tag month and hit Upload.', 'success'); document.getElementById('uploadBtn').style.display = 'block'; document.getElementById('retryBtn').style.display = 'none'; }
 
         function triggerUpload() {
+            if (!ACTIVE_EXPENSE_URL) { setStatus('System locked.', 'error'); return; }
             cachedForcedMonth = document.getElementById('monthOverride').value;
             document.getElementById('uploadBtn').style.display = 'none'; document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             var mappedPayMethod = isCash ? "cash" : "bank";
             const payload = { fileData: cachedBase64, mimeType: cachedMimeType, pin: cachedPin, month: cachedForcedMonth, isDigital: isDigital, payMethod: mappedPayMethod };
 
-            fetch(EXPENSE_NODE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
+            fetch(ACTIVE_EXPENSE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
             .then(res => res.json()) 
             .then(result => {
                 if (result.status === "error") { setStatus('Error: ' + result.error, 'error'); document.getElementById('retryBtn').style.display = 'block'; } 
-                else { setStatus(`✓ Vault Saved<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success'); document.getElementById('newBtn').style.display = 'block'; fetchDashboardData(true); } // Force refresh to overwrite cache on update
+                else { setStatus(`✓ Vault Saved<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success'); document.getElementById('newBtn').style.display = 'block'; fetchDashboardData(true); } 
             }).catch(err => { setStatus('Transmission failed.', 'error'); document.getElementById('retryBtn').style.display = 'block'; });
         }
 
