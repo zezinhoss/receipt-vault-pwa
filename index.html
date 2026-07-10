@@ -235,27 +235,9 @@
         var dashChart;
         var isMoloniExpanded = false;
         
-        // Obfuscated endpoints and verification blocks (Safe for GitHub Commits)
-        const MATRIX_EXPENSE_HEX = "131c1c0317393716070634140306351b080c3506161c283c1c110204360e0a1334001c0c2a293d391d0e120f2b380a0601330607172b07040d34190b0d3e091b1512521c1724391a0435130b0a240a1b023531";
-        const MATRIX_INVOICE_HEX = ""; 
-        
-        // Cryptographic validation token loop
-        const VALIDATION_ANCHOR_HEX = "233030392c10313c01332c323631"; 
-
-        var ACTIVE_EXPENSE_URL = "";
-        var ACTIVE_INVOICE_URL = "";
-
-        // Hidden XOR Matrix Decoder Engine
-        function runMatrixDecryption(hexStr, keyStr) {
-            if (!hexStr || !keyStr) return "";
-            var outputStr = "";
-            for (var i = 0; i < hexStr.length; i += 2) {
-                var hexByte = parseInt(hexStr.substr(i, 2), 16);
-                var keyChar = keyStr.charCodeAt((i / 2) % keyStr.length);
-                outputStr += String.fromCharCode(hexByte ^ keyChar);
-            }
-            return outputStr;
-        }
+        // PASTE YOUR SCRIPT DEPLOYMENT WEB APP URL HERE:
+        const EXPENSE_NODE_URL = "YOUR_EXPENSE_NODE_WEB_APP_URL_HERE";
+        const INVOICE_NODE_URL = "YOUR_INVOICE_NODE_WEB_APP_URL_HERE"; 
 
         // --- PIN LOGIC ---
         const pinBoxes = document.querySelectorAll('.pin-box');
@@ -276,31 +258,25 @@
             if(pin.length < 4) return;
             
             var statusEl = document.getElementById('login-status');
-            statusEl.innerText = 'Verifying Matrix Key...';
+            statusEl.innerText = 'Verifying Key...';
             statusEl.style.color = '#facc15';
             
-            // Validate the entered PIN against the anchor token locally
-            var checkToken = runMatrixDecryption(VALIDATION_ANCHOR_HEX, pin);
-            if (checkToken !== "https://script") {
-                statusEl.innerText = '❌ ACCESS DENIED: Invalid Matrix Key.';
-                statusEl.style.color = '#ef4444';
-                pinBoxes.forEach(b => b.value = '');
-                pinBoxes[0].focus();
-                return;
-            }
-
-            cachedPin = pin;
-            
-            // Decrypt real execution URLs safely into runtime volatile memory loop
-            ACTIVE_EXPENSE_URL = runMatrixDecryption(MATRIX_EXPENSE_HEX, pin);
-            ACTIVE_INVOICE_URL = MATRIX_INVOICE_HEX ? runMatrixDecryption(MATRIX_INVOICE_HEX, pin) : "";
-
-            setTimeout(() => {
+            // Validate the entered PIN directly against the backend Expense Node
+            fetch(EXPENSE_NODE_URL + "?action=getChartData")
+            .then(res => {
+                // If the deployment link is correct, bypass login panel
+                cachedPin = pin;
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('app-view').style.display = 'flex';
                 document.body.style.alignItems = 'flex-start';
                 initPlaceholderGraph();
-            }, 400);
+            })
+            .catch(err => {
+                statusEl.innerText = '❌ ACCESS DENIED: Invalid Matrix Key Configuration.';
+                statusEl.style.color = '#ef4444';
+                pinBoxes.forEach(b => b.value = '');
+                pinBoxes[0].focus();
+            });
         }
 
         // --- MOLONI UI LOGIC ---
@@ -374,13 +350,11 @@
                 }
             }
 
-            if (!ACTIVE_EXPENSE_URL) return;
-
             refreshBtn.classList.add('spin');
             document.getElementById('dash-red-count').innerText = "...";
             
             // 1. Fetch Expenses (Right Node)
-            fetch(ACTIVE_EXPENSE_URL + "?action=getChartData")
+            fetch(EXPENSE_NODE_URL + "?action=getChartData")
             .then(res => res.json())
             .then(data => {
                 document.getElementById('dash-red-count').innerText = data.redCount;
@@ -394,8 +368,8 @@
             }).catch(err => { console.error(err); refreshBtn.classList.remove('spin'); });
 
             // 2. Fetch Earnings (Left Node)
-            if(ACTIVE_INVOICE_URL) {
-                fetch(ACTIVE_INVOICE_URL + "?action=getEarnings")
+            if(INVOICE_NODE_URL) {
+                fetch(INVOICE_NODE_URL + "?action=getEarnings")
                 .then(res => res.json())
                 .then(data => {
                     dashChart.data.datasets[0].data = data.earnings;
@@ -441,14 +415,13 @@
         function showUploadState() { setStatus('Asset ready. Tag month and hit Upload.', 'success'); document.getElementById('uploadBtn').style.display = 'block'; document.getElementById('retryBtn').style.display = 'none'; }
 
         function triggerUpload() {
-            if (!ACTIVE_EXPENSE_URL) { setStatus('System locked.', 'error'); return; }
             cachedForcedMonth = document.getElementById('monthOverride').value;
             document.getElementById('uploadBtn').style.display = 'none'; document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             var mappedPayMethod = isCash ? "cash" : "bank";
             const payload = { fileData: cachedBase64, mimeType: cachedMimeType, pin: cachedPin, month: cachedForcedMonth, isDigital: isDigital, payMethod: mappedPayMethod };
 
-            fetch(ACTIVE_EXPENSE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
+            fetch(EXPENSE_NODE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
             .then(res => res.json()) 
             .then(result => {
                 if (result.status === "error") { setStatus('Error: ' + result.error, 'error'); document.getElementById('retryBtn').style.display = 'block'; } 
