@@ -36,7 +36,7 @@
         
         .toggle-btn { flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px 10px; color:#888; font-size:14px; text-align:center; cursor:pointer; transition:all 0.3s; box-sizing:border-box; user-select:none; }
         .toggle-btn.active { border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2); }
-        .toggle-btn.active .t-text { color:#facc15; font-weight:600; text-shadow:0 0 5px rgba(250,204,21,0.4); }
+        .toggle-btn.active t-text { color:#facc15; font-weight:600; text-shadow:0 0 5px rgba(250,204,21,0.4); }
         
         .btn { display:block; width:100%; background:transparent; color:#ddd; padding:16px; border-radius:12px; font-size:13px; font-weight:400; letter-spacing:1px; cursor:pointer; border:1px solid rgba(255, 255, 255, 0.1); transition:all 0.3s ease; margin-bottom:12px; box-sizing:border-box; text-transform:uppercase; }
         .btn-primary { background:rgba(250, 204, 21, 0.9); color:#000; border:none; font-weight:600; }
@@ -112,7 +112,7 @@
                     FINANCIAL OASIS 
                     <span style="font-size:12px; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:8px; margin-left:10px;">🔴 <span id="dash-red-count">0</span> To Reconcile</span>
                 </h3>
-                <button id="refresh-graph-btn" onclick="fetchDashboardData()" style="background:transparent; border:none; font-size:18px; cursor:pointer; opacity:0.7; transition:opacity 0.3s;" title="Refresh Data">🔄</button>
+                <button id="refresh-graph-btn" onclick="fetchDashboardData(true)" style="background:transparent; border:none; font-size:18px; cursor:pointer; opacity:0.7; transition:opacity 0.3s;" title="Force Live Refresh">🔄</button>
             </div>
             <div style="position: relative; height: 100%; width: 100%;">
                 <canvas id="dashboardChart"></canvas>
@@ -235,9 +235,9 @@
         var dashChart;
         var isMoloniExpanded = false;
         
-        // DECOUPLED ARCHITECTURE NODES (Both endpoints isolated)
+        // DECOUPLED ARCHITECTURE NODES
         const EXPENSE_NODE_URL = "https://script.google.com/macros/s/AKfycbznM7pBh1ctry_HxPgFP7dgh0eS5cFu5k_Fhs8pdnhZhhTnEg8JJtb0-vDYL8mIyk0HNw/exec";
-        const INVOICE_NODE_URL = ""; // Waiting for your final deployment URL
+        const INVOICE_NODE_URL = ""; 
 
         // --- PIN LOGIC ---
         const pinBoxes = document.querySelectorAll('.pin-box');
@@ -302,7 +302,6 @@
                     </div>
                 </div>
             `;
-            // E.g., fetch(INVOICE_NODE_URL + "?action=getView&view=" + viewName) will be routed here.
         }
 
         // --- DASHBOARD & UPLOAD LOGIC ---
@@ -319,13 +318,31 @@
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } } } }
             });
-            fetchDashboardData();
+            fetchDashboardData(false); // Read from cache first on init
         }
 
-        function fetchDashboardData() {
+        function fetchDashboardData(forceRefresh) {
             var refreshBtn = document.getElementById('refresh-graph-btn');
-            refreshBtn.classList.add('spin'); // Spin icon while loading
             
+            // Check Local Cache first if it's not a forced manual refresh
+            if (!forceRefresh) {
+                var cachedExpenses = localStorage.getItem('vault_cache_expenses');
+                var cachedRedCount = localStorage.getItem('vault_cache_redcount');
+                var cachedEarnings = localStorage.getItem('vault_cache_earnings');
+                
+                if (cachedExpenses && cachedRedCount) {
+                    document.getElementById('dash-red-count').innerText = cachedRedCount;
+                    dashChart.data.datasets[1].data = JSON.parse(cachedExpenses);
+                    if (cachedEarnings) {
+                        dashChart.data.datasets[0].data = JSON.parse(cachedEarnings);
+                    }
+                    dashChart.update();
+                    return; // Abort network requests entirely
+                }
+            }
+
+            // If we get here, we are doing a live network fetch
+            refreshBtn.classList.add('spin');
             document.getElementById('dash-red-count').innerText = "...";
             
             // 1. Fetch Expenses (Right Node)
@@ -335,20 +352,26 @@
                 document.getElementById('dash-red-count').innerText = data.redCount;
                 dashChart.data.datasets[1].data = data.expenses;
                 dashChart.update();
+                
+                // Lock into Local Cache
+                localStorage.setItem('vault_cache_expenses', JSON.stringify(data.expenses));
+                localStorage.setItem('vault_cache_redcount', data.redCount.toString());
+                
                 refreshBtn.classList.remove('spin');
             }).catch(err => { console.error(err); refreshBtn.classList.remove('spin'); });
 
-            // 2. Fetch Earnings (Left Node) - Ready to uncomment when URL is added
-            /*
+            // 2. Fetch Earnings (Left Node)
             if(INVOICE_NODE_URL) {
                 fetch(INVOICE_NODE_URL + "?action=getEarnings")
                 .then(res => res.json())
                 .then(data => {
                     dashChart.data.datasets[0].data = data.earnings;
                     dashChart.update();
+                    
+                    // Lock into Local Cache
+                    localStorage.setItem('vault_cache_earnings', JSON.stringify(data.earnings));
                 }).catch(console.error);
             }
-            */
         }
 
         function toggleDigital(){ isDigital = !isDigital; var btn = document.getElementById('btn-digital'), txt = document.getElementById('text-digital'); if(isDigital){ btn.classList.add('active'); txt.innerText = 'Digital ✓'; } else{ btn.classList.remove('active'); txt.innerText = 'Digital?'; } }
@@ -397,7 +420,7 @@
             .then(res => res.json()) 
             .then(result => {
                 if (result.status === "error") { setStatus('Error: ' + result.error, 'error'); document.getElementById('retryBtn').style.display = 'block'; } 
-                else { setStatus(`✓ Vault Saved<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success'); document.getElementById('newBtn').style.display = 'block'; fetchDashboardData(); }
+                else { setStatus(`✓ Vault Saved<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success'); document.getElementById('newBtn').style.display = 'block'; fetchDashboardData(true); } // Force refresh to overwrite cache on update
             }).catch(err => { setStatus('Transmission failed.', 'error'); document.getElementById('retryBtn').style.display = 'block'; });
         }
 
