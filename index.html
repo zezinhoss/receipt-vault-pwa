@@ -10,33 +10,72 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body{font-family:'Inter',sans-serif;background:#0a0a0a;background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%);color:#fff;padding:20px;display:flex;justify-content:center;align-items:center;min-height:90vh;margin:0}
-        .glass-panel{background:rgba(30,30,30,0.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:40px 30px;border-radius:24px;border:1px solid rgba(250,204,21,0.15);box-shadow:0 25px 50px rgba(0,0,0,0.5);width:100%;max-width:360px;text-align:center;box-sizing:border-box}
-        h3{color:#facc15;font-size:16px;font-weight:600;letter-spacing:2px;margin-top:0;margin-bottom:6px}
-        p{color:#888;font-size:13px;font-weight:300;margin-bottom:30px}
-        .pin-container{display:flex;gap:12px;justify-content:center;margin-bottom:10px}
-        .pin-box{width:50px;height:60px;background:rgba(0, 0, 0, 0.4);border:1px solid rgba(255, 255, 255, 0.1);border-radius:12px;color:#facc15;font-size:24px;text-align:center;outline:none;transition:all 0.3s ease}
-        .pin-box:focus{border-color:#facc15;box-shadow:0 0 15px rgba(250, 204, 21, 0.2);background:rgba(0, 0, 0, 0.6)}
-        .input-group{display:flex;gap:10px;margin-bottom:25px}
-        select{flex:1;appearance:none;background:rgba(0, 0, 0, 0.4);border:1px solid rgba(255, 255, 255, 0.1);border-radius:10px;color:#ddd;padding:14px 12px;font-size:13px;outline:none;transition:border 0.3s ease;text-align:center}
-        select:focus{border-color:#facc15;color:#fff}
-        .toggle-btn{flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px 10px; color:#888; font-size:14px; text-align:center; cursor:pointer; transition:all 0.3s; box-sizing:border-box; user-select:none;}
-        .toggle-btn.active{border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2);}
-        .toggle-btn.active .t-text{color:#facc15; font-weight:600; text-shadow:0 0 5px rgba(250,204,21,0.4);}
-        .btn{display:block;width:100%;background:transparent;color:#ddd;padding:16px;border-radius:12px;font-size:13px;font-weight:400;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255, 255, 255, 0.1);transition:all 0.3s ease;margin-bottom:12px;box-sizing:border-box;text-transform:uppercase}
-        .btn-primary{background:rgba(250, 204, 21, 0.9);color:#000;border:none;font-weight:600}
-        .btn:hover {background:rgba(255, 255, 255, 0.05);}
-        .btn-primary:hover {background:#facc15;box-shadow:0 0 20px rgba(250, 204, 21, 0.4);}
-        input[type='file'] {display: none;}
-        #status {margin-top: 20px;font-size: 13px;color: #888;font-weight: 300;}
-        .error-text {color: #ef4444!important;}
-        .success-text {color: #22c55e!important;}
-        .loading-text {color: #facc15!important;}
-        .preview-zone img {max-width: 100%;max-height: 160px;margin-top: 15px;border-radius: 8px;display: none;border: 1px solid rgba(255,255,255,0.1);}
+        body { font-family:'Inter',sans-serif; background:#0a0a0a; background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%); color:#fff; padding:20px; display:flex; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; }
+        
+        /* Base Glass Panel Component */
+        .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(250,204,21,0.15); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; }
+        
+        /* Lock Screen Constraints */
+        #login-wrapper { width:100%; max-width:360px; }
+        
+        /* Typography */
+        h3 { color:#facc15; font-size:16px; font-weight:600; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; justify-content:center; align-items:center; gap:8px;}
+        p { color:#888; font-size:13px; font-weight:300; margin-bottom:25px; }
+        
+        /* PIN Controls */
+        .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
+        .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color:#facc15; font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; }
+        .pin-box:focus { border-color:#facc15; box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
+        
+        /* Workspace 3-Pane Layout */
+        #app-view { width:100%; max-width:1200px; flex-direction:column; gap:20px; display:none; }
+        .pane-top { max-width:100%; display:flex; flex-direction:column; height:30vh; min-height:200px; justify-content:center; position:relative; }
+        .bottom-grid { display:flex; gap:20px; width:100%; height:50vh; min-height:450px; }
+        .pane-left, .pane-right { max-width:100%; flex:1; display:flex; flex-direction:column; }
+        
+        /* Embedded Moloni Frame */
+        .moloni-frame { width:100%; height:100%; border:none; border-radius:12px; margin-top:15px; background:#fff; flex-grow:1; }
+
+        /* Dashboard Placeholder Elements */
+        .dash-line { width:100%; height:2px; background:linear-gradient(90deg, rgba(250,204,21,0) 0%, rgba(250,204,21,0.5) 50%, rgba(250,204,21,0) 100%); margin:20px 0; }
+        
+        /* Inputs & Toggles */
+        .input-group { display:flex; gap:10px; margin-bottom:20px; }
+        select { flex:1; appearance:none; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:10px; color:#ddd; padding:14px 12px; font-size:13px; outline:none; transition:border 0.3s ease; text-align:center; }
+        select:focus { border-color:#facc15; color:#fff; }
+        
+        .toggle-btn { flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px 10px; color:#888; font-size:14px; text-align:center; cursor:pointer; transition:all 0.3s; box-sizing:border-box; user-select:none; }
+        .toggle-btn.active { border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2); }
+        .toggle-btn.active .t-text { color:#facc15; font-weight:600; text-shadow:0 0 5px rgba(250,204,21,0.4); }
+        
+        /* Buttons */
+        .btn { display:block; width:100%; background:transparent; color:#ddd; padding:16px; border-radius:12px; font-size:13px; font-weight:400; letter-spacing:1px; cursor:pointer; border:1px solid rgba(255, 255, 255, 0.1); transition:all 0.3s ease; margin-bottom:12px; box-sizing:border-box; text-transform:uppercase; }
+        .btn-primary { background:rgba(250, 204, 21, 0.9); color:#000; border:none; font-weight:600; }
+        .btn:hover { background:rgba(255, 255, 255, 0.05); }
+        .btn-primary:hover { background:#facc15; box-shadow:0 0 20px rgba(250, 204, 21, 0.4); }
+        
+        input[type='file'] { display: none; }
+        
+        /* Status & Image Preview */
+        #status { margin-top:20px; font-size:13px; color:#888; font-weight:400; line-height: 1.6; }
+        .error-text { color:#ef4444!important; }
+        .success-text { color:#22c55e!important; }
+        .loading-text { color:#facc15!important; }
+        
+        .preview-zone img { max-width:100%; max-height:140px; margin-top:10px; border-radius:8px; display:none; border:1px solid rgba(255,255,255,0.1); }
+        
+        /* Mobile Breakpoint */
+        @media (max-width: 768px) {
+            body { align-items: flex-start; padding: 15px; }
+            .bottom-grid { flex-direction: column; height: auto; min-height: unset; }
+            .pane-left, .pane-right { height: auto; min-height: 400px; }
+        }
     </style>
 </head>
 <body>
-    <div class='glass-panel'>
+    
+    <!-- LOGIN GATEKEEPER -->
+    <div class='glass-panel' id='login-wrapper'>
         <div id='login-view'>
             <h3>SECURE VAULT</h3>
             <p>Restricted Access</p>
@@ -48,172 +87,204 @@
             </div>
             <div id='login-status' style='margin-top:15px;color:#ef4444;font-size:13px;'></div>
         </div>
+    </div>
         
-        <div id='app-view' style='display:none;'>
-            <h3>EXPENSE SCAN</h3>
-            <p>Document Ingestion</p>
-            <div class="input-group">
-                <select id='monthOverride'>
-                    <option value='auto'>Auto Month</option>
-                    <option value='1'>January</option>
-                    <option value='2'>February</option>
-                    <option value='3'>March</option>
-                    <option value='4'>April</option>
-                    <option value='5'>May</option>
-                    <option value='6'>June</option>
-                    <option value='7'>July</option>
-                    <option value='8'>August</option>
-                    <option value='9'>September</option>
-                    <option value='10'>October</option>
-                    <option value='11'>November</option>
-                    <option value='12'>December</option>
-                </select>
-                <select id='payMethod'>
-                    <option value='auto'>Auto Routing</option>
-                    <option value='bank'>Bank Transfer</option>
-                    <option value='cash'>Cash Payment</option>
-                </select>
-            </div>
-            <div class="input-group" style="margin-bottom:25px;">
-                <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()">
-                    <span class="t-text" id="text-digital">Digital?</span>
-                </div>
-                <div class="toggle-btn" id="btn-cash" onclick="toggleCash()">
-                    <span class="t-text" id="text-cash">In Cash?</span>
-                </div>
-            </div>
-            <div id='inputContainer'>
-                <label class='btn btn-primary'>Open Camera
-                    <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
-                </label>
-                <label class='btn'>Open Gallery / Folder
-                    <input type='file' accept='*/*' onchange='handleFile(this)'>
-                </label>
-            </div>
-            
-            <div class='preview-zone'>
-                <img id='preview' src='' alt='Preview'>
-            </div>
-
-            <button id='uploadBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Upload to Vault</button>
-            <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Try Again</button>
-            <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
-            
-            <div id='status'>Awaiting Document...</div>
+    <!-- 3-PANE WORKSPACE -->
+    <div id='app-view'>
+        
+        <!-- TOP PANE: DASHBOARD OASIS -->
+        <div class='glass-panel pane-top'>
+            <h3>FINANCIAL OASIS <span style="font-size:12px; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:8px; margin-left:10px;">🔴 <span id="dash-red-count">0</span> To Reconcile</span></h3>
+            <p style="margin-bottom:0;">Live Trajectory 2026</p>
+            <div class="dash-line"></div>
+            <p style="font-size:11px; opacity:0.5;">[ Fine-line graph engine overlay connects here ]</p>
         </div>
+        
+        <div class="bottom-grid">
+            <!-- BOTTOM LEFT: MOLONI INVOICES -->
+            <div class='glass-panel pane-left'>
+                <h3>MOLONI BILLING</h3>
+                <iframe src="https://www.moloni.pt/login/" class="moloni-frame" title="Moloni Workspace"></iframe>
+            </div>
+            
+            <!-- BOTTOM RIGHT: EXPENSE VAULT -->
+            <div class='glass-panel pane-right'>
+                <div style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom: 25px;">
+                    <h3 style="margin:0;">EXPENSE SCAN</h3>
+                    <span style="cursor:pointer; font-size:20px; position:absolute; right:30px;" title="2026 Private Archive Viewer">📁</span>
+                </div>
+                
+                <div class="input-group">
+                    <select id='monthOverride'>
+                        <option value='auto'>Auto Month</option>
+                        <option value='1'>January</option>
+                        <option value='2'>February</option>
+                        <option value='3'>March</option>
+                        <option value='4'>April</option>
+                        <option value='5'>May</option>
+                        <option value='6'>June</option>
+                        <option value='7'>July</option>
+                        <option value='8'>August</option>
+                        <option value='9'>September</option>
+                        <option value='10'>October</option>
+                        <option value='11'>November</option>
+                        <option value='12'>December</option>
+                    </select>
+                </div>
+                
+                <!-- Streamlined Controls -->
+                <div class="input-group" style="margin-bottom:25px;">
+                    <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()">
+                        <span class="t-text" id="text-digital">Digital?</span>
+                    </div>
+                    <div class="toggle-btn" id="btn-cash" onclick="toggleCash()">
+                        <span class="t-text" id="text-cash">In Cash?</span>
+                    </div>
+                </div>
+                
+                <div id='inputContainer'>
+                    <label class='btn btn-primary'>Open Camera
+                        <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
+                    </label>
+                    <label class='btn'>Open Gallery / Folder
+                        <input type='file' accept='*/*' onchange='handleFile(this)'>
+                    </label>
+                </div>
+                
+                <div class='preview-zone'>
+                    <img id='preview' src='' alt='Preview'>
+                </div>
+
+                <button id='uploadBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Upload to Vault</button>
+                <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Try Again</button>
+                <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
+                
+                <div id='status'>Awaiting Document...</div>
+            </div>
+        </div>
+        
     </div>
 
     <script>
-        var cachedBase64='',cachedFullImgSrc='',cachedMimeType='',cachedPin='',cachedForcedMonth='auto',cachedPayMethod='auto';
-        var isDigital=false,isCash=false;
-        const pinBoxes=document.querySelectorAll('.pin-box');
+        var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto';
+        var isDigital=false, isCash=false;
+        const pinBoxes = document.querySelectorAll('.pin-box');
         
-        pinBoxes.forEach((box,index)=>{
-            box.addEventListener('input',(e)=>{
-                if(box.value.length===1){
-                    if(index<pinBoxes.length-1){
+        // Auto-advance PIN
+        pinBoxes.forEach((box,index) => {
+            box.addEventListener('input', (e) => {
+                if(box.value.length === 1){
+                    if(index < pinBoxes.length - 1){
                         pinBoxes[index+1].focus();
-                    }else{
+                    } else {
                         unlockApp();
                     }
                 }
             });
-            box.addEventListener('keydown',(e)=>{
-                if(e.key==='Backspace'&&box.value===''&&index>0){
+            box.addEventListener('keydown', (e) => {
+                if(e.key === 'Backspace' && box.value === '' && index > 0){
                     pinBoxes[index-1].focus();
                 }
             });
         });
 
+        // Layout Transition
         function unlockApp(){
-            var pin=Array.from(pinBoxes).map(b=>b.value).join('');
-            if(pin.length<4)return;
-            document.getElementById('login-status').innerText='Verifying...';
-            document.getElementById('login-status').style.color='#facc15';
+            var pin = Array.from(pinBoxes).map(b => b.value).join('');
+            if(pin.length < 4) return;
             
-            cachedPin=pin;
-            document.getElementById('login-view').style.display='none';
-            document.getElementById('app-view').style.display='block';
+            document.getElementById('login-status').innerText = 'Verifying...';
+            document.getElementById('login-status').style.color = '#facc15';
+            cachedPin = pin;
+            
+            setTimeout(() => {
+                document.getElementById('login-wrapper').style.display = 'none';
+                document.getElementById('app-view').style.display = 'flex';
+                document.body.style.alignItems = 'flex-start'; // Push app to top of viewport
+            }, 400);
         }
 
+        // Toggles
         function toggleDigital(){
-            isDigital=!isDigital;
-            var btn=document.getElementById('btn-digital');
-            var txt=document.getElementById('text-digital');
+            isDigital = !isDigital;
+            var btn = document.getElementById('btn-digital');
+            var txt = document.getElementById('text-digital');
             if(isDigital){
                 btn.classList.add('active');
-                txt.innerText='Digital ✓';
+                txt.innerText = 'Digital ✓';
             }else{
                 btn.classList.remove('active');
-                txt.innerText='Digital?';
+                txt.innerText = 'Digital?';
             }
         }
 
         function toggleCash(){
-            isCash=!isCash;
-            var btn=document.getElementById('btn-cash');
-            var txt=document.getElementById('text-cash');
+            isCash = !isCash;
+            var btn = document.getElementById('btn-cash');
+            var txt = document.getElementById('text-cash');
             if(isCash){
                 btn.classList.add('active');
-                txt.innerText='In Cash ✓';
+                txt.innerText = 'In Cash ✓';
             }else{
                 btn.classList.remove('active');
-                txt.innerText='In Cash?';
+                txt.innerText = 'In Cash?';
             }
         }
 
-        function setStatus(msg,type){
-            var el=document.getElementById('status');
-            el.innerHTML=msg;
-            el.className=type+'-text';
+        function setStatus(msg, type){
+            var el = document.getElementById('status');
+            el.innerHTML = msg;
+            el.className = type + '-text';
         }
 
+        // Image Compression & Processing
         function handleFile(inputEl){
-            if(!inputEl.files.length)return;
-            document.getElementById('inputContainer').style.display='none';
-            var file=inputEl.files[0];
-            var mimeType=file.type;
-            setStatus('Compacting asset...','loading');
+            if(!inputEl.files.length) return;
+            document.getElementById('inputContainer').style.display = 'none';
+            var file = inputEl.files[0];
+            var mimeType = file.type;
+            setStatus('Compacting asset...', 'loading');
             
-            if(mimeType==='application/pdf' || mimeType.includes('word') || mimeType.includes('officedocument')){
-                var reader=new FileReader();
-                reader.onload=function(e){
-                    cachedBase64=e.target.result.split(',')[1];
-                    cachedFullImgSrc=e.target.result;
-                    cachedMimeType=mimeType;
-                    document.getElementById('preview').style.display='none';
+            if(mimeType === 'application/pdf' || mimeType.includes('word') || mimeType.includes('officedocument')){
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    cachedBase64 = e.target.result.split(',')[1];
+                    cachedFullImgSrc = e.target.result;
+                    cachedMimeType = mimeType;
+                    document.getElementById('preview').style.display = 'none';
                     showUploadState();
                 };
                 reader.readAsDataURL(file);
-            }else{
-                var reader=new FileReader();
-                reader.onload=function(e){
-                    var img=new Image();
-                    img.onload=function(){
-                        var canvas=document.createElement('canvas');
-                        var maxW=2400,maxH=2400,w=img.width,h=img.height;
-                        if(w>maxW||h>maxH){
-                            if(w>h){h*=maxW/w;w=maxW}
-                            else{w*=maxH/h;h=maxH}
+            } else {
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    var img = new Image();
+                    img.onload = function(){
+                        var canvas = document.createElement('canvas');
+                        var maxW = 2400, maxH = 2400, w = img.width, h = img.height;
+                        if(w > maxW || h > maxH){
+                            if(w > h){ h *= maxW/w; w = maxW; }
+                            else { w *= maxH/h; h = maxH; }
                         }
-                        canvas.width=w;
-                        canvas.height=h;
+                        canvas.width = w;
+                        canvas.height = h;
                         canvas.getContext('2d').drawImage(img,0,0,w,h);
-                        var dataUrl=canvas.toDataURL('image/jpeg',0.90);
-                        cachedBase64=dataUrl.split(',')[1];
-                        cachedFullImgSrc=dataUrl;
-                        cachedMimeType='image/jpeg';
-                        document.getElementById('preview').src=dataUrl;
-                        document.getElementById('preview').style.display='inline-block';
+                        var dataUrl = canvas.toDataURL('image/jpeg', 0.90);
+                        
+                        cachedBase64 = dataUrl.split(',')[1];
+                        cachedFullImgSrc = dataUrl;
+                        cachedMimeType = 'image/jpeg';
+                        document.getElementById('preview').src = dataUrl;
+                        document.getElementById('preview').style.display = 'inline-block';
                         showUploadState();
                     };
-                    img.onerror=function(){
-                        cachedBase64=e.target.result.split(',')[1];
-                        cachedFullImgSrc=e.target.result;
-                        cachedMimeType=mimeType;
+                    img.onerror = function(){
+                        cachedBase64 = e.target.result.split(',')[1];
+                        cachedFullImgSrc = e.target.result;
+                        cachedMimeType = mimeType;
                         showUploadState();
                     };
-                    img.src=e.target.result;
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }
@@ -225,15 +296,16 @@
             document.getElementById('retryBtn').style.display = 'none';
         }
 
+        // Transmission
         function triggerUpload() {
             cachedForcedMonth = document.getElementById('monthOverride').value;
-            cachedPayMethod = document.getElementById('payMethod').value;
             
             document.getElementById('uploadBtn').style.display = 'none';
             document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
             
-            var mappedPayMethod = isCash ? "cash" : (cachedPayMethod === 'cash' ? 'cash' : 'auto');
+            // Replaced dropdown logic with streamlined toggle logic
+            var mappedPayMethod = isCash ? "cash" : "bank";
             
             const payload = {
                 fileData: cachedBase64, 
@@ -257,7 +329,8 @@
                     setStatus('Error: ' + result.error, 'error');
                     document.getElementById('retryBtn').style.display = 'block';
                 } else {
-                    setStatus('Success!<br>' + result.file, 'success');
+                    // New Explicit Summary Card Output
+                    setStatus(`✓ Folder: Receipts 2026<br>✓ Ledger: Row Created<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success');
                     document.getElementById('newBtn').style.display = 'block';
                 }
             })
@@ -268,25 +341,27 @@
             });
         }
 
+        // Reset
         function resetForm(){
             setStatus('Awaiting Document...','');
-            document.getElementById('preview').style.display='none';
-            document.getElementById('preview').src='';
-            document.querySelectorAll('input[type=file]').forEach(i=>i.value='');
-            document.getElementById('uploadBtn').style.display='none';
-            document.getElementById('retryBtn').style.display='none';
-            document.getElementById('newBtn').style.display='none';
-            document.getElementById('inputContainer').style.display='block';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('preview').src = '';
+            document.querySelectorAll('input[type=file]').forEach(i => i.value='');
+            document.getElementById('uploadBtn').style.display = 'none';
+            document.getElementById('retryBtn').style.display = 'none';
+            document.getElementById('newBtn').style.display = 'none';
+            document.getElementById('inputContainer').style.display = 'block';
             
             isDigital = false;
             document.getElementById('btn-digital').classList.remove('active');
-            document.getElementById('text-digital').innerText='Digital?';
+            document.getElementById('text-digital').innerText = 'Digital?';
             
             isCash = false;
             document.getElementById('btn-cash').classList.remove('active');
-            document.getElementById('text-cash').innerText='In Cash?';
+            document.getElementById('text-cash').innerText = 'In Cash?';
         }
 
+        // Service Worker (PWA Share Target)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Failed:', err));
