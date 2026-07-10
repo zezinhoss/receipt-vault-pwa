@@ -43,7 +43,6 @@
         .btn:hover { background:rgba(255, 255, 255, 0.05); }
         .btn-primary:hover { background:#facc15; box-shadow:0 0 20px rgba(250, 204, 21, 0.4); }
         
-        /* Moloni Launch Button styling */
         .moloni-launch { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 25px; border-radius: 16px; font-size: 16px; font-weight: 600; margin-top: 20px; cursor: pointer; transition: all 0.3s ease; display:flex; flex-direction:column; align-items:center; gap:10px; text-decoration:none; }
         .moloni-launch:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(30,58,138,0.5); border-color: #3b82f6; }
 
@@ -156,9 +155,10 @@
     <script>
         var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto';
         var isDigital=false, isCash=false;
+        var dashChart;
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzI6jnbSZvQZzpEeF0OwLiZ90N3fKrXn1veXWwgYshoPg2C4JoraRN2CY0fiqYlsmRopg/exec";
         const pinBoxes = document.querySelectorAll('.pin-box');
         
-        // Auto-advance PIN
         pinBoxes.forEach((box,index) => {
             box.addEventListener('input', (e) => {
                 if(box.value.length === 1){
@@ -176,7 +176,6 @@
             });
         });
 
-        // Layout Transition & Graph Init
         function unlockApp(){
             var pin = Array.from(pinBoxes).map(b => b.value).join('');
             if(pin.length < 4) return;
@@ -190,22 +189,21 @@
                 document.getElementById('app-view').style.display = 'flex';
                 document.body.style.alignItems = 'flex-start';
                 
-                // Initialize the empty graph once the UI is visible
                 initPlaceholderGraph();
             }, 400);
         }
 
         function initPlaceholderGraph() {
             const ctx = document.getElementById('dashboardChart').getContext('2d');
-            new Chart(ctx, {
+            dashChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [
                         {
                             label: 'Earnings (Moloni)',
-                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Empty for now
-                            borderColor: '#3b82f6', // Pastel Blue
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                            borderColor: '#3b82f6', 
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             borderWidth: 1.5,
                             pointBackgroundColor: '#3b82f6',
@@ -213,8 +211,8 @@
                         },
                         {
                             label: 'Expenses (Drive)',
-                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Empty for now
-                            borderColor: '#facc15', // Yellow
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                            borderColor: '#facc15', 
                             backgroundColor: 'rgba(250, 204, 21, 0.1)',
                             borderWidth: 1.5,
                             pointBackgroundColor: '#facc15',
@@ -232,42 +230,43 @@
                     }
                 }
             });
+            fetchDashboardData();
         }
 
-        // Toggles
+        function fetchDashboardData() {
+            document.getElementById('dash-red-count').innerText = "...";
+            fetch(GAS_URL + "?action=getChartData")
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('dash-red-count').innerText = data.redCount;
+                dashChart.data.datasets[0].data = data.earnings;
+                dashChart.data.datasets[1].data = data.expenses;
+                dashChart.update();
+            })
+            .catch(err => console.error("Dashboard Sync Error:", err));
+        }
+
         function toggleDigital(){
             isDigital = !isDigital;
             var btn = document.getElementById('btn-digital');
             var txt = document.getElementById('text-digital');
-            if(isDigital){
-                btn.classList.add('active');
-                txt.innerText = 'Digital ✓';
-            }else{
-                btn.classList.remove('active');
-                txt.innerText = 'Digital?';
-            }
+            if(isDigital){ btn.classList.add('active'); txt.innerText = 'Digital ✓'; }
+            else{ btn.classList.remove('active'); txt.innerText = 'Digital?'; }
         }
 
         function toggleCash(){
             isCash = !isCash;
             var btn = document.getElementById('btn-cash');
             var txt = document.getElementById('text-cash');
-            if(isCash){
-                btn.classList.add('active');
-                txt.innerText = 'In Cash ✓';
-            }else{
-                btn.classList.remove('active');
-                txt.innerText = 'In Cash?';
-            }
+            if(isCash){ btn.classList.add('active'); txt.innerText = 'In Cash ✓'; }
+            else{ btn.classList.remove('active'); txt.innerText = 'In Cash?'; }
         }
 
         function setStatus(msg, type){
             var el = document.getElementById('status');
-            el.innerHTML = msg;
-            el.className = type + '-text';
+            el.innerHTML = msg; el.className = type + '-text';
         }
 
-        // Image Compression & Processing
         function handleFile(inputEl){
             if(!inputEl.files.length) return;
             document.getElementById('inputContainer').style.display = 'none';
@@ -296,8 +295,7 @@
                             if(w > h){ h *= maxW/w; w = maxW; }
                             else { w *= maxH/h; h = maxH; }
                         }
-                        canvas.width = w;
-                        canvas.height = h;
+                        canvas.width = w; canvas.height = h;
                         canvas.getContext('2d').drawImage(img,0,0,w,h);
                         var dataUrl = canvas.toDataURL('image/jpeg', 0.90);
                         
@@ -326,10 +324,8 @@
             document.getElementById('retryBtn').style.display = 'none';
         }
 
-        // Transmission
         function triggerUpload() {
             cachedForcedMonth = document.getElementById('monthOverride').value;
-            
             document.getElementById('uploadBtn').style.display = 'none';
             document.getElementById('retryBtn').style.display = 'none';
             setStatus('Transmitting to Ledger...', 'loading');
@@ -337,15 +333,9 @@
             var mappedPayMethod = isCash ? "cash" : "bank";
             
             const payload = {
-                fileData: cachedBase64, 
-                mimeType: cachedMimeType,
-                pin: cachedPin,
-                month: cachedForcedMonth,
-                isDigital: isDigital,
-                payMethod: mappedPayMethod
+                fileData: cachedBase64, mimeType: cachedMimeType, pin: cachedPin,
+                month: cachedForcedMonth, isDigital: isDigital, payMethod: mappedPayMethod
             };
-
-            const GAS_URL = "https://script.google.com/macros/s/AKfycbzI6jnbSZvQZzpEeF0OwLiZ90N3fKrXn1veXWwgYshoPg2C4JoraRN2CY0fiqYlsmRopg/exec";
 
             fetch(GAS_URL, {
                 method: 'POST',
@@ -360,6 +350,7 @@
                 } else {
                     setStatus(`✓ Folder: Receipts 2026<br>✓ Ledger: Row Created<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success');
                     document.getElementById('newBtn').style.display = 'block';
+                    fetchDashboardData(); // Refresh graph on upload
                 }
             })
             .catch(err => {
@@ -369,7 +360,6 @@
             });
         }
 
-        // Reset
         function resetForm(){
             setStatus('Awaiting Document...','');
             document.getElementById('preview').style.display = 'none';
@@ -389,32 +379,15 @@
             document.getElementById('text-cash').innerText = 'In Cash?';
         }
 
-        // Service Worker (PWA Share Target)
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Failed:', err));
-            });
-            
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Failed:', err)); });
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data && event.data.file) {
-                    const sharedFile = event.data.file;
                     const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(sharedFile);
+                    dataTransfer.items.add(event.data.file);
                     handleFile({ files: dataTransfer.files });
                 }
             });
-
-            if (window.location.search.includes('shared=true')) {
-                navigator.serviceWorker.ready.then(reg => {
-                    if (navigator.serviceWorker.controller) {
-                        navigator.serviceWorker.controller.postMessage({action: 'get-shared-file'});
-                    } else {
-                        navigator.serviceWorker.addEventListener('controllerchange', () => {
-                            navigator.serviceWorker.controller.postMessage({action: 'get-shared-file'});
-                        });
-                    }
-                });
-            }
         }
     </script>
 </body>
