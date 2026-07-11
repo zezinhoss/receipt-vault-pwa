@@ -57,8 +57,8 @@
         .moloni-expand-btn { background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
         .moloni-expand-btn:hover { background: #3b82f6; }
 
-        .moloni-nav { display: none; width: 100%; justify-content: space-around; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-        .m-nav-item { position: relative; padding: 10px 0; font-size: 13px; font-weight: 500; color: #ccc; cursor: pointer; }
+        .moloni-nav { display: none; width: 100%; justify-content: space-around; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; padding-bottom: 10px;}
+        .m-nav-item { position: relative; padding: 5px 0; font-size: 13px; font-weight: 500; color: #ccc; cursor: pointer; }
         .m-nav-item:hover { color: #3b82f6; }
         
         .m-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #1a1a1a; min-width: 200px; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 100; text-align: left; }
@@ -84,6 +84,22 @@
         .m-search { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 11px; outline: none; }
         .m-btn { background: #3b82f6; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; }
 
+        /* TICKER STYLES */
+        .ticker-wrap { width: 100%; height: 160px; overflow: hidden; position: relative; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .ticker-move { position: absolute; width: 100%; animation: ticker-scroll 12s linear infinite; }
+        .ticker-move:hover { animation-play-state: paused; }
+        .ticker-item { padding: 12px; border-bottom: 1px solid rgba(239, 68, 68, 0.1); display: flex; justify-content: space-between; font-size: 12px; align-items: center; }
+        .ticker-client { font-weight: 500; color: #ccc; text-align: left;}
+        .ticker-amt { font-weight: 600; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 4px 8px; border-radius: 6px; }
+        
+        @keyframes ticker-scroll { 0% { top: 100%; } 100% { top: -100%; } }
+
+        /* DASHBOARD SPLIT STYLES */
+        .dash-split { display: flex; width: 100%; height: 100%; gap: 20px; }
+        .dash-left { flex: 1.2; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px; overflow-y: auto; text-align: left; }
+        .dash-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        .dash-title { color: #fff; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(59, 130, 246, 0.3); padding-bottom: 8px; margin-top: 0; margin-bottom: 10px; width: 100%; }
+
         .expanded-moloni .pane-right { display: none !important; }
         .expanded-moloni .bottom-grid { height: 60vh; min-height: 500px; }
         .expanded-moloni .pane-left { border-color: rgba(59, 130, 246, 0.4); }
@@ -94,6 +110,8 @@
             .bottom-grid { flex-direction: column; height: auto; min-height: unset; }
             .pane-left, .pane-right { height: auto; min-height: 400px; }
             .expanded-moloni .bottom-grid { height: auto; min-height: 85vh; }
+            .dash-split { flex-direction: column; }
+            .dash-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-right: 0; padding-bottom: 15px; flex: unset; max-height: 250px; }
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -142,45 +160,30 @@
                 </div>
 
                 <div class="moloni-nav" id="m-nav">
+                    <div class="m-nav-item" onclick="loadMoloniView('Dashboard')">Dashboard</div>
                     <div class="m-nav-item">Create ▾
                         <div class="m-dropdown">
-                            <a onclick="loadMoloniView('Invoice')">Invoice</a>
+                            <a onclick="loadMoloniView('Invoice')">Invoice Table</a>
                             <a onclick="loadMoloniView('Estimate')">Estimate</a>
-                            <a onclick="loadMoloniView('Pro Forma')">Pro Forma Invoices</a>
                             <a onclick="loadMoloniView('Receipts')">Receipts</a>
-                            <a onclick="loadMoloniView('Expense')">Expense</a>
                         </div>
                     </div>
                     <div class="m-nav-item">Queries ▾
                         <div class="m-dropdown">
-                            <div class="m-dropdown-title">Sales</div>
                             <a onclick="loadMoloniView('Sales Report')">Sales Report</a>
-                            <a onclick="loadMoloniView('Sales VAT')">VAT Reports</a>
-                            <a onclick="loadMoloniView('VAT Maps')">VATs Reconciliation Maps</a>
-                            <div class="m-dropdown-title" style="border-top:1px solid #333; margin-top:5px;">Purchases</div>
-                            <a onclick="loadMoloniView('Purchase Report')">Purchase Report</a>
-                            <a onclick="loadMoloniView('Purchase VAT')">VAT Reports</a>
+                            <a onclick="loadMoloniView('VAT Maps')">VATs Maps</a>
                         </div>
                     </div>
                     <div class="m-nav-item">CRM ▾
                         <div class="m-dropdown">
                             <a onclick="loadMoloniView('Clients')">Clients</a>
-                            <a onclick="loadMoloniView('Suppliers')">Suppliers</a>
-                            <a onclick="loadMoloniView('Products')">Categories & Products</a>
-                        </div>
-                    </div>
-                    <div class="m-nav-item">TAX ▾
-                        <div class="m-dropdown">
-                            <a onclick="loadMoloniView('SAFT')">SAF-T(PT) File</a>
                         </div>
                     </div>
                 </div>
 
                 <div id="moloni-workspace">
-                    <div id="m-dash-info" style="text-align: center; margin-top: 50px;">
-                        <span style="font-size:32px; display:block; margin-bottom:10px;">💼</span>
-                        <div class="success-text" style="font-weight:600; margin-bottom:5px;">API STANDBY</div>
-                        <p style="font-size: 12px; margin-top:0;">Expand to access workspace UI.</p>
+                    <div style="text-align: center; margin-top: 40px; color:#facc15; font-size: 13px;">
+                        Scanning Ledger... 🔄
                     </div>
                 </div>
             </div>
@@ -247,8 +250,12 @@
         var isDigital=false, isCash=false;
         var dashChart;
         var isMoloniExpanded = false;
+        var expensePieChartInstance = null;
         
-        // Secure XOR Array encrypted for Pin 2011 (Expense Node remains unchanged)
+        window.globalInvoices = [];
+        window.globalCategoryTotals = {};
+        
+        // Secure XOR Array encrypted for Pin 2011 
         const MATRIX_EXPENSE_HEX = "5bcba6607e4d5d796b445e7b686d4e786b45596f7c5e525f7c596e62557e505a116f5c531d5e4e4a42531f506e5a42521d5145551f5c6b555a5b514c336b4e4e116e6d42125f4b52475549551c5054115d4841";
 
         var ACTIVE_EXPENSE_URL = "";
@@ -286,14 +293,13 @@
             statusEl.innerText = 'Verifying Key Alignment...';
             statusEl.style.color = '#facc15';
             
-            // Decrypt Expense, safely assemble new Invoice link
             var testExpenseUrl = runMatrixDecryption(MATRIX_EXPENSE_HEX, pin);
             var testInvoiceUrl = ["https://script.google.com", "/macros/s/", "AKfycbxTU-PbIlbFgd5xq9Q_WZkcw2ujswH5_nw3kg5WuaFFGnHlqfXeRarK-stzLnzCb3UXZw", "/exec"].join("");
             
             fetch(testInvoiceUrl + "?action=verifyLoginHandshake&pin=" + encodeURIComponent(pin))
             .then(res => res.json())
             .then(result => {
-                if (result && result.status === "error") { throw new Error("Rejected by ledger gateway"); }
+                if (result && result.status === "error") { throw new Error("Rejected"); }
                 cachedPin = pin;
                 ACTIVE_EXPENSE_URL = testExpenseUrl;
                 ACTIVE_INVOICE_URL = testInvoiceUrl;
@@ -301,7 +307,10 @@
                 document.getElementById('login-wrapper').style.display = 'none';
                 document.getElementById('app-view').style.display = 'flex';
                 document.body.style.alignItems = 'flex-start';
+                
+                // Initialize top chart and trigger background data loads
                 initPlaceholderGraph();
+                fetchMoloniDataBackground();
             })
             .catch(err => {
                 statusEl.innerText = '❌ ACCESS DENIED: Invalid Key Matrix.';
@@ -314,22 +323,21 @@
         function toggleMoloniMode() {
             var appView = document.getElementById('app-view');
             var btn = document.getElementById('m-toggle-btn');
-            var dashInfo = document.getElementById('m-dash-info');
 
             isMoloniExpanded = !isMoloniExpanded;
 
             if (isMoloniExpanded) {
                 appView.classList.add('expanded-moloni');
                 btn.innerText = "Collapse";
-                dashInfo.style.display = 'none';
-                loadMoloniView('Invoice'); // Load Invoice Table By Default!
+                loadMoloniView('Dashboard'); // Load Dual-Node Dashboard!
             } else {
                 appView.classList.remove('expanded-moloni');
                 btn.innerText = "Expand";
-                document.getElementById('moloni-workspace').innerHTML = dashInfo.outerHTML;
-                document.getElementById('m-dash-info').style.display = 'block';
+                renderRetractedTicker(); // Back to Ticker mode
             }
         }
+
+        // --- CHART & DATA LOGIC --- //
 
         function initPlaceholderGraph() {
             const ctx = document.getElementById('dashboardChart').getContext('2d');
@@ -349,10 +357,15 @@
 
         function fetchDashboardData(forceRefresh) {
             var refreshBtn = document.getElementById('refresh-graph-btn');
+            
             if (!forceRefresh) {
                 var cachedExpenses = localStorage.getItem('vault_cache_expenses');
                 var cachedRedCount = localStorage.getItem('vault_cache_redcount');
+                var cachedCatTotals = localStorage.getItem('vault_cache_catTotals');
                 var cachedEarnings = localStorage.getItem('vault_cache_earnings');
+                
+                if (cachedCatTotals) window.globalCategoryTotals = JSON.parse(cachedCatTotals);
+                
                 if (cachedExpenses && cachedRedCount) {
                     document.getElementById('dash-red-count').innerText = cachedRedCount;
                     dashChart.data.datasets[1].data = JSON.parse(cachedExpenses);
@@ -364,13 +377,25 @@
 
             refreshBtn.classList.add('spin'); document.getElementById('dash-red-count').innerText = "...";
             
+            // 1. Fetch Expenses + Category Pie Chart Data
             fetch(ACTIVE_EXPENSE_URL + "?action=getChartData&pin=" + encodeURIComponent(cachedPin))
             .then(res => res.json()).then(data => {
-                document.getElementById('dash-red-count').innerText = data.redCount; dashChart.data.datasets[1].data = data.expenses; dashChart.update();
-                localStorage.setItem('vault_cache_expenses', JSON.stringify(data.expenses)); localStorage.setItem('vault_cache_redcount', data.redCount.toString());
+                document.getElementById('dash-red-count').innerText = data.redCount; 
+                dashChart.data.datasets[1].data = data.expenses; 
+                dashChart.update();
+                
+                window.globalCategoryTotals = data.categoryTotals; // Store Pie Data Globally
+                
+                localStorage.setItem('vault_cache_expenses', JSON.stringify(data.expenses)); 
+                localStorage.setItem('vault_cache_redcount', data.redCount.toString());
+                localStorage.setItem('vault_cache_catTotals', JSON.stringify(data.categoryTotals));
+                
+                if (isMoloniExpanded && expensePieChartInstance) renderPieChart(); // Live update pie chart if viewing it
+
                 if (!refreshBtn.classList.contains('processing-earnings')) refreshBtn.classList.remove('spin');
             }).catch(err => { console.error(err); refreshBtn.classList.remove('spin'); });
 
+            // 2. Fetch Earnings
             refreshBtn.classList.add('processing-earnings');
             fetch(ACTIVE_INVOICE_URL + "?action=getEarnings&pin=" + encodeURIComponent(cachedPin))
             .then(res => res.json()).then(data => {
@@ -378,6 +403,222 @@
                 refreshBtn.classList.remove('processing-earnings'); refreshBtn.classList.remove('spin');
             }).catch(err => { console.error(err); refreshBtn.classList.remove('processing-earnings'); refreshBtn.classList.remove('spin'); });
         }
+
+        function fetchMoloniDataBackground() {
+            var cachedMoloni = localStorage.getItem('vault_cache_moloniInvoices');
+            if (cachedMoloni) {
+                window.globalInvoices = JSON.parse(cachedMoloni);
+                if(!isMoloniExpanded) renderRetractedTicker();
+            }
+
+            fetch(ACTIVE_INVOICE_URL + "?action=getMoloniInvoices&pin=" + encodeURIComponent(cachedPin))
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    window.globalInvoices = data.invoices;
+                    localStorage.setItem('vault_cache_moloniInvoices', JSON.stringify(data.invoices));
+                    if(!isMoloniExpanded) renderRetractedTicker();
+                    else if (document.getElementById('expanded-invoice-list')) renderExpandedInvoiceList();
+                }
+            }).catch(err => console.error("Moloni API failed.", err));
+        }
+
+        // --- MOLONI UI RENDERING --- //
+
+        function renderRetractedTicker() {
+            var ws = document.getElementById('moloni-workspace');
+            
+            // Filter only 100% Unpaid (Pending roughly equals Total)
+            var unpaid = window.globalInvoices.filter(i => i.pending > 0 && Math.abs(i.pending - i.total) < 0.05);
+            
+            if(unpaid.length === 0) {
+                ws.innerHTML = `
+                    <div style="text-align: center; margin-top: 30px;">
+                        <span style="font-size:32px; display:block; margin-bottom:10px;">💼</span>
+                        <div class="success-text" style="font-weight:600; margin-bottom:5px;">ALL CLEAR</div>
+                        <p style="font-size: 11px; margin-top:0;">No 100% unpaid invoices found.</p>
+                    </div>`;
+                return;
+            }
+
+            var html = `<div style="width:100%; text-align:left; margin-bottom:8px; font-size:11px; color:#888; text-transform:uppercase; letter-spacing:1px;">⚠️ Missing Payments</div>`;
+            html += `<div class="ticker-wrap"><div class="ticker-move">`;
+            unpaid.forEach(inv => {
+                var clientName = inv.client.length > 18 ? inv.client.substring(0,18) + '...' : inv.client;
+                html += `<div class="ticker-item">
+                            <span class="ticker-client">${clientName}<br><span style="font-size:10px; color:#666;">${inv.date}</span></span>
+                            <span class="ticker-amt">${inv.pending.toFixed(2)} €</span>
+                         </div>`;
+            });
+            html += `</div></div>`;
+            ws.innerHTML = html;
+        }
+
+        function loadMoloniView(viewName) {
+            var ws = document.getElementById('moloni-workspace');
+            
+            if (viewName === 'Dashboard') {
+                ws.innerHTML = `
+                    <div class="dash-split">
+                        <!-- Left Node: Remaining Open Invoices -->
+                        <div class="dash-left">
+                            <h4 class="dash-title" style="border-color: rgba(59, 130, 246, 0.4);">Open Balances</h4>
+                            <div id="expanded-invoice-list" style="font-size:11px;">Carregando...</div>
+                        </div>
+                        
+                        <!-- Right Node: Expense Category Pie -->
+                        <div class="dash-right">
+                            <h4 class="dash-title" style="border-color: rgba(250, 204, 21, 0.4); text-align:right;">Expense Breakdown</h4>
+                            <div style="position:relative; width:100%; height:200px; display:flex; justify-content:center;">
+                                <canvas id="expensePieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                renderExpandedInvoiceList();
+                renderPieChart();
+            } 
+            else if (viewName === 'Invoice') {
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 0 10px; box-sizing: border-box;">
+                        <div class="m-toolbar">
+                            <input type="text" class="m-search" placeholder="Search invoices...">
+                            <button class="m-btn">+ Fatura</button>
+                        </div>
+                        <div class="moloni-table-container">
+                            <table class="moloni-table">
+                                <thead>
+                                    <tr>
+                                        <th>Série</th><th>N.º</th><th>Data</th><th>Cliente</th>
+                                        <th class="text-right">Total</th><th class="text-right">Dívida</th><th class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoice-tbody"><tr><td colspan="7" class="text-center" style="padding: 20px;">Carregando...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                renderFullInvoiceTable();
+            } else {
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 10px; box-sizing: border-box;">
+                        <h4 class="dash-title">${viewName}</h4>
+                        <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(59,130,246,0.3); padding: 40px; text-align: center; border-radius: 8px; color: #888;">
+                            <span style="font-size: 24px;">🚧</span><br><br>Interface for <b>${viewName}</b> ready.<br>Awaiting data binding.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderExpandedInvoiceList() {
+            var listEl = document.getElementById('expanded-invoice-list');
+            var openInvs = window.globalInvoices.filter(i => i.pending > 0);
+            
+            if(openInvs.length === 0) {
+                listEl.innerHTML = `<div style="color:#22c55e; padding:10px; text-align:center;">All invoices settled.</div>`; return;
+            }
+            
+            var html = `<table style="width:100%; border-collapse:collapse;">`;
+            openInvs.forEach(inv => {
+                var isPartial = inv.pending < inv.total;
+                var color = isPartial ? '#facc15' : '#ef4444'; // Yellow if partially paid, Red if 100% unpaid
+                var clientName = inv.client.length > 20 ? inv.client.substring(0,20) + '...' : inv.client;
+                html += `<tr>
+                    <td style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); color:#ccc;">
+                        ${clientName}<br><span style="font-size:9px; color:#666;">${inv.date} | ${inv.serie}-${inv.number}</span>
+                    </td>
+                    <td style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600; color:${color};">
+                        ${inv.pending.toFixed(2)} €
+                    </td>
+                </tr>`;
+            });
+            html += `</table>`;
+            listEl.innerHTML = html;
+        }
+
+        function renderPieChart() {
+            var ctx = document.getElementById('expensePieChart');
+            if(!ctx) return;
+            
+            var labels = []; var data = [];
+            var totals = window.globalCategoryTotals || {};
+            
+            // Standardize slice colors based on categories
+            var colorMap = {
+                "Equipa Externa": "#3b82f6", // Blue
+                "Subcontratação": "#6366f1", // Indigo
+                "Alojamento": "#a855f7",     // Purple
+                "Alimentação": "#ec4899",    // Pink
+                "Consumíveis e Operações": "#8b5cf6", // Violet
+                "Equipamento": "#facc15",    // Yellow
+                "Transportes e Deslocações": "#10b981" // Emerald
+            };
+            var bgColors = [];
+
+            for(var key in totals) {
+                if(totals[key] > 0) { 
+                    labels.push(key); 
+                    data.push(totals[key]); 
+                    bgColors.push(colorMap[key] || "#ef4444"); 
+                }
+            }
+
+            if(labels.length === 0) {
+                // Dummy state if no expenses logged yet
+                labels = ["No Data"]; data = [1]; bgColors = ["#333"];
+            }
+
+            if(expensePieChartInstance) expensePieChartInstance.destroy();
+
+            expensePieChartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: bgColors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#ccc', font: {size: 10, family: 'Inter'}, boxWidth:12, padding: 15 } } 
+                    }
+                }
+            });
+        }
+
+        function renderFullInvoiceTable() {
+            var tbody = document.getElementById('invoice-tbody');
+            if(window.globalInvoices.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding:20px;">Nenhum registo encontrado.</td></tr>';
+                return;
+            }
+            var html = '';
+            window.globalInvoices.forEach(inv => {
+                var isDebt = inv.pending > 0;
+                var clientName = inv.client.length > 20 ? inv.client.substring(0,20) + '...' : inv.client;
+                html += `
+                    <tr>
+                        <td>${inv.serie}</td>
+                        <td>${inv.number}</td>
+                        <td>${inv.date}</td>
+                        <td title="${inv.client}">${clientName}</td>
+                        <td class="text-right" style="font-weight:600; color:#fff;">${inv.total.toFixed(2)} €</td>
+                        <td class="text-right" style="color: ${isDebt ? '#ef4444' : '#22c55e'}; font-weight:600;">${inv.pending.toFixed(2)} €</td>
+                        <td class="text-center"><a class="action-link">Ver</a></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // --- SCANNER LOGIC --- //
 
         function toggleDigital(){ isDigital = !isDigital; var btn = document.getElementById('btn-digital'), txt = document.getElementById('text-digital'); if(isDigital){ btn.classList.add('active'); txt.innerText = 'Digital ✓'; } else{ btn.classList.remove('active'); txt.innerText = 'Digital?'; } }
         function toggleCash(){ isCash = !isCash; var btn = document.getElementById('btn-cash'), txt = document.getElementById('text-cash'); if(isCash){ btn.classList.add('active'); txt.innerText = 'In Cash ✓'; } else{ btn.classList.remove('active'); txt.innerText = 'In Cash?'; } }
@@ -433,98 +674,6 @@
             document.getElementById('uploadBtn').style.display = 'none'; document.getElementById('retryBtn').style.display = 'none'; document.getElementById('newBtn').style.display = 'none'; document.getElementById('inputContainer').style.display = 'block';
             isDigital = false; document.getElementById('btn-digital').classList.remove('active'); document.getElementById('text-digital').innerText = 'Digital?';
             isCash = false; document.getElementById('btn-cash').classList.remove('active'); document.getElementById('text-cash').innerText = 'In Cash?';
-        }
-
-        function loadMoloniView(viewName) {
-            var ws = document.getElementById('moloni-workspace');
-            
-            if (viewName === 'Invoice') {
-                ws.innerHTML = `
-                    <div style="text-align:left; width:100%; padding: 10px 20px; box-sizing: border-box;">
-                        <h2 style="color:#fff; font-weight:300; margin-top:0; margin-bottom: 5px;">Faturas</h2>
-                        <p style="color:#888; font-size: 12px; margin-top:0; margin-bottom: 15px;">Nesta secção pode administrar as faturas</p>
-                        
-                        <div class="m-toolbar">
-                            <div style="display: flex; gap: 5px;">
-                                <select class="m-search" style="width: auto; padding: 6px;"><option>Insira palavras para pesquisar</option></select>
-                                <input type="text" class="m-search" placeholder="Pesquisar">
-                                <button class="m-btn" style="background: transparent; border: 1px solid #3b82f6; color: #3b82f6;">Pesquisar</button>
-                            </div>
-                            <button class="m-btn">+ Adicionar Fatura</button>
-                        </div>
-                        
-                        <div class="moloni-table-container">
-                            <table class="moloni-table">
-                                <thead>
-                                    <tr>
-                                        <th>Série</th>
-                                        <th>N.º</th>
-                                        <th>Enc./Orç.</th>
-                                        <th>Data</th>
-                                        <th>Cliente</th>
-                                        <th class="text-right">Ilíquido</th>
-                                        <th class="text-right">Impostos</th>
-                                        <th class="text-right">Total Liq.</th>
-                                        <th class="text-right">Dívida</th>
-                                        <th class="text-center">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="invoice-tbody">
-                                    <tr><td colspan="10" class="text-center" style="padding: 30px; color:#facc15;">A carregar dados do Moloni... 🔄</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-                fetchMoloniInvoices();
-            } else {
-                ws.innerHTML = `
-                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
-                        <h2 style="color:#fff; font-weight:300; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-top:0;">${viewName}</h2>
-                        <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(59,130,246,0.3); padding: 40px; text-align: center; border-radius: 8px; color: #888;">
-                            <span style="font-size: 24px;">🚧</span><br><br>
-                            Interface for <b>${viewName}</b> ready.<br>
-                            Awaiting data binding from Invoice Node.
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        function fetchMoloniInvoices() {
-            fetch(ACTIVE_INVOICE_URL + "?action=getMoloniInvoices&pin=" + encodeURIComponent(cachedPin))
-            .then(res => res.json())
-            .then(data => {
-                var tbody = document.getElementById('invoice-tbody');
-                if (data.status === "error") {
-                    tbody.innerHTML = `<tr><td colspan="10" class="error-text text-center" style="padding:20px;">Erro: ${data.error}</td></tr>`; return;
-                }
-                
-                var html = '';
-                data.invoices.forEach(inv => {
-                    var isDebt = inv.pending > 0;
-                    html += `
-                        <tr>
-                            <td>${inv.serie}</td>
-                            <td>${inv.number}</td>
-                            <td>${inv.reference || '---'}</td>
-                            <td>${inv.date}</td>
-                            <td>${inv.client}</td>
-                            <td class="text-right">${inv.net.toFixed(2)} €</td>
-                            <td class="text-right">${inv.taxes.toFixed(2)} €</td>
-                            <td class="text-right" style="font-weight:600; color:#fff;">${inv.total.toFixed(2)} €</td>
-                            <td class="text-right" style="color: ${isDebt ? '#ef4444' : '#22c55e'}; font-weight:600;">${inv.pending.toFixed(2)} €</td>
-                            <td class="text-center">
-                                <a class="action-link">Ver</a> | <a class="action-link" style="color:#ef4444;">Eliminar</a>
-                            </td>
-                        </tr>
-                    `;
-                });
-                if(data.invoices.length === 0) html = '<tr><td colspan="10" class="text-center" style="padding:20px;">Nenhum registo encontrado.</td></tr>';
-                tbody.innerHTML = html;
-            }).catch(err => {
-                document.getElementById('invoice-tbody').innerHTML = `<tr><td colspan="10" class="error-text text-center" style="padding:20px;">Falha na ligação à API do Moloni.</td></tr>`;
-            });
         }
 
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Failed:', err)); }); }
