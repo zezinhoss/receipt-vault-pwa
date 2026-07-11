@@ -8,7 +8,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#facc15">
     
-    <!-- Swapped to Nunito for a clean, rounded, highly legible data font -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -118,6 +117,8 @@
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .spin { animation: spin 1s linear infinite; }
+        
+        option { background: #1a1a1a; color: #fff; }
     </style>
 </head>
 <body>
@@ -325,7 +326,6 @@
                 document.getElementById('app-view').style.display = 'flex';
                 document.body.style.alignItems = 'flex-start';
                 
-                // Initialize charts and trigger high-speed background loads
                 initPlaceholderGraph();
                 fetchMoloniDataBackground();
             })
@@ -346,11 +346,11 @@
             if (isMoloniExpanded) {
                 appView.classList.add('expanded-moloni');
                 btn.innerText = "Collapse";
-                loadMoloniView('Dashboard'); // Load Dual-Node Dashboard first!
+                loadMoloniView('Dashboard'); 
             } else {
                 appView.classList.remove('expanded-moloni');
                 btn.innerText = "Expand";
-                renderRetractedTicker(); // Back to red hot-list
+                renderRetractedTicker(); 
             }
         }
 
@@ -363,7 +363,7 @@
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [
-                        { label: 'Earnings (Moloni)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#cbd5e1', backgroundColor: 'rgba(203, 213, 225, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#cbd5e1', tension: 0.4 },
+                        { label: 'Earnings (Moloni)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#60a5fa', backgroundColor: 'rgba(96, 165, 250, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#60a5fa', tension: 0.4 },
                         { label: 'Expenses (Drive)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#facc15', tension: 0.4 }
                     ]
                 },
@@ -417,7 +417,6 @@
             }).catch(err => { console.error(err); refreshBtn.classList.remove('processing-earnings'); refreshBtn.classList.remove('spin'); });
         }
 
-        // Background loader for the dual-node displays
         function fetchMoloniDataBackground() {
             var cachedMoloni = localStorage.getItem('vault_cache_moloniInvoices');
             if (cachedMoloni) {
@@ -433,12 +432,12 @@
                     localStorage.setItem('vault_cache_moloniInvoices', JSON.stringify(data.invoices));
                     if(!isMoloniExpanded) renderRetractedTicker();
                     else if (document.getElementById('expanded-invoice-list')) renderExpandedInvoiceList();
-                    else if (document.getElementById('invoice-tbody')) renderFullInvoiceTable();
+                    else if (document.getElementById('invoice-tbody')) renderFilteredInvoiceTable(window.globalInvoices);
                 }
             }).catch(err => console.error("Moloni API failed.", err));
         }
 
-        // --- MOLONI UI RENDERING --- //
+        // --- MOLONI UI RENDERING & FILTERING BRAIN --- //
 
         function renderRetractedTicker() {
             var ws = document.getElementById('moloni-workspace');
@@ -496,9 +495,16 @@
                         
                         <div class="m-toolbar">
                             <div style="display: flex; gap: 8px;">
-                                <select class="m-search" style="width: auto; padding: 6px;"><option>Insira palavras para pesquisar</option></select>
-                                <input type="text" class="m-search" placeholder="Pesquisar">
-                                <button class="m-btn">Pesquisar</button>
+                                <select id="invoice-date-filter" class="m-search" style="width: auto; padding: 6px;" onchange="applyInvoiceFilters()">
+                                    <option value="all">Escolha uma opção</option>
+                                    <option value="este_trimestre">Este Trimestre</option>
+                                    <option value="trimestre_anterior">Trimestre Anterior</option>
+                                    <option value="este_semestre">Este Semestre</option>
+                                    <option value="este_ano">Este Ano</option>
+                                    <option value="ano_anterior">Ano Anterior</option>
+                                </select>
+                                <input type="text" id="invoice-search-input" class="m-search" placeholder="Pesquisar" onkeyup="applyInvoiceFilters()">
+                                <button class="m-btn" onclick="applyInvoiceFilters()">Pesquisar</button>
                             </div>
                             <button class="m-btn" style="color:#facc15; border-color:rgba(250,204,21,0.3);">+ Adicionar Fatura</button>
                         </div>
@@ -520,13 +526,13 @@
                                     </tr>
                                 </thead>
                                 <tbody id="invoice-tbody">
-                                    <tr><td colspan="10" class="text-center" style="padding: 30px; color:#facc15;">A carregar dados do Moloni... 🔄</td></tr>
+                                    <tr><td colspan="10" class="text-center" style="padding: 30px; color:#facc15;">A carregar dados... 🔄</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 `;
-                renderFullInvoiceTable();
+                renderFilteredInvoiceTable(window.globalInvoices);
             } else {
                 ws.innerHTML = `
                     <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
@@ -539,6 +545,101 @@
                     </div>
                 `;
             }
+        }
+
+        // The Filtering "Brain"
+        function applyInvoiceFilters() {
+            var searchInput = document.getElementById('invoice-search-input');
+            var dateFilterEl = document.getElementById('invoice-date-filter');
+            if(!searchInput || !dateFilterEl) return;
+            
+            var searchTerm = searchInput.value.toLowerCase();
+            var dateFilter = dateFilterEl.value;
+            
+            var filtered = window.globalInvoices.filter(inv => {
+                var textMatch = true;
+                if(searchTerm) {
+                    textMatch = (inv.client && inv.client.toLowerCase().includes(searchTerm)) ||
+                                (inv.number && inv.number.toString().includes(searchTerm)) ||
+                                (inv.serie && inv.serie.toLowerCase().includes(searchTerm));
+                }
+                
+                var dateMatch = true;
+                if(dateFilter !== 'all' && inv.date) {
+                    var d = new Date(inv.date); 
+                    if(isNaN(d.getTime())) {
+                        var parts = inv.date.split(/[-.\/]/);
+                        if(parts.length===3) {
+                            if(parts[2].length===4) d = new Date(parts[2], parts[1]-1, parts[0]);
+                            else d = new Date(parts[0], parts[1]-1, parts[2]);
+                        }
+                    }
+                    
+                    if(!isNaN(d.getTime())) {
+                        var now = new Date();
+                        var year = now.getFullYear();
+                        var month = now.getMonth();
+                        var invYear = d.getFullYear();
+                        var invMonth = d.getMonth();
+                        
+                        var currentQuarter = Math.floor(month / 3);
+                        var invQuarter = Math.floor(invMonth / 3);
+                        var currentSemester = Math.floor(month / 6);
+                        var invSemester = Math.floor(invMonth / 6);
+                        
+                        if(dateFilter === 'este_trimestre') {
+                            dateMatch = (invYear === year && invQuarter === currentQuarter);
+                        } else if(dateFilter === 'trimestre_anterior') {
+                            var prevQ = currentQuarter - 1;
+                            var qYear = year;
+                            if(prevQ < 0) { prevQ = 3; qYear--; }
+                            dateMatch = (invYear === qYear && invQuarter === prevQ);
+                        } else if(dateFilter === 'este_semestre') {
+                            dateMatch = (invYear === year && invSemester === currentSemester);
+                        } else if(dateFilter === 'este_ano') {
+                            dateMatch = (invYear === year);
+                        } else if(dateFilter === 'ano_anterior') {
+                            dateMatch = (invYear === year - 1);
+                        }
+                    }
+                }
+                return textMatch && dateMatch;
+            });
+            
+            renderFilteredInvoiceTable(filtered);
+        }
+
+        function renderFilteredInvoiceTable(invoicesToRender) {
+            var tbody = document.getElementById('invoice-tbody');
+            if(!tbody) return;
+            if(invoicesToRender.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center" style="padding:20px;">Nenhum registo encontrado.</td></tr>';
+                return;
+            }
+            var html = '';
+            invoicesToRender.forEach(inv => {
+                var isDebt = inv.pending > 0;
+                var clientName = inv.client.length > 20 ? inv.client.substring(0,20) + '...' : inv.client;
+                var net = inv.net || 0;
+                var taxes = inv.taxes || 0;
+                html += `
+                    <tr>
+                        <td>${inv.serie}</td>
+                        <td>${inv.number}</td>
+                        <td>${inv.reference || '---'}</td>
+                        <td>${inv.date}</td>
+                        <td title="${inv.client}">${clientName}</td>
+                        <td class="text-right">${net.toFixed(2)} €</td>
+                        <td class="text-right">${taxes.toFixed(2)} €</td>
+                        <td class="text-right" style="font-weight:700; color:#fff;">${inv.total.toFixed(2)} €</td>
+                        <td class="text-right" style="color: ${isDebt ? '#ef4444' : '#22c55e'}; font-weight:700;">${inv.pending.toFixed(2)} €</td>
+                        <td class="text-center">
+                            <a class="action-link">Ver</a> | <a class="action-link" style="color:#ef4444;">Eliminar</a>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
         }
 
         function renderExpandedInvoiceList() {
@@ -575,7 +676,6 @@
             var labels = []; var data = [];
             var totals = window.globalCategoryTotals || {};
             
-            // Soft Pastel Palette
             var colorMap = {
                 "Equipa Externa": "#93c5fd", 
                 "Subcontratação": "#c4b5fd", 
@@ -621,40 +721,6 @@
                     }
                 }
             });
-        }
-
-        // Instant Table Render (no secondary API fetch required)
-        function renderFullInvoiceTable() {
-            var tbody = document.getElementById('invoice-tbody');
-            if(!tbody) return;
-            if(window.globalInvoices.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="text-center" style="padding:20px;">Nenhum registo encontrado.</td></tr>';
-                return;
-            }
-            var html = '';
-            window.globalInvoices.forEach(inv => {
-                var isDebt = inv.pending > 0;
-                var clientName = inv.client.length > 20 ? inv.client.substring(0,20) + '...' : inv.client;
-                var net = inv.net || 0;
-                var taxes = inv.taxes || 0;
-                html += `
-                    <tr>
-                        <td>${inv.serie}</td>
-                        <td>${inv.number}</td>
-                        <td>${inv.reference || '---'}</td>
-                        <td>${inv.date}</td>
-                        <td title="${inv.client}">${clientName}</td>
-                        <td class="text-right">${net.toFixed(2)} €</td>
-                        <td class="text-right">${taxes.toFixed(2)} €</td>
-                        <td class="text-right" style="font-weight:700; color:#fff;">${inv.total.toFixed(2)} €</td>
-                        <td class="text-right" style="color: ${isDebt ? '#ef4444' : '#22c55e'}; font-weight:700;">${inv.pending.toFixed(2)} €</td>
-                        <td class="text-center">
-                            <a class="action-link">Ver</a> | <a class="action-link" style="color:#ef4444;">Eliminar</a>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
         }
 
         // --- SCANNER LOGIC --- //
