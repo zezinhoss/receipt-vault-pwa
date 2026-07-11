@@ -8,17 +8,23 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#facc15">
     
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body { font-family:'Nunito', sans-serif; background:#0a0a0a; background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%); color:#fff; padding:20px; display:flex; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; }
+        body { font-family:'Nunito', sans-serif; background:#0a0a0a; background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%); color:#fff; padding:20px; display:flex; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; overflow-x: hidden;}
         
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
         .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(250,204,21,0.15); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; transition: all 0.4s ease; }
         
         #login-wrapper { width:100%; max-width:360px; }
         
-        h3 { color:#facc15; font-size:16px; font-weight:600; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+        h3 { color:#facc15; font-size:16px; font-weight:700; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
         p { color:#888; font-size:13px; font-weight:300; margin-bottom:25px; }
         
         .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
@@ -26,8 +32,16 @@
         .pin-box:focus { border-color:#facc15; box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
         
         #app-view { width:100%; max-width:1200px; flex-direction:column; gap:20px; display:none; }
-        .pane-top { max-width:100%; display:flex; flex-direction:column; height:35vh; min-height:250px; justify-content:center; position:relative; }
-        .bottom-grid { display:flex; gap:20px; width:100%; height:45vh; min-height:400px; }
+        
+        /* PANE TOP STYLES & TRANSITIONS */
+        .pane-top { max-width:100%; display:flex; flex-direction:column; height:35vh; min-height:250px; justify-content:flex-start; position:relative; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
+        .chart-container { transition: all 0.4s ease; opacity: 1; height: calc(100% - 40px); width: 100%; }
+        
+        /* Sleek Button */
+        .sleek-icon-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 8px; padding: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+        .sleek-icon-btn:hover { background: rgba(250,204,21,0.15); border-color: #facc15; color: #facc15; box-shadow: 0 0 10px rgba(250,204,21,0.2); }
+        
+        .bottom-grid { display:flex; gap:20px; width:100%; height:45vh; min-height:400px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .pane-left, .pane-right { max-width:100%; flex:1; display:flex; flex-direction:column; justify-content: flex-start; position: relative; overflow: hidden; }
         
         .input-group { display:flex; gap:10px; margin-bottom:20px; }
@@ -36,89 +50,150 @@
         
         .toggle-btn { flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px 10px; color:#888; font-size:14px; text-align:center; cursor:pointer; transition:all 0.3s; box-sizing:border-box; user-select:none; }
         .toggle-btn.active { border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2); }
-        .toggle-btn.active t-text { color:#facc15; font-weight:600; text-shadow:0 0 5px rgba(250,204,21,0.4); }
+        .toggle-btn.active .t-text { color:#facc15; font-weight:700; text-shadow:0 0 5px rgba(250,204,21,0.4); }
         
-        .btn { display:block; width:100%; background:transparent; color:#ddd; padding:16px; border-radius:12px; font-size:13px; font-weight:600; letter-spacing:1px; cursor:pointer; border:1px solid rgba(255, 255, 255, 0.1); transition:all 0.3s ease; margin-bottom:12px; box-sizing:border-box; text-transform:uppercase; font-family:'Nunito', sans-serif;}
+        .btn { display:block; width:100%; background:transparent; color:#ddd; padding:16px; border-radius:12px; font-size:13px; font-weight:700; letter-spacing:1px; cursor:pointer; border:1px solid rgba(255, 255, 255, 0.1); transition:all 0.3s ease; margin-bottom:12px; box-sizing:border-box; text-transform:uppercase; font-family:'Nunito', sans-serif;}
         .btn-primary { background:rgba(250, 204, 21, 0.9); color:#000; border:none; }
         .btn:hover { background:rgba(255, 255, 255, 0.05); }
         .btn-primary:hover { background:#facc15; box-shadow:0 0 20px rgba(250, 204, 21, 0.4); }
         
         input[type='file'] { display: none; }
-        #status { margin-top:20px; font-size:13px; color:#888; font-weight:400; line-height: 1.6; }
+        #status { margin-top:20px; font-size:13px; color:#888; font-weight:500; line-height: 1.6; }
         .error-text { color:#ef4444!important; }
         .success-text { color:#22c55e!important; }
         .loading-text { color:#facc15!important; }
         .preview-zone img { max-width:100%; max-height:140px; margin-top:10px; border-radius:8px; display:none; border:1px solid rgba(255,255,255,0.1); }
         
-        /* --- MOLONI INVOICE UI STYLES (Softened Pastel Theme) --- */
+        /* --- MOLONI INVOICE UI STYLES --- */
         .moloni-header { display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px; margin-bottom: 15px; }
-        .moloni-header h3 { color: #e2e8f0; margin: 0; justify-content: flex-start; font-weight: 500; letter-spacing: 1px;}
+        .moloni-header h3 { color: #e2e8f0; margin: 0; justify-content: flex-start; font-weight: 600; letter-spacing: 1px;}
         
-        .moloni-expand-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); color: #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; font-family:'Nunito', sans-serif;}
+        .moloni-expand-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); color: #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; font-family:'Nunito', sans-serif;}
         .moloni-expand-btn:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
 
-        .moloni-nav { display: none; width: 100%; justify-content: space-around; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-        .m-nav-item { position: relative; padding: 10px 0; font-size: 14px; font-weight: 500; color: #cbd5e1; cursor: pointer; transition: color 0.2s;}
+        .moloni-nav { display: none; width: 100%; justify-content: space-around; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; padding-bottom: 10px;}
+        .m-nav-item { position: relative; padding: 5px 0; font-size: 14px; font-weight: 600; color: #cbd5e1; cursor: pointer; transition: color 0.2s;}
         .m-nav-item:hover { color: #facc15; }
         
         .m-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #1a1a1a; min-width: 200px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 100; text-align: left; overflow: hidden;}
         .m-nav-item:hover .m-dropdown { display: block; }
-        .m-dropdown a { display: block; padding: 12px 16px; color: #e2e8f0; text-decoration: none; border-left: 2px solid transparent; transition: all 0.2s; font-size: 13px;}
+        .m-dropdown a { display: block; padding: 12px 16px; color: #e2e8f0; text-decoration: none; border-left: 2px solid transparent; transition: all 0.2s; font-size: 13px; font-weight: 500;}
         .m-dropdown a:hover { background: rgba(255,255,255,0.05); border-left: 2px solid #facc15; color: #fff;}
-        .m-dropdown-title { color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 10px 16px 4px 16px; pointer-events: none; }
+        .m-dropdown-title { color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 10px 16px 4px 16px; pointer-events: none; }
 
         #moloni-workspace { flex: 1; width: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
 
-        /* Dynamic Table Overrides - Enhanced Legibility */
         .moloni-table-container { width: 100%; overflow-x: auto; }
         .moloni-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; color: #cbd5e1; }
-        .moloni-table th { border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding: 12px 10px; font-weight: 600; color: #e2e8f0; white-space: nowrap; }
+        .moloni-table th { border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding: 12px 10px; font-weight: 700; color: #e2e8f0; white-space: nowrap; }
         .moloni-table td { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 12px 10px; white-space: nowrap; }
         .moloni-table tr:hover { background: rgba(255,255,255,0.03); }
-        .action-link { color: #94a3b8; cursor: pointer; text-decoration: none; transition: 0.2s; font-weight: 600;}
+        .action-link { color: #94a3b8; cursor: pointer; text-decoration: none; transition: 0.2s; font-weight: 700;}
         .action-link:hover { text-decoration: underline; color: #facc15; }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         
         .m-toolbar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; gap: 10px; }
-        .m-search { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; padding: 8px 12px; border-radius: 6px; font-size: 12px; outline: none; font-family:'Nunito', sans-serif;}
-        .m-search:focus { border-color: rgba(255,255,255,0.3); }
-        .m-btn { background: rgba(255,255,255,0.1); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family:'Nunito', sans-serif;}
-        .m-btn:hover { background: rgba(255,255,255,0.2); color: #fff;}
+        
+        .btn-yellow-outline { background: rgba(250,204,21,0.05); color: #facc15; border: 1px solid rgba(250,204,21,0.3); padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; font-family:'Nunito', sans-serif;}
+        .btn-yellow-outline:hover { background: rgba(250,204,21,0.15); border-color: #facc15; }
+        
+        .input-transparent { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 6px; font-size: 13px; outline: none; font-family:'Nunito', sans-serif; transition: 0.2s;}
+        .input-transparent::placeholder { color: rgba(255,255,255,0.3); }
+        .input-transparent:focus { border-color: rgba(255,255,255,0.3); }
+        .input-transparent option { background: #1a1a1a; color: #fff; }
 
-        /* TICKER STYLES */
+        /* FORM STYLES */
+        .form-container { width: 100%; text-align: left; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 20px; box-sizing: border-box; }
+        .form-header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
+        .f-title { font-size: 20px; font-weight: 400; color: #fff; margin: 0; display:flex; align-items:baseline; gap:10px;}
+        .f-title span { color: #94a3b8; font-size: 14px; font-weight: 600;}
+        .f-actions { display: flex; gap: 10px; }
+        .f-btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'Nunito'; font-weight: 600; font-size: 13px; transition: 0.2s;}
+        .f-btn-cancel:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .f-btn-draft { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'Nunito'; font-weight: 600; font-size: 13px; transition: 0.2s;}
+        .f-btn-draft:hover { background: rgba(255,255,255,0.2); }
+        .f-btn-save { background: #facc15; border: none; color: #000; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'Nunito'; font-weight: 700; font-size: 13px; transition: 0.2s;}
+        .f-btn-save:hover { box-shadow: 0 0 15px rgba(250,204,21,0.4); }
+
+        .f-section { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 15px; margin-bottom: 15px; }
+        .f-section-title { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;}
+        .f-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .f-group { display: flex; flex-direction: column; flex: 1; min-width: 150px; position:relative;}
+        .f-label { font-size: 12px; color: #94a3b8; margin-bottom: 6px; display: flex; justify-content: space-between;}
+        .f-help { width: 14px; height: 14px; background: rgba(255,255,255,0.1); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; cursor: help;}
+        
+        .f-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px 12px; border-radius: 6px; font-family: 'Nunito'; font-size: 13px; outline: none; transition: 0.2s; width:100%; box-sizing:border-box;}
+        .f-input:focus { border-color: rgba(255,255,255,0.3); }
+        .f-input[type="date"] { color-scheme: dark; }
+        .f-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Custom Checkbox */
+        .custom-checkbox-container { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; color:#e2e8f0; user-select: none;}
+        .custom-checkbox { width: 16px; height: 16px; background: #22c55e; border-radius: 4px; display: flex; justify-content: center; align-items: center; }
+        .custom-checkbox::after { content: '✔'; color: #000; font-size: 10px; font-weight: 900;}
+
+        /* Auto-suggest dropdown */
+        .auto-suggest-list { position:absolute; top:100%; left:0; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:6px; z-index:10; max-height:200px; overflow-y:auto; display:none; margin-top:4px;}
+        .auto-suggest-item { padding:10px 12px; font-size:13px; color:#e2e8f0; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); }
+        .auto-suggest-item:hover { background:rgba(250,204,21,0.1); color:#facc15; }
+        
+        /* Modal Overlay */
+        .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:1000; display:none; justify-content:center; align-items:center; backdrop-filter: blur(5px); }
+        .modal-content { background:#1e1e1e; border:1px solid rgba(255,255,255,0.1); border-radius:12px; width:90%; max-width:800px; max-height:90vh; overflow-y:auto; padding:25px; position:relative;}
+        .modal-close { position:absolute; top:20px; right:20px; font-size:20px; color:#888; cursor:pointer; background:none; border:none; padding:0; }
+        .modal-close:hover { color:#fff; }
+        .modal-tabs { display:flex; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:20px; gap:20px;}
+        .modal-tab { padding:10px 0; color:#888; cursor:pointer; font-weight:600; font-size:14px; position:relative; }
+        .modal-tab.active { color:#fff; }
+        .modal-tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:#facc15; }
+        .modal-tab-content { display:none; }
+        .modal-tab-content.active { display:block; }
+        
+        /* Article Row Expansion */
+        .article-expanded-row { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 15px; margin-top: 10px; display:flex; flex-direction:column; gap:10px;}
+        .article-grid { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap:10px; align-items:end;}
+        .article-header-row { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap:10px; font-size:11px; color:#888; margin-bottom:5px; font-weight:600;}
+
+        /* TICKER */
         .ticker-wrap { width: 100%; height: 160px; overflow: hidden; position: relative; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2); margin-top: 15px; }
         .ticker-move { position: absolute; width: 100%; animation: ticker-scroll 12s linear infinite; }
         .ticker-move:hover { animation-play-state: paused; }
         .ticker-item { padding: 14px 16px; border-bottom: 1px solid rgba(239, 68, 68, 0.1); display: flex; justify-content: space-between; font-size: 13px; align-items: center; }
-        .ticker-client { font-weight: 500; color: #e2e8f0; text-align: left;}
-        .ticker-amt { font-weight: 700; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px;}
+        .ticker-client { font-weight: 600; color: #e2e8f0; text-align: left;}
+        .ticker-amt { font-weight: 800; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px;}
         @keyframes ticker-scroll { 0% { top: 100%; } 100% { top: -100%; } }
 
-        /* DASHBOARD SPLIT STYLES */
         .dash-split { display: flex; width: 100%; height: 100%; gap: 20px; }
         .dash-left { flex: 1.2; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px; overflow-y: auto; text-align: left; }
         .dash-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        .dash-title { color: #e2e8f0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; width: 100%; }
+        .dash-title { color: #e2e8f0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; width: 100%; }
 
+        /* 3-STATE EXPANSION CSS */
         .expanded-moloni .pane-right { display: none !important; }
         .expanded-moloni .bottom-grid { height: 60vh; min-height: 500px; }
         .expanded-moloni .pane-left { border-color: rgba(255, 255, 255, 0.2); }
         .expanded-moloni .moloni-nav { display: flex; }
+        
+        .maximized-moloni .pane-top { height: 75px !important; min-height: 75px !important; padding: 15px 20px !important; }
+        .maximized-moloni .chart-container { height: 0; opacity: 0; margin: 0; pointer-events: none; }
+        .maximized-moloni .bottom-grid { height: calc(90vh - 100px); min-height: 600px; }
 
         @media (max-width: 768px) {
             body { align-items: flex-start; padding: 15px; }
             .bottom-grid { flex-direction: column; height: auto; min-height: unset; }
             .pane-left, .pane-right { height: auto; min-height: 400px; }
             .expanded-moloni .bottom-grid { height: auto; min-height: 85vh; }
+            .maximized-moloni .bottom-grid { height: auto; min-height: 90vh; }
             .dash-split { flex-direction: column; }
             .dash-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-right: 0; padding-bottom: 15px; flex: unset; max-height: 250px; }
+            .article-grid { grid-template-columns: 1fr; }
+            .article-header-row { display:none; }
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .spin { animation: spin 1s linear infinite; }
-        
-        option { background: #1a1a1a; color: #fff; }
+        .spin svg { animation: spin 1s linear infinite; }
     </style>
 </head>
 <body>
@@ -128,10 +203,10 @@
             <h3 style="justify-content: center;">SECURE VAULT</h3>
             <p>Restricted Access</p>
             <div class="pin-container" id="pin-container">
-                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off">
-                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off">
-                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off">
-                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="2">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="0">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="1">
+                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="1">
             </div>
             <div id='login-status' style='margin-top:15px;color:#ef4444;font-size:13px;'></div>
         </div>
@@ -139,23 +214,22 @@
         
     <div id='app-view'>
         
-        <!-- TOP PANE: ALWAYS VISIBLE -->
         <div class='glass-panel pane-top' style="padding: 20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:10px;">
+            <div class="top-header-row" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:15px;">
                 <h3 style="margin:0;">
                     FINANCIAL OASIS 
-                    <span style="font-size:12px; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:8px; margin-left:10px; font-weight: 500;">🔴 <span id="dash-red-count">0</span> To Reconcile</span>
                 </h3>
-                <button id="refresh-graph-btn" onclick="fetchDashboardData(true)" style="background:transparent; border:none; font-size:18px; cursor:pointer; opacity:0.7; transition:opacity 0.3s;" title="Force Live Refresh">🔄</button>
+                <button id="refresh-graph-btn" onclick="fetchDashboardData(true)" class="sleek-icon-btn" title="Force Live Refresh">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-8.21l5.67-5.67"/></svg>
+                </button>
             </div>
-            <div style="position: relative; height: 100%; width: 100%;">
+            <div class="chart-container" style="position: relative; width: 100%;">
                 <canvas id="dashboardChart"></canvas>
             </div>
         </div>
         
         <div class="bottom-grid">
             
-            <!-- LEFT PANE: INVOICE UI -->
             <div class='glass-panel pane-left' id="moloni-pane">
                 <div class="moloni-header">
                     <h3>MOLONI BILLING</h3>
@@ -199,14 +273,12 @@
                 </div>
 
                 <div id="moloni-workspace">
-                    <!-- Ticker will be injected here in retracted mode -->
                     <div style="text-align: center; margin-top: 40px; color:#facc15; font-size: 13px;">
                         Scanning Ledger... 🔄
                     </div>
                 </div>
             </div>
             
-            <!-- RIGHT PANE: EXPENSE SCANNER -->
             <div class='glass-panel pane-right' id="expense-pane" style="justify-content: flex-start; text-align: center;">
                 <div style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom: 25px; position: relative;">
                     <h3 style="margin:0; justify-content: center;">EXPENSE SCAN</h3>
@@ -260,101 +332,169 @@
                 <div id='status'>Awaiting Document...</div>
             </div>
         </div>
-        
+    </div>
+
+    <!-- MODAL: Custom Alert -->
+    <div class="modal-overlay" id="custom-alert-modal">
+        <div class="modal-content" style="max-width:400px; text-align:center;">
+            <h3 style="justify-content:center; color:#fff;" id="alert-title">Confirmation</h3>
+            <p id="alert-message" style="margin:20px 0; color:#ccc;">Are you sure?</p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                <button class="f-btn-cancel" onclick="closeCustomAlert()">Cancel</button>
+                <button class="f-btn-save" id="alert-confirm-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: New Client -->
+    <div class="modal-overlay" id="new-client-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('new-client-modal')">×</button>
+            <h2 class="f-title" style="margin-bottom:20px;">Create Client</h2>
+            
+            <div class="modal-tabs">
+                <div class="modal-tab active" onclick="switchTab(this, 'tab-fiscal')">Fiscal Details</div>
+                <div class="modal-tab" onclick="switchTab(this, 'tab-contacts')">Contacts</div>
+                <div class="modal-tab" onclick="switchTab(this, 'tab-settings')">Invoice Settings</div>
+            </div>
+
+            <div id="tab-fiscal" class="modal-tab-content active">
+                <div class="f-row">
+                    <div class="f-group" style="flex:2;">
+                        <label class="f-label">VAT Number / Contribuinte</label>
+                        <input type="text" class="f-input" placeholder="e.g. 500000000">
+                    </div>
+                    <div class="f-group" style="flex:1;">
+                        <label class="f-label">Client Code</label>
+                        <input type="text" class="f-input" value="10066">
+                    </div>
+                </div>
+                <div class="f-group" style="margin-bottom:15px;">
+                    <label class="f-label">Name</label>
+                    <input type="text" class="f-input">
+                </div>
+                <div class="f-group" style="margin-bottom:15px;">
+                    <label class="f-label">Address</label>
+                    <textarea class="f-input" style="height:60px; resize:vertical;"></textarea>
+                </div>
+                <div class="f-row">
+                    <div class="f-group">
+                        <label class="f-label">Postal Code</label>
+                        <input type="text" class="f-input" placeholder="0000-000">
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">City</label>
+                        <input type="text" class="f-input">
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Country</label>
+                        <select class="f-input"><option>Portugal</option><option>United Kingdom</option><option>United States</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-contacts" class="modal-tab-content">
+                <div class="f-row">
+                    <div class="f-group"><label class="f-label">Phone</label><input type="text" class="f-input"></div>
+                    <div class="f-group"><label class="f-label">Website</label><input type="text" class="f-input"></div>
+                </div>
+                <div class="f-row">
+                    <div class="f-group"><label class="f-label">Contact Person</label><input type="text" class="f-input"></div>
+                    <div class="f-group"><label class="f-label">Contact Email</label><input type="text" class="f-input"></div>
+                </div>
+            </div>
+
+            <div id="tab-settings" class="modal-tab-content">
+                <div class="f-row">
+                    <div class="f-group">
+                        <label class="f-label">Default Tax (IVA)</label>
+                        <select class="f-input" id="new-client-iva"><option value="23">Normal (23%)</option><option value="13">Intermédia (13%)</option><option value="6">Reduzida (6%)</option><option value="0">Isento (0%)</option></select>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Due Date</label>
+                        <select class="f-input"><option>Immediate Payment</option><option selected>30 Days</option><option>60 Days</option></select>
+                    </div>
+                </div>
+                <div class="f-row">
+                    <div class="f-group"><label class="f-label">Payment Method</label><select class="f-input"><option>Bank Transfer</option><option>Cash</option></select></div>
+                    <div class="f-group"><label class="f-label">Global Discount %</label><input type="text" class="f-input" value="0"></div>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
+                <button class="f-btn-cancel" onclick="closeModal('new-client-modal')">Cancel</button>
+                <button class="f-btn-save" onclick="saveNewClient()">Save Client</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto';
-        var isDigital=false, isCash=false;
         var dashChart;
-        var isMoloniExpanded = false;
+        var moloniState = 0; // 0: Retracted, 1: Expanded (Dash), 2: Maximized (Invoice Form)
         var expensePieChartInstance = null;
         
-        window.globalInvoices = [];
-        window.globalCategoryTotals = {};
-        
-        // Secure XOR Array encrypted for Pin 2011 
-        const MATRIX_EXPENSE_HEX = "5bcba6607e4d5d796b445e7b686d4e786b45596f7c5e525f7c596e62557e505a116f5c531d5e4e4a42531f506e5a42521d5145551f5c6b555a5b514c336b4e4e116e6d42125f4b52475549551c5054115d4841";
+        // --- DEV SANDBOX MOCK DATA --- //
+        var nextInvoiceNumber = "2026/46";
+        window.globalInvoices = [
+            { serie: 'RCPT', number: '2026/1', reference: 'Web Project', date: '2026-07-10', client: 'Tech Innovation LDA', net: 1500, taxes: 345, total: 1845, pending: 1845 },
+            { serie: 'FT', number: '2026/45', reference: 'Consulting', date: '2026-07-08', client: 'Global Media SA', net: 800, taxes: 184, total: 984, pending: 0 },
+            { serie: 'RCPT', number: '2026/2', reference: 'Maintenance', date: '2026-07-01', client: 'Freelance Studio Unip.', net: 350, taxes: 80.5, total: 430.5, pending: 430.5 },
+            { serie: 'FT', number: '2026/42', reference: 'IT Services', date: '2026-06-25', client: 'Alpha Core Tech', net: 2000, taxes: 460, total: 2460, pending: 500 },
+            { serie: 'RCPT', number: '2026/3', reference: 'UI Design', date: '2026-06-15', client: 'Beta Startup', net: 1200, taxes: 276, total: 1476, pending: 1476 }
+        ];
 
-        var ACTIVE_EXPENSE_URL = "";
-        var ACTIVE_INVOICE_URL = "";
+        window.mockClients = [
+            { name: "Tech Innovation LDA", nif: "501234567", iva: 23 },
+            { name: "Consumidor Final", nif: "999999990", iva: 23 },
+            { name: "Global Media SA", nif: "509876543", iva: 23 },
+            { name: "Alpha Core Tech", nif: "501112223", iva: 0 }
+        ];
 
-        function runMatrixDecryption(hexStr, keyStr) {
-            if (!hexStr || !keyStr) return "";
-            var outputStr = "";
-            for (var i = 0; i < hexStr.length; i += 2) {
-                var hexByte = parseInt(hexStr.substr(i, 2), 16);
-                var keyChar = keyStr.charCodeAt((i / 2) % keyStr.length);
-                outputStr += String.fromCharCode(hexByte ^ keyChar);
-            }
-            return outputStr;
-        }
+        window.mockArticles = [
+            { name: "Service Pack", desc: "Standard service bundle", price: 100, iva: 23 },
+            { name: "Consulting Hours", desc: "Professional consulting", price: 75, iva: 23 },
+            { name: "Server Hosting", desc: "Annual dedicated server", price: 1200, iva: 23 },
+            { name: "Setup Fee", desc: "Initial configuration", price: 250, iva: 23 }
+        ];
 
-        const pinBoxes = document.querySelectorAll('.pin-box');
-        pinBoxes.forEach((box,index) => {
-            box.addEventListener('input', (e) => {
-                if(box.value.length === 1){
-                    if(index < pinBoxes.length - 1) pinBoxes[index+1].focus();
-                    else unlockApp();
-                }
-            });
-            box.addEventListener('keydown', (e) => {
-                if(e.key === 'Backspace' && box.value === '' && index > 0) pinBoxes[index-1].focus();
-            });
-        });
+        // Auto-login for Dev Sandbox
+        setTimeout(unlockApp, 100);
 
         function unlockApp(){
-            var pin = Array.from(pinBoxes).map(b => b.value).join('');
-            if(pin.length < 4) return;
+            document.getElementById('login-wrapper').style.display = 'none';
+            document.getElementById('app-view').style.display = 'flex';
+            document.body.style.alignItems = 'flex-start';
             
-            var statusEl = document.getElementById('login-status');
-            statusEl.innerText = 'Verifying Key Alignment...';
-            statusEl.style.color = '#facc15';
-            
-            var testExpenseUrl = runMatrixDecryption(MATRIX_EXPENSE_HEX, pin);
-            var testInvoiceUrl = ["https://script.google.com", "/macros/s/", "AKfycbxTU-PbIlbFgd5xq9Q_WZkcw2ujswH5_nw3kg5WuaFFGnHlqfXeRarK-stzLnzCb3UXZw", "/exec"].join("");
-            
-            fetch(testInvoiceUrl + "?action=verifyLoginHandshake&pin=" + encodeURIComponent(pin))
-            .then(res => res.json())
-            .then(result => {
-                if (result && result.status === "error") { throw new Error("Rejected"); }
-                cachedPin = pin;
-                ACTIVE_EXPENSE_URL = testExpenseUrl;
-                ACTIVE_INVOICE_URL = testInvoiceUrl;
-
-                document.getElementById('login-wrapper').style.display = 'none';
-                document.getElementById('app-view').style.display = 'flex';
-                document.body.style.alignItems = 'flex-start';
-                
-                initPlaceholderGraph();
-                fetchMoloniDataBackground();
-            })
-            .catch(err => {
-                statusEl.innerText = '❌ ACCESS DENIED: Invalid Key Matrix.';
-                statusEl.style.color = '#ef4444';
-                pinBoxes.forEach(b => b.value = '');
-                pinBoxes[0].focus();
-            });
+            initPlaceholderGraph();
+            if(moloniState === 0) renderRetractedTicker();
         }
 
+        // State Machine Controller
         function toggleMoloniMode() {
+            if (moloniState === 2) setMoloniState(1);
+            else if (moloniState === 1) setMoloniState(0);
+            else setMoloniState(1);
+        }
+
+        function setMoloniState(state, preventRecursion = false) {
+            moloniState = state;
             var appView = document.getElementById('app-view');
             var btn = document.getElementById('m-toggle-btn');
-
-            isMoloniExpanded = !isMoloniExpanded;
-
-            if (isMoloniExpanded) {
-                appView.classList.add('expanded-moloni');
-                btn.innerText = "Collapse";
-                loadMoloniView('Dashboard'); 
-            } else {
-                appView.classList.remove('expanded-moloni');
+            
+            if (state === 0) {
+                appView.classList.remove('expanded-moloni', 'maximized-moloni');
                 btn.innerText = "Expand";
-                renderRetractedTicker(); 
+                if(!preventRecursion) renderRetractedTicker();
+            } else if (state === 1) {
+                appView.classList.add('expanded-moloni');
+                appView.classList.remove('maximized-moloni');
+                btn.innerText = "Collapse";
+                if(!preventRecursion) loadMoloniView('Dashboard', true);
+            } else if (state === 2) {
+                appView.classList.add('expanded-moloni', 'maximized-moloni');
+                btn.innerText = "Collapse"; 
             }
         }
-
-        // --- DASHBOARD DATA ENGINE --- //
 
         function initPlaceholderGraph() {
             const ctx = document.getElementById('dashboardChart').getContext('2d');
@@ -363,87 +503,23 @@
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [
-                        { label: 'Earnings (Moloni)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#60a5fa', backgroundColor: 'rgba(96, 165, 250, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#60a5fa', tension: 0.4 },
-                        { label: 'Expenses (Drive)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#facc15', tension: 0.4 }
+                        { label: 'Earnings (Moloni)', data: [1200,2100,1800,3200,2500,2800,1500,0,0,0,0,0], borderColor: '#cbd5e1', backgroundColor: 'rgba(203, 213, 225, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#cbd5e1', tension: 0.4 },
+                        { label: 'Expenses (Drive)', data: [800,1500,1200,2000,1800,1900,900,0,0,0,0,0], borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#facc15', tension: 0.4 }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888', font: {family: 'Nunito'} } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'} } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'} } } } }
             });
-            fetchDashboardData(false); 
+            window.globalCategoryTotals = {"Equipa Externa": 500, "Subcontratação": 1200, "Consumíveis e Operações": 420, "Equipamento": 850};
         }
 
-        function fetchDashboardData(forceRefresh) {
-            var refreshBtn = document.getElementById('refresh-graph-btn');
-            if (!forceRefresh) {
-                var cachedExpenses = localStorage.getItem('vault_cache_expenses');
-                var cachedRedCount = localStorage.getItem('vault_cache_redcount');
-                var cachedCatTotals = localStorage.getItem('vault_cache_catTotals');
-                var cachedEarnings = localStorage.getItem('vault_cache_earnings');
-                
-                if (cachedCatTotals) window.globalCategoryTotals = JSON.parse(cachedCatTotals);
-                
-                if (cachedExpenses && cachedRedCount) {
-                    document.getElementById('dash-red-count').innerText = cachedRedCount;
-                    dashChart.data.datasets[1].data = JSON.parse(cachedExpenses);
-                    if (cachedEarnings) dashChart.data.datasets[0].data = JSON.parse(cachedEarnings);
-                    dashChart.update(); return; 
-                }
-            }
-            if (!ACTIVE_EXPENSE_URL || !ACTIVE_INVOICE_URL) return;
-
-            refreshBtn.classList.add('spin'); document.getElementById('dash-red-count').innerText = "...";
-            
-            fetch(ACTIVE_EXPENSE_URL + "?action=getChartData&pin=" + encodeURIComponent(cachedPin))
-            .then(res => res.json()).then(data => {
-                document.getElementById('dash-red-count').innerText = data.redCount; 
-                dashChart.data.datasets[1].data = data.expenses; 
-                dashChart.update();
-                
-                window.globalCategoryTotals = data.categoryTotals;
-                localStorage.setItem('vault_cache_expenses', JSON.stringify(data.expenses)); 
-                localStorage.setItem('vault_cache_redcount', data.redCount.toString());
-                localStorage.setItem('vault_cache_catTotals', JSON.stringify(data.categoryTotals));
-                
-                if (isMoloniExpanded && expensePieChartInstance) renderPieChart(); 
-
-                if (!refreshBtn.classList.contains('processing-earnings')) refreshBtn.classList.remove('spin');
-            }).catch(err => { console.error(err); refreshBtn.classList.remove('spin'); });
-
-            refreshBtn.classList.add('processing-earnings');
-            fetch(ACTIVE_INVOICE_URL + "?action=getEarnings&pin=" + encodeURIComponent(cachedPin))
-            .then(res => res.json()).then(data => {
-                if (data && data.earnings) { dashChart.data.datasets[0].data = data.earnings; dashChart.update(); localStorage.setItem('vault_cache_earnings', JSON.stringify(data.earnings)); }
-                refreshBtn.classList.remove('processing-earnings'); refreshBtn.classList.remove('spin');
-            }).catch(err => { console.error(err); refreshBtn.classList.remove('processing-earnings'); refreshBtn.classList.remove('spin'); });
-        }
-
-        function fetchMoloniDataBackground() {
-            var cachedMoloni = localStorage.getItem('vault_cache_moloniInvoices');
-            if (cachedMoloni) {
-                window.globalInvoices = JSON.parse(cachedMoloni);
-                if(!isMoloniExpanded) renderRetractedTicker();
-            }
-
-            fetch(ACTIVE_INVOICE_URL + "?action=getMoloniInvoices&pin=" + encodeURIComponent(cachedPin))
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    window.globalInvoices = data.invoices;
-                    localStorage.setItem('vault_cache_moloniInvoices', JSON.stringify(data.invoices));
-                    if(!isMoloniExpanded) renderRetractedTicker();
-                    else if (document.getElementById('expanded-invoice-list')) renderExpandedInvoiceList();
-                    else if (document.getElementById('invoice-tbody')) renderFilteredInvoiceTable(window.globalInvoices);
-                }
-            }).catch(err => console.error("Moloni API failed.", err));
-        }
-
-        // --- MOLONI UI RENDERING & FILTERING BRAIN --- //
+        // --- UI & VIEWS --- //
 
         function renderRetractedTicker() {
             var ws = document.getElementById('moloni-workspace');
             var unpaid = window.globalInvoices.filter(i => i.pending > 0 && Math.abs(i.pending - i.total) < 0.05);
+            var unpaidCount = unpaid.length;
             
-            if(unpaid.length === 0) {
+            if(unpaidCount === 0) {
                 ws.innerHTML = `
                     <div style="text-align: center; margin-top: 30px;">
                         <span style="font-size:32px; display:block; margin-bottom:10px;">💼</span>
@@ -453,7 +529,7 @@
                 return;
             }
 
-            var html = `<div style="width:100%; text-align:left; margin-bottom:8px; font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; font-weight:600;">⚠️ Missing Payments</div>`;
+            var html = `<div style="width:100%; text-align:left; margin-bottom:8px; font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; font-weight:600;">⚠️ ${unpaidCount} Missing Payment${unpaidCount > 1 ? 's' : ''}</div>`;
             html += `<div class="ticker-wrap"><div class="ticker-move">`;
             unpaid.forEach(inv => {
                 var clientName = inv.client.length > 18 ? inv.client.substring(0,18) + '...' : inv.client;
@@ -466,7 +542,13 @@
             ws.innerHTML = html;
         }
 
-        function loadMoloniView(viewName) {
+        function loadMoloniView(viewName, isInternalCall = false) {
+            if (!isInternalCall && viewName !== 'Dashboard') {
+                setMoloniState(2, true); 
+            } else if (!isInternalCall && viewName === 'Dashboard') {
+                setMoloniState(1, true);
+            }
+            
             var ws = document.getElementById('moloni-workspace');
             
             if (viewName === 'Dashboard') {
@@ -474,10 +556,19 @@
                     <div class="dash-split">
                         <div class="dash-left">
                             <h4 class="dash-title">Open Balances</h4>
-                            <div id="expanded-invoice-list" style="font-size:12px;">Carregando...</div>
+                            <div id="expanded-invoice-list" style="font-size:12px;"></div>
                         </div>
                         <div class="dash-right">
-                            <h4 class="dash-title" style="border-color: rgba(250, 204, 21, 0.4); text-align:right;">Expense Breakdown</h4>
+                            <div style="display:flex; justify-content:flex-end; align-items:center; width:100%; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; gap: 10px;">
+                                <h4 class="dash-title" style="border:none; padding:0; margin:0; text-align:right; flex:1;">Expense Breakdown</h4>
+                                <select class="f-input" style="width: auto; padding: 4px 8px; font-size: 11px;">
+                                    <option value="este_ano">Este Ano</option>
+                                    <option value="este_trimestre">Este Trimestre</option>
+                                    <option value="trimestre_anterior">Trimestre Anterior</option>
+                                    <option value="este_semestre">Este Semestre</option>
+                                    <option value="ano_anterior">Ano Anterior</option>
+                                </select>
+                            </div>
                             <div style="position:relative; width:100%; height:200px; display:flex; justify-content:center;">
                                 <canvas id="expensePieChart"></canvas>
                             </div>
@@ -490,298 +581,344 @@
             else if (viewName === 'Invoice') {
                 ws.innerHTML = `
                     <div style="text-align:left; width:100%; padding: 10px 20px; box-sizing: border-box;">
-                        <h2 style="color:#f8fafc; font-weight:400; margin-top:0; margin-bottom: 5px;">Faturas</h2>
-                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 15px;">Nesta secção pode administrar as faturas</p>
+                        <h2 style="color:#f8fafc; font-weight:400; margin-top:0; margin-bottom: 5px;">Invoices</h2>
+                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 15px;">Manage your billing documents here.</p>
                         
                         <div class="m-toolbar">
                             <div style="display: flex; gap: 8px;">
-                                <select id="invoice-date-filter" class="m-search" style="width: auto; padding: 6px;" onchange="applyInvoiceFilters()">
-                                    <option value="all">Escolha uma opção</option>
-                                    <option value="este_trimestre">Este Trimestre</option>
-                                    <option value="trimestre_anterior">Trimestre Anterior</option>
-                                    <option value="este_semestre">Este Semestre</option>
-                                    <option value="este_ano">Este Ano</option>
-                                    <option value="ano_anterior">Ano Anterior</option>
+                                <select id="invoice-date-filter" class="input-transparent" style="width: auto; padding: 6px;">
+                                    <option value="all">Choose an option</option>
+                                    <option value="este_trimestre">This Quarter</option>
+                                    <option value="trimestre_anterior">Previous Quarter</option>
+                                    <option value="este_semestre">This Semester</option>
+                                    <option value="este_ano">This Year</option>
+                                    <option value="ano_anterior">Previous Year</option>
                                 </select>
-                                <input type="text" id="invoice-search-input" class="m-search" placeholder="Pesquisar" onkeyup="applyInvoiceFilters()">
-                                <button class="m-btn" onclick="applyInvoiceFilters()">Pesquisar</button>
+                                <input type="text" id="invoice-search-input" class="input-transparent" placeholder="Search">
+                                <button class="btn-yellow-outline" style="background:transparent; color:#cbd5e1; border-color:rgba(255,255,255,0.2);">Search</button>
                             </div>
-                            <button class="m-btn" style="color:#facc15; border-color:rgba(250,204,21,0.3);">+ Adicionar Fatura</button>
+                            <button class="btn-yellow-outline" onclick="loadMoloniView('Create Invoice')">+ Create Invoice</button>
                         </div>
                         
                         <div class="moloni-table-container">
                             <table class="moloni-table">
                                 <thead>
                                     <tr>
-                                        <th>Série</th>
-                                        <th>N.º</th>
-                                        <th>Enc./Orç.</th>
-                                        <th>Data</th>
-                                        <th>Cliente</th>
-                                        <th class="text-right">Ilíquido</th>
-                                        <th class="text-right">Impostos</th>
-                                        <th class="text-right">Total Liq.</th>
-                                        <th class="text-right">Dívida</th>
-                                        <th class="text-center">Ações</th>
+                                        <th>Series</th><th>No.</th><th>Ref.</th><th>Date</th><th>Client</th>
+                                        <th class="text-right">Net</th><th class="text-right">Taxes</th><th class="text-right">Total</th>
+                                        <th class="text-right">Pending</th><th class="text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="invoice-tbody">
-                                    <tr><td colspan="10" class="text-center" style="padding: 30px; color:#facc15;">A carregar dados... 🔄</td></tr>
-                                </tbody>
+                                <tbody id="invoice-tbody"></tbody>
                             </table>
                         </div>
                     </div>
                 `;
                 renderFilteredInvoiceTable(window.globalInvoices);
-            } else {
+            } 
+            else if (viewName === 'Create Invoice') {
+                var today = new Date().toISOString().split('T')[0];
                 ws.innerHTML = `
-                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
-                        <h2 style="color:#f8fafc; font-weight:400; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-top:0;">${viewName}</h2>
-                        <div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); padding: 40px; text-align: center; border-radius: 8px; color: #888;">
-                            <span style="font-size: 24px;">🚧</span><br><br>
-                            Interface for <b>${viewName}</b> ready.<br>
-                            Awaiting data binding from Invoice Node.
+                    <div class="form-container">
+                        <div class="form-header-bar">
+                            <h2 class="f-title">Create Invoice <span>Invoice N.º RCPT/${nextInvoiceNumber} (Provisional)</span></h2>
+                            <div class="f-actions">
+                                <button class="f-btn-cancel" onclick="confirmCancelInvoice()">Cancel</button>
+                                <button class="f-btn-draft" onclick="simulateSave('Draft saved.')">Save Draft</button>
+                                <button class="f-btn-save" onclick="simulateSave('Document Finalized!')">Save & Finalize</button>
+                            </div>
+                        </div>
+
+                        <div class="f-row">
+                            <div class="f-group" style="max-width: 200px;">
+                                <label class="f-label">Issue Date <span class="f-help">?</span></label>
+                                <input type="date" class="f-input" value="${today}">
+                            </div>
+                            <div class="f-group" style="max-width: 200px;">
+                                <label class="f-label">Series <span class="f-help" style="background:#22c55e;">✓</span></label>
+                                <select class="f-input"><option>RCPT</option><option>FT</option></select>
+                            </div>
+                            <div class="f-group" style="flex-direction:row; align-items:center; gap:8px; margin-top:22px;">
+                                <label class="custom-checkbox-container">
+                                    <div class="custom-checkbox"></div> Paperless invoice issue
+                                </label>
+                                <span class="f-help">?</span>
+                            </div>
+                        </div>
+                        <p style="font-size:11px; color:#888; margin-top:0; margin-bottom:20px;">AT Communication starting: <b>16-07-2026</b>. <a href="#" style="color:#facc15; text-decoration:none;">Learn more</a><br>To indicate a different availability date, use the observations field.</p>
+
+                        <div class="f-section">
+                            <h4 class="f-section-title">Clients</h4>
+                            <div class="f-row" style="margin-bottom:0;">
+                                <div class="f-group" style="flex:4;">
+                                    <input type="text" class="f-input" id="client-search" placeholder="Search clients..." oninput="handleClientSearch(this.value)">
+                                    <div class="auto-suggest-list" id="client-suggest-list"></div>
+                                </div>
+                                <div class="f-group" style="flex:1; max-width: 150px;" id="client-action-container">
+                                    <button class="btn-yellow-outline" style="height:100%; display:flex; align-items:center; justify-content:center; gap:5px;" onclick="document.getElementById('new-client-modal').style.display='flex'">New Client <span style="font-size:16px;">+</span></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="f-section">
+                            <h4 class="f-section-title">^ Financial Data</h4>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                                <div class="f-group">
+                                    <label class="f-label">PO / Estimate <span class="f-help">?</span></label>
+                                    <input type="text" class="f-input">
+                                </div>
+                                <div class="f-group">
+                                    <label class="f-label">CAE</label>
+                                    <select class="f-input"><option>Production of films, videos and television programs...</option></select>
+                                </div>
+                                <div class="f-group">
+                                    <label class="f-label">Due Date</label>
+                                    <select class="f-input"><option>Immediate Payment</option><option selected>30 Days</option><option>60 Days</option></select>
+                                </div>
+                                <div class="f-group">
+                                    <label class="f-label">Maturity Date <span class="f-help">?</span></label>
+                                    <input type="date" class="f-input">
+                                </div>
+                                <div class="f-group">
+                                    <label class="f-label">Client Reference <span class="f-help">?</span></label>
+                                    <input type="text" class="f-input">
+                                </div>
+                                <div class="f-group">
+                                    <label class="f-label">Global Discount <span class="f-help">?</span></label>
+                                    <div style="display:flex; gap:10px;">
+                                        <input type="text" class="f-input" value="0 %" style="flex:1; text-align:right;">
+                                        <button class="f-btn-cancel" style="border-color:rgba(250,204,21,0.3); color:rgba(250,204,21,0.8); flex:2;">Set Discount</button>
+                                    </div>
+                                </div>
+                                <div class="f-group">
+                                    <label class="f-label">Currency Exchange</label>
+                                    <button class="f-btn-cancel" style="border-color:rgba(250,204,21,0.3); color:rgba(250,204,21,0.8); max-width: 180px;">Configure Exchange</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="f-section">
+                            <h4 class="f-section-title">Articles</h4>
+                            <div style="display:flex; gap:20px; font-size:12px; color:rgba(250,204,21,0.8); margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                                <span style="border-bottom: 2px solid #facc15; padding-bottom: 8px;">Simple Search</span>
+                                <span style="color:#888;">Multiple Article Import</span>
+                            </div>
+                            <div class="f-row" style="margin-bottom:0;">
+                                <div class="f-group" style="flex:4;">
+                                    <input type="text" class="f-input" id="article-search" placeholder="Search articles..." oninput="handleArticleSearch(this.value)">
+                                    <div class="auto-suggest-list" id="article-suggest-list"></div>
+                                </div>
+                                <div class="f-group" style="flex:1; flex-direction:row; gap:10px; min-width: 250px;">
+                                    <button class="f-btn-cancel" style="border-color:rgba(250,204,21,0.3); color:rgba(250,204,21,0.8); flex:1;">Advanced Search</button>
+                                    <button class="btn-yellow-outline" style="flex:1; display:flex; align-items:center; justify-content:center; gap:5px;">New Article <span>+</span></button>
+                                </div>
+                            </div>
+                            
+                            <div id="articles-container"></div>
+
+                            <div style="text-align:right; border-top:1px solid rgba(255,255,255,0.1); margin-top:20px; padding-top:15px; font-size:13px; display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                                <div style="display:flex; justify-content:space-between; width:200px; color:#94a3b8;"><span>Net Total</span> <span id="summary-net">0.00 €</span></div>
+                                <div style="display:flex; justify-content:space-between; width:200px; color:#94a3b8;"><span>Normal VAT</span> <span id="summary-vat">0.00 €</span></div>
+                                <div style="display:flex; justify-content:space-between; width:200px; color:#fff; font-weight:700; font-size:16px;"><span>Total to Pay</span> <span id="summary-total">0.00 €</span></div>
+                            </div>
+                        </div>
+
+                        <div class="f-section">
+                            <h4 class="f-section-title">Delivery and Transport</h4>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+                                <div class="f-group">
+                                    <label class="f-label">Transport Details</label>
+                                    <input type="date" class="f-input" style="margin-bottom:10px;">
+                                    <select class="f-input"><option>Select expedition type</option></select>
+                                </div>
+                                <div class="f-group">
+                                    <label class="f-label">Loading Location</label>
+                                    <textarea class="f-input" style="height:60px; resize:vertical;"></textarea>
+                                </div>
+                                <div class="f-group">
+                                    <label class="f-label">Unloading Location</label>
+                                    <textarea class="f-input" style="height:60px; resize:vertical;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="f-section">
+                            <h4 class="f-section-title">Observations</h4>
+                            <textarea class="f-input" style="height:80px; resize:vertical; width:100%; box-sizing:border-box;"></textarea>
+                            <p style="font-size:10px; color:#888; font-style:italic; margin-top:5px;">Note: Please minimize the use of personal data.</p>
                         </div>
                     </div>
                 `;
             }
-        }
-
-        // The Filtering "Brain"
-        function applyInvoiceFilters() {
-            var searchInput = document.getElementById('invoice-search-input');
-            var dateFilterEl = document.getElementById('invoice-date-filter');
-            if(!searchInput || !dateFilterEl) return;
-            
-            var searchTerm = searchInput.value.toLowerCase();
-            var dateFilter = dateFilterEl.value;
-            
-            var filtered = window.globalInvoices.filter(inv => {
-                var textMatch = true;
-                if(searchTerm) {
-                    textMatch = (inv.client && inv.client.toLowerCase().includes(searchTerm)) ||
-                                (inv.number && inv.number.toString().includes(searchTerm)) ||
-                                (inv.serie && inv.serie.toLowerCase().includes(searchTerm));
-                }
-                
-                var dateMatch = true;
-                if(dateFilter !== 'all' && inv.date) {
-                    var d = new Date(inv.date); 
-                    if(isNaN(d.getTime())) {
-                        var parts = inv.date.split(/[-.\/]/);
-                        if(parts.length===3) {
-                            if(parts[2].length===4) d = new Date(parts[2], parts[1]-1, parts[0]);
-                            else d = new Date(parts[0], parts[1]-1, parts[2]);
-                        }
-                    }
-                    
-                    if(!isNaN(d.getTime())) {
-                        var now = new Date();
-                        var year = now.getFullYear();
-                        var month = now.getMonth();
-                        var invYear = d.getFullYear();
-                        var invMonth = d.getMonth();
-                        
-                        var currentQuarter = Math.floor(month / 3);
-                        var invQuarter = Math.floor(invMonth / 3);
-                        var currentSemester = Math.floor(month / 6);
-                        var invSemester = Math.floor(invMonth / 6);
-                        
-                        if(dateFilter === 'este_trimestre') {
-                            dateMatch = (invYear === year && invQuarter === currentQuarter);
-                        } else if(dateFilter === 'trimestre_anterior') {
-                            var prevQ = currentQuarter - 1;
-                            var qYear = year;
-                            if(prevQ < 0) { prevQ = 3; qYear--; }
-                            dateMatch = (invYear === qYear && invQuarter === prevQ);
-                        } else if(dateFilter === 'este_semestre') {
-                            dateMatch = (invYear === year && invSemester === currentSemester);
-                        } else if(dateFilter === 'este_ano') {
-                            dateMatch = (invYear === year);
-                        } else if(dateFilter === 'ano_anterior') {
-                            dateMatch = (invYear === year - 1);
-                        }
-                    }
-                }
-                return textMatch && dateMatch;
-            });
-            
-            renderFilteredInvoiceTable(filtered);
-        }
-
-        function renderFilteredInvoiceTable(invoicesToRender) {
-            var tbody = document.getElementById('invoice-tbody');
-            if(!tbody) return;
-            if(invoicesToRender.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="text-center" style="padding:20px;">Nenhum registo encontrado.</td></tr>';
-                return;
+            else {
+                ws.innerHTML = `<div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;"><h2 style="color:#f8fafc; font-weight:400; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-top:0;">${viewName}</h2><div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); padding: 40px; text-align: center; border-radius: 8px; color: #888;"><span style="font-size: 24px;">🚧</span><br><br>Interface for <b>${viewName}</b> ready.<br>Awaiting data binding from Invoice Node.</div></div>`;
             }
-            var html = '';
-            invoicesToRender.forEach(inv => {
-                var isDebt = inv.pending > 0;
-                var clientName = inv.client.length > 20 ? inv.client.substring(0,20) + '...' : inv.client;
-                var net = inv.net || 0;
-                var taxes = inv.taxes || 0;
-                html += `
-                    <tr>
-                        <td>${inv.serie}</td>
-                        <td>${inv.number}</td>
-                        <td>${inv.reference || '---'}</td>
-                        <td>${inv.date}</td>
-                        <td title="${inv.client}">${clientName}</td>
-                        <td class="text-right">${net.toFixed(2)} €</td>
-                        <td class="text-right">${taxes.toFixed(2)} €</td>
-                        <td class="text-right" style="font-weight:700; color:#fff;">${inv.total.toFixed(2)} €</td>
-                        <td class="text-right" style="color: ${isDebt ? '#ef4444' : '#22c55e'}; font-weight:700;">${inv.pending.toFixed(2)} €</td>
-                        <td class="text-center">
-                            <a class="action-link">Ver</a> | <a class="action-link" style="color:#ef4444;">Eliminar</a>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
         }
+
+        // --- BRAIN: AUTO-SUGGEST & MODALS ---
+
+        var activeClientIva = 23; // Default
+
+        function handleClientSearch(val) {
+            var list = document.getElementById('client-suggest-list');
+            if (val.length < 3) { list.style.display = 'none'; return; }
+            var matches = window.mockClients.filter(c => c.name.toLowerCase().includes(val.toLowerCase()) || c.nif.includes(val));
+            if (matches.length > 0) {
+                var html = '';
+                matches.forEach(m => html += `<div class="auto-suggest-item" onclick="selectClient('${m.name}', ${m.iva})">${m.name} <span style="color:#888; font-size:11px; margin-left:10px;">NIF: ${m.nif}</span></div>`);
+                list.innerHTML = html; list.style.display = 'block';
+            } else { list.style.display = 'none'; }
+        }
+
+        function selectClient(name, iva) {
+            document.getElementById('client-search').value = name;
+            document.getElementById('client-suggest-list').style.display = 'none';
+            activeClientIva = iva;
+            document.getElementById('client-action-container').innerHTML = `<button class="btn-yellow-outline" style="height:100%; display:flex; align-items:center; justify-content:center; gap:5px; border-color:rgba(255,255,255,0.2); color:#cbd5e1;" onclick="document.getElementById('new-client-modal').style.display='flex'">Edit Client</button>`;
+        }
+
+        function saveNewClient() {
+            var name = document.querySelector('#tab-fiscal input[type="text"]').value || "New Custom Client";
+            var iva = parseInt(document.getElementById('new-client-iva').value);
+            window.mockClients.push({name: name, nif: "New", iva: iva});
+            closeModal('new-client-modal');
+            selectClient(name, iva);
+        }
+
+        var selectedArticles = [];
+
+        function handleArticleSearch(val) {
+            var list = document.getElementById('article-suggest-list');
+            if (val.length < 3) { list.style.display = 'none'; return; }
+            var matches = window.mockArticles.filter(a => a.name.toLowerCase().includes(val.toLowerCase()));
+            if (matches.length > 0) {
+                var html = '';
+                matches.forEach((m, idx) => html += `<div class="auto-suggest-item" onclick="addArticleRow(${idx})">${m.name}</div>`);
+                list.innerHTML = html; list.style.display = 'block';
+            } else { list.style.display = 'none'; }
+        }
+
+        function addArticleRow(mockIdx) {
+            var art = window.mockArticles[mockIdx];
+            document.getElementById('article-search').value = '';
+            document.getElementById('article-suggest-list').style.display = 'none';
+            
+            var newId = Date.now();
+            selectedArticles.push({ id: newId, price: art.price, qty: 1, iva: activeClientIva, discount: 0 });
+            
+            var container = document.getElementById('articles-container');
+            var rowHtml = `
+                <div class="article-expanded-row" id="row-${newId}">
+                    <div class="article-header-row">
+                        <div>Title / Designation</div><div>Qty</div><div>Unit Price (€)</div><div>Discount (%)</div><div>Tax (IVA %)</div><div>Net Total</div>
+                    </div>
+                    <div class="article-grid">
+                        <input type="text" class="f-input" value="${art.name}">
+                        <input type="number" class="f-input text-right" value="1" oninput="updateArticleRow(${newId}, 'qty', this.value)">
+                        <input type="number" class="f-input text-right" value="${art.price}" oninput="updateArticleRow(${newId}, 'price', this.value)">
+                        <input type="number" class="f-input text-right" value="0" oninput="updateArticleRow(${newId}, 'discount', this.value)">
+                        <input type="number" class="f-input text-right" value="${activeClientIva}" oninput="updateArticleRow(${newId}, 'iva', this.value)">
+                        <input type="text" class="f-input text-right" id="row-total-${newId}" value="${art.price.toFixed(2)} €" disabled>
+                    </div>
+                    <textarea class="f-input" style="height:60px; resize:vertical; font-size:12px; color:#cbd5e1;" placeholder="Article description or notes...">${art.desc}</textarea>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', rowHtml);
+            recalculateTotals();
+        }
+
+        function updateArticleRow(id, field, val) {
+            var article = selectedArticles.find(a => a.id === id);
+            if(article) {
+                article[field] = parseFloat(val) || 0;
+                var rowNet = (article.price * article.qty) * (1 - (article.discount/100));
+                document.getElementById(`row-total-${id}`).value = rowNet.toFixed(2) + " €";
+                recalculateTotals();
+            }
+        }
+
+        function recalculateTotals() {
+            var net = 0, vat = 0;
+            selectedArticles.forEach(a => {
+                var rowNet = (a.price * a.qty) * (1 - (a.discount/100));
+                net += rowNet;
+                vat += rowNet * (a.iva/100);
+            });
+            document.getElementById('summary-net').innerText = net.toFixed(2) + " €";
+            document.getElementById('summary-vat').innerText = vat.toFixed(2) + " €";
+            document.getElementById('summary-total').innerText = (net + vat).toFixed(2) + " €";
+        }
+
+        function confirmCancelInvoice() {
+            document.getElementById('alert-title').innerText = "Cancel Invoice";
+            document.getElementById('alert-message').innerText = "Are you sure you want to cancel? Any unsaved data will be lost.";
+            document.getElementById('alert-confirm-btn').onclick = function() { closeCustomAlert(); loadMoloniView('Invoice'); };
+            document.getElementById('custom-alert-modal').style.display = 'flex';
+        }
+
+        function simulateSave(msg) {
+            document.getElementById('alert-title').innerText = "Saving";
+            document.getElementById('alert-message').innerText = "Processing document...";
+            document.getElementById('alert-confirm-btn').style.display = 'none';
+            document.getElementById('custom-alert-modal').style.display = 'flex';
+            setTimeout(() => {
+                closeCustomAlert();
+                document.getElementById('alert-confirm-btn').style.display = 'block';
+                loadMoloniView('Invoice');
+            }, 800);
+        }
+
+        function closeCustomAlert() { document.getElementById('custom-alert-modal').style.display = 'none'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function switchTab(el, targetId) {
+            document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById(targetId).classList.add('active');
+        }
+
+        // --- DASHBOARD LISTS ---
 
         function renderExpandedInvoiceList() {
             var listEl = document.getElementById('expanded-invoice-list');
             if(!listEl) return;
             var openInvs = window.globalInvoices.filter(i => i.pending > 0);
-            
-            if(openInvs.length === 0) {
-                listEl.innerHTML = `<div style="color:#22c55e; padding:10px; text-align:center;">All invoices settled.</div>`; return;
-            }
-            
+            if(openInvs.length === 0) { listEl.innerHTML = `<div style="color:#22c55e; padding:10px; text-align:center;">All invoices settled.</div>`; return; }
             var html = `<table style="width:100%; border-collapse:collapse;">`;
             openInvs.forEach(inv => {
                 var isPartial = inv.pending < inv.total;
                 var color = isPartial ? '#facc15' : '#ef4444'; 
                 var clientName = inv.client.length > 20 ? inv.client.substring(0,20) + '...' : inv.client;
-                html += `<tr>
-                    <td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); color:#e2e8f0; font-size: 13px;">
-                        ${clientName}<br><span style="font-size:11px; color:#888;">${inv.date} | ${inv.serie}-${inv.number}</span>
-                    </td>
-                    <td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:700; color:${color}; font-size: 13px;">
-                        ${inv.pending.toFixed(2)} €
-                    </td>
-                </tr>`;
+                html += `<tr><td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); color:#e2e8f0; font-size: 13px;">${clientName}<br><span style="font-size:11px; color:#888;">${inv.date} | ${inv.serie}-${inv.number}</span></td><td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:700; color:${color}; font-size: 13px;">${inv.pending.toFixed(2)} €</td></tr>`;
             });
-            html += `</table>`;
-            listEl.innerHTML = html;
+            html += `</table>`; listEl.innerHTML = html;
         }
 
         function renderPieChart() {
             var ctx = document.getElementById('expensePieChart');
             if(!ctx) return;
-            
-            var labels = []; var data = [];
-            var totals = window.globalCategoryTotals || {};
-            
-            var colorMap = {
-                "Equipa Externa": "#93c5fd", 
-                "Subcontratação": "#c4b5fd", 
-                "Alojamento": "#f9a8d4",     
-                "Alimentação": "#fca5a5",    
-                "Consumíveis e Operações": "#fdba74", 
-                "Equipamento": "#fde047",    
-                "Transportes e Deslocações": "#86efac" 
-            };
+            var labels = []; var data = []; var totals = window.globalCategoryTotals || {};
+            var colorMap = { "Equipa Externa": "#93c5fd", "Subcontratação": "#c4b5fd", "Alojamento": "#f9a8d4", "Alimentação": "#fca5a5", "Consumíveis e Operações": "#fdba74", "Equipamento": "#fde047", "Transportes e Deslocações": "#86efac" };
             var bgColors = [];
-
-            for(var key in totals) {
-                if(totals[key] > 0) { 
-                    labels.push(key); 
-                    data.push(totals[key]); 
-                    bgColors.push(colorMap[key] || "#ef4444"); 
-                }
-            }
-
-            if(labels.length === 0) {
-                labels = ["No Data"]; data = [1]; bgColors = ["rgba(255,255,255,0.05)"];
-            }
-
+            for(var key in totals) { if(totals[key] > 0) { labels.push(key); data.push(totals[key]); bgColors.push(colorMap[key] || "#ef4444"); } }
+            if(labels.length === 0) { labels = ["No Data"]; data = [1]; bgColors = ["rgba(255,255,255,0.05)"]; }
             if(expensePieChartInstance) expensePieChartInstance.destroy();
+            expensePieChartInstance = new Chart(ctx.getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 4, spacing: 5 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { position: 'right', labels: { color: '#e2e8f0', font: {size: 12, family: 'Nunito', weight: '600'}, boxWidth:8, padding: 20, usePointStyle: true, pointStyle: 'circle' } } } } });
+        }
 
-            expensePieChartInstance = new Chart(ctx.getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: bgColors,
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    cutout: '65%',
-                    plugins: { 
-                        legend: { position: 'right', labels: { color: '#ccc', font: {size: 11, family: 'Nunito'}, boxWidth:12, padding: 15 } } 
-                    }
-                }
+        function renderFilteredInvoiceTable(invoicesToRender) {
+            var tbody = document.getElementById('invoice-tbody');
+            if(!tbody) return;
+            if(invoicesToRender.length === 0) { tbody.innerHTML = '<tr><td colspan="10" class="text-center" style="padding:20px;">No records found.</td></tr>'; return; }
+            var html = '';
+            invoicesToRender.forEach(inv => {
+                var isDebt = inv.pending > 0;
+                var clientName = inv.client.length > 20 ? inv.client.substring(0,20) + '...' : inv.client;
+                html += `<tr><td>${inv.serie}</td><td>${inv.number}</td><td>${inv.reference || '---'}</td><td>${inv.date}</td><td title="${inv.client}">${clientName}</td><td class="text-right">${inv.net.toFixed(2)} €</td><td class="text-right">${inv.taxes.toFixed(2)} €</td><td class="text-right" style="font-weight:700; color:#fff;">${inv.total.toFixed(2)} €</td><td class="text-right" style="color: ${isDebt ? '#ef4444' : '#22c55e'}; font-weight:700;">${inv.pending.toFixed(2)} €</td><td class="text-center"><a class="action-link">Ver</a> | <a class="action-link" style="color:#ef4444;">Eliminar</a></td></tr>`;
             });
+            tbody.innerHTML = html;
         }
-
-        // --- SCANNER LOGIC --- //
-
-        function toggleDigital(){ isDigital = !isDigital; var btn = document.getElementById('btn-digital'), txt = document.getElementById('text-digital'); if(isDigital){ btn.classList.add('active'); txt.innerText = 'Digital ✓'; } else{ btn.classList.remove('active'); txt.innerText = 'Digital?'; } }
-        function toggleCash(){ isCash = !isCash; var btn = document.getElementById('btn-cash'), txt = document.getElementById('text-cash'); if(isCash){ btn.classList.add('active'); txt.innerText = 'In Cash ✓'; } else{ btn.classList.remove('active'); txt.innerText = 'In Cash?'; } }
-        function setStatus(msg, type){ var el = document.getElementById('status'); el.innerHTML = msg; el.className = type + '-text'; }
-
-        function handleFile(inputEl){
-            if(!inputEl.files.length) return;
-            document.getElementById('inputContainer').style.display = 'none';
-            var file = inputEl.files[0], mimeType = file.type;
-            setStatus('Compacting asset...', 'loading');
-            
-            var reader = new FileReader();
-            reader.onload = function(e){
-                if(mimeType === 'application/pdf' || mimeType.includes('word') || mimeType.includes('officedocument')){
-                    cachedBase64 = e.target.result.split(',')[1]; cachedFullImgSrc = e.target.result; cachedMimeType = mimeType;
-                    document.getElementById('preview').style.display = 'none'; showUploadState();
-                } else {
-                    var img = new Image();
-                    img.onload = function(){
-                        var canvas = document.createElement('canvas'); var maxW = 2400, maxH = 2400, w = img.width, h = img.height;
-                        if(w > maxW || h > maxH){ if(w > h){ h *= maxW/w; w = maxW; } else { w *= maxH/h; h = maxH; } }
-                        canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img,0,0,w,h);
-                        var dataUrl = canvas.toDataURL('image/jpeg', 0.90);
-                        cachedBase64 = dataUrl.split(',')[1]; cachedFullImgSrc = dataUrl; cachedMimeType = 'image/jpeg';
-                        document.getElementById('preview').src = dataUrl; document.getElementById('preview').style.display = 'inline-block'; showUploadState();
-                    };
-                    img.onerror = function(){ cachedBase64 = e.target.result.split(',')[1]; cachedFullImgSrc = e.target.result; cachedMimeType = mimeType; showUploadState(); };
-                    img.src = e.target.result;
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function showUploadState() { setStatus('Asset ready. Tag month and hit Upload.', 'success'); document.getElementById('uploadBtn').style.display = 'block'; document.getElementById('retryBtn').style.display = 'none'; }
-
-        function triggerUpload() {
-            if (!ACTIVE_EXPENSE_URL) { setStatus('System locked.', 'error'); return; }
-            cachedForcedMonth = document.getElementById('monthOverride').value;
-            document.getElementById('uploadBtn').style.display = 'none'; document.getElementById('retryBtn').style.display = 'none';
-            setStatus('Transmitting to Ledger...', 'loading');
-            var mappedPayMethod = isCash ? "cash" : "bank";
-            const payload = { fileData: cachedBase64, mimeType: cachedMimeType, pin: cachedPin, month: cachedForcedMonth, isDigital: isDigital, payMethod: mappedPayMethod };
-
-            fetch(ACTIVE_EXPENSE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
-            .then(res => res.json()).then(result => {
-                if (result.status === "error") { setStatus('Error: ' + result.error, 'error'); document.getElementById('retryBtn').style.display = 'block'; } 
-                else { setStatus(`✓ Vault Saved<br>✓ Status: Não Conciliado <span style='color:#ef4444; font-weight:600;'>(Red)</span>`, 'success'); document.getElementById('newBtn').style.display = 'block'; fetchDashboardData(true); } 
-            }).catch(err => { setStatus('Transmission failed.', 'error'); document.getElementById('retryBtn').style.display = 'block'; });
-        }
-
-        function resetForm(){
-            setStatus('Awaiting Document...',''); document.getElementById('preview').style.display = 'none'; document.getElementById('preview').src = ''; document.querySelectorAll('input[type=file]').forEach(i => i.value='');
-            document.getElementById('uploadBtn').style.display = 'none'; document.getElementById('retryBtn').style.display = 'none'; document.getElementById('newBtn').style.display = 'none'; document.getElementById('inputContainer').style.display = 'block';
-            isDigital = false; document.getElementById('btn-digital').classList.remove('active'); document.getElementById('text-digital').innerText = 'Digital?';
-            isCash = false; document.getElementById('btn-cash').classList.remove('active'); document.getElementById('text-cash').innerText = 'In Cash?';
-        }
-
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Failed:', err)); }); }
     </script>
 </body>
 </html>
