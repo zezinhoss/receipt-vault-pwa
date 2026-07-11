@@ -47,7 +47,7 @@
         .pane-top { max-width:100%; display:flex; flex-direction:column; height:35vh; min-height:250px; justify-content:flex-start; position:relative; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
         .chart-container { transition: all 0.4s ease; opacity: 1; height: calc(100% - 40px); width: 100%; }
         
-        .sleek-icon-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 8px; padding: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+        .sleek-icon-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 8px; padding: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1px; font-family: 'Nunito'; text-decoration: none;}
         .sleek-icon-btn:hover { background: rgba(250,204,21,0.15); border-color: #facc15; color: #facc15; box-shadow: 0 0 10px rgba(250,204,21,0.2); }
         
         .bottom-grid { display:flex; gap:20px; width:100%; height:45vh; min-height:400px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -184,9 +184,8 @@
         .expanded-moloni .pane-left { border-color: rgba(255, 255, 255, 0.2); }
         .expanded-moloni .moloni-nav { display: flex; }
         
-        .maximized-moloni .pane-top { height: 75px !important; min-height: 75px !important; padding: 15px 20px !important; }
-        .maximized-moloni .chart-container { height: 0; opacity: 0; margin: 0; pointer-events: none; }
-        .maximized-moloni .bottom-grid { height: calc(90vh - 100px); min-height: 600px; }
+        .maximized-moloni .pane-top { height: 0 !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; border: none !important; opacity: 0; pointer-events: none; }
+        .maximized-moloni .bottom-grid { height: calc(100vh - 40px); min-height: 600px; }
 
         /* INVOICE FOCUS MODE */
         .invoice-focus-mode .pane-top, 
@@ -212,7 +211,7 @@
         .month-accordion-btn { width: 100%; text-align: left; background: rgba(255,255,255,0.05); color: #e2e8f0; font-size: 14px; font-weight: 700; padding: 12px 20px; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; font-family: 'Nunito'; }
         .month-accordion-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); }
         .month-accordion-btn.active { border-radius: 8px 8px 0 0; border-bottom: none; background: rgba(30,30,30,0.8); }
-        .month-table-container { display: none; padding: 15px; border: 1px solid rgba(255,255,255,0.05); border-top: none; background: rgba(0,0,0,0.2); border-radius: 0 0 8px 8px; margin-bottom: 15px; }
+        .month-table-container { display: none; padding: 15px; border: 1px solid rgba(255,255,255,0.05); border-top: none; background: rgba(0,0,0,0.2); border-radius: 0 0 8px 8px; margin-bottom: 15px; overflow-x: auto; }
 
         /* PDF MODAL */
         #pdf-preview-modal .modal-content { max-width: 900px; height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden;}
@@ -221,10 +220,8 @@
         .pdf-body { flex: 1; background: #2a2a2a; position: relative; display:flex; justify-content:center; align-items:center;}
         .pdf-iframe { width: 100%; height: 100%; border: none; }
 
-        .minimal-download-btn { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; text-decoration: none; transition: all 0.3s ease; font-family: 'Nunito', sans-serif; }
-        .minimal-download-btn:hover { background: rgba(250,204,21,0.1); border-color: rgba(250,204,21,0.3); color: #facc15; }
-        .minimal-download-btn svg { transition: transform 0.3s ease; }
-        .minimal-download-btn:hover svg { transform: translateY(2px); }
+        .minimal-download-btn { display: flex; align-items: center; gap: 8px; background: transparent; border: none; color: #cbd5e1; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; transition: color 0.2s ease; cursor: pointer; font-family: 'Nunito'; }
+        .minimal-download-btn:hover { color: #facc15; }
 
         /* SPLIT REVIEW MODAL */
         #expense-review-modal .modal-content { max-width: 1000px; height: 85vh; display: flex; flex-direction: row; padding: 0; overflow: hidden; background: #1a1a1a;}
@@ -237,6 +234,12 @@
         .r-label { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         .r-val { color: #e2e8f0; font-size: 14px; font-weight: 700; text-align: right; }
         .review-actions { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); background: #151515; display: flex; flex-direction: column; gap: 10px; }
+        
+        /* KPI BOXES FOR REPORTS */
+        .kpi-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .kpi-box { flex: 1; min-width: 120px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; text-align: right; }
+        .kpi-title { color: #94a3b8; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+        .kpi-value { color: #e2e8f0; font-size: 16px; font-weight: 800; }
 
         @media (max-width: 768px) {
             body { align-items: flex-start; padding: 15px; }
@@ -297,11 +300,12 @@
             <div class='glass-panel pane-left' id="moloni-pane">
                 <div class="moloni-header">
                     <h3>MOLONI BILLING</h3>
-                    <button class="moloni-expand-btn" id="m-toggle-btn" onclick="toggleMoloniMode()">Expand</button>
+                    <div style="display:flex; gap: 8px;" id="moloni-header-actions">
+                        <button class="moloni-expand-btn" id="m-toggle-btn" onclick="toggleMoloniMode()">Expand</button>
+                    </div>
                 </div>
 
                 <div class="moloni-nav" id="m-nav">
-                    <div class="m-nav-item" onclick="loadMoloniView('Dashboard')">Dashboard</div>
                     <div class="m-nav-item">Create ▾
                         <div class="m-dropdown">
                             <a onclick="loadMoloniView('Invoice')">Invoice</a>
@@ -316,10 +320,12 @@
                             <div class="m-dropdown-title">Sales</div>
                             <a onclick="loadMoloniView('Sales Report')">Sales Report</a>
                             <a onclick="loadMoloniView('Sales VAT')">VAT Reports</a>
-                            <a onclick="loadMoloniView('VAT Maps')">VATs Reconciliation Maps</a>
                             <div class="m-dropdown-title" style="border-top:1px solid rgba(255,255,255,0.1); margin-top:5px;">Purchases</div>
                             <a onclick="loadMoloniView('Purchase Report')">Purchase Report</a>
                             <a onclick="loadMoloniView('Purchase VAT')">VAT Reports</a>
+                            <div class="m-dropdown-title" style="border-top:1px solid rgba(255,255,255,0.1); margin-top:5px;">Reconciliation Maps</div>
+                            <a onclick="loadMoloniView('VAT Maps')">VATs</a>
+                            <a onclick="loadMoloniView('Invoice Recon')">Invoices</a>
                         </div>
                     </div>
                     <div class="m-nav-item">CRM ▾
@@ -515,10 +521,7 @@
             <div class="pdf-header">
                 <h3 id="pdf-modal-title" style="justify-content:flex-start;">Preview Document</h3>
                 <div style="display:flex; gap:15px; align-items:center;">
-                    <a id="pdf-download-btn" href="#" download class="minimal-download-btn">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Download
-                    </a>
+                    <a id="pdf-download-btn" href="#" download class="minimal-download-btn">DOWNLOAD</a>
                     <button class="modal-close" style="position:static;" onclick="closeModal('pdf-preview-modal')">×</button>
                 </div>
             </div>
@@ -537,10 +540,7 @@
             <div class="review-left">
                 <div class="review-header">
                     <h3 id="review-pdf-title" style="justify-content:flex-start;">Preview Document</h3>
-                    <a id="review-pdf-download" href="#" download class="minimal-download-btn">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Download
-                    </a>
+                    <a id="review-pdf-download" href="#" download class="minimal-download-btn">DOWNLOAD</a>
                 </div>
                 <iframe id="review-pdf-iframe" style="width:100%; height:100%; border:none; background:#2a2a2a;"></iframe>
             </div>
@@ -568,8 +568,11 @@
 
     <script>
         var dashChart;
-        var moloniState = 0; // 0: Retracted, 1: Expanded (Dash), 2: Maximized (Invoice Form)
+        var moloniState = 0; // 0: Retracted, 1: Expanded (Dash/Lists), 2: Maximized (Forms/Reports)
         var expensePieChartInstance = null;
+        var expenseAnalyticsChartInstance = null;
+        var reconciliationMode = false;
+        var expenseVatMode = false;
         
         // --- DEV SANDBOX MOCK DATA --- //
         var nextInvoiceNumber = "2026/46";
@@ -620,6 +623,9 @@
             var appView = document.getElementById('app-view');
             var btn = document.getElementById('m-toggle-btn');
             
+            // Manage UI Header Buttons dynamically
+            updateHeaderButtons(state);
+            
             if (state === 0) {
                 appView.classList.remove('expanded-moloni', 'maximized-moloni');
                 btn.innerText = "Expand";
@@ -633,6 +639,41 @@
                 appView.classList.add('expanded-moloni', 'maximized-moloni');
                 btn.innerText = "Collapse"; 
             }
+        }
+        
+        function updateHeaderButtons(state) {
+            var headerActions = document.getElementById('moloni-header-actions');
+            if(!headerActions) return;
+            var btn = document.getElementById('m-toggle-btn');
+            var isListMode = state === 1 && document.getElementById('invoice-search-input') !== null;
+            
+            headerActions.innerHTML = '';
+            
+            if(isListMode) {
+                headerActions.innerHTML = `
+                    <button class="moloni-expand-btn" style="background:transparent; border-color:rgba(255,255,255,0.1); color:#94a3b8;" title="Export CSV">CSV</button>
+                    <button class="moloni-expand-btn" style="background:transparent; border-color:rgba(255,255,255,0.1); color:#94a3b8;" title="Export PDF">PDF</button>
+                `;
+            }
+            
+            // Add Stats button dynamically if we are in expanded mode
+            if (state > 0) {
+                var statsBtn = document.createElement('button');
+                statsBtn.className = 'moloni-expand-btn';
+                statsBtn.style.background = 'transparent';
+                statsBtn.style.borderColor = 'rgba(250,204,21,0.3)';
+                statsBtn.style.color = '#facc15';
+                statsBtn.style.display = 'flex';
+                statsBtn.style.alignItems = 'center';
+                statsBtn.style.justifyContent = 'center';
+                statsBtn.style.padding = '6px 10px';
+                statsBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>';
+                statsBtn.title = "View Dashboard Stats";
+                statsBtn.onclick = function() { loadMoloniView('Dashboard'); };
+                headerActions.appendChild(statsBtn); // Add Stats
+            }
+            
+            headerActions.appendChild(btn); // Ensure Expand/Collapse is on the far right
         }
 
         function initPlaceholderGraph() {
@@ -682,14 +723,19 @@
         }
 
         function loadMoloniView(viewName, isInternalCall = false) {
-            if (!isInternalCall && viewName !== 'Dashboard') {
-                setMoloniState(2, true); 
-            } else if (!isInternalCall && viewName === 'Dashboard') {
-                setMoloniState(1, true);
+            // Determine required state
+            var isFocusMode = viewName.startsWith('Create ') || viewName === 'Expense' || viewName.includes('Report') || viewName.includes('VAT') || viewName === 'Invoice Recon';
+            
+            if (!isInternalCall) {
+                if (viewName === 'Dashboard') {
+                    setMoloniState(1, true); // Dashboard stays State 1 (Chart + Dashboard UI)
+                } else {
+                    setMoloniState(2, true); // Everything else goes to State 2 (Maximized Moloni pane)
+                }
             }
             
             var appView = document.getElementById('app-view');
-            if (viewName.startsWith('Create ') || viewName === 'Expense') {
+            if (isFocusMode) {
                 appView.classList.add('invoice-focus-mode');
             } else {
                 appView.classList.remove('invoice-focus-mode');
@@ -723,6 +769,7 @@
                 `;
                 renderExpandedInvoiceList();
                 renderPieChart();
+                updateHeaderButtons(1); // Ensure dashboard has correct header
             } 
             else if (viewName === 'Invoice' || viewName === 'Estimate' || viewName === 'Pro Forma' || viewName === 'Receipts') {
                 var titleMap = {'Invoice': 'Invoices', 'Estimate': 'Estimates', 'Pro Forma': 'Pro Forma Invoices', 'Receipts': 'Receipts'};
@@ -766,6 +813,7 @@
                     </div>
                 `;
                 renderFilteredInvoiceTable(window.globalInvoices);
+                updateHeaderButtons(1); // Force header update to show export icons
             } 
             else if (viewName === 'Create Invoice' || viewName === 'Create Estimate' || viewName === 'Create Pro Forma') {
                 var today = new Date().toISOString().split('T')[0];
@@ -1014,31 +1062,41 @@
             else if (viewName === 'Expense') {
                 ws.innerHTML = `
                     <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box; display:flex; flex-direction:column; align-items:center;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px; margin-bottom: 25px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
                             <div>
                                 <h2 style="color:#facc15; font-weight:800; margin-top:0; margin-bottom: 5px; font-size: 24px; text-transform:uppercase; letter-spacing: 1px;">Command Center</h2>
-                                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">AI OCR Auto-Draft Pipeline (Gemini → Apps Script → Moloni)</p>
+                                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">AI OCR Auto-Draft Pipeline</p>
                             </div>
-                            <div style="display:flex; gap:15px; align-items:center;">
-                                <div style="text-align:right; background:rgba(0,0,0,0.3); padding:10px 20px; border-radius:8px; border:1px solid rgba(34, 197, 94, 0.2);">
-                                    <span style="color:#94a3b8; font-size:11px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Reconciled YTD</span><br>
-                                    <span style="color:#22c55e; font-size:18px; font-weight:800;">€ 14,250.00</span>
+                            <div style="display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
+                                <div style="display:flex; align-items:center; gap: 10px; background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(250,204,21,0.2); margin-right: 10px;">
+                                    <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:#94a3b8;">VAT Mode</span>
+                                    <div class="toggle-btn" id="expense-vat-toggle" style="padding: 6px 12px; margin:0;" onclick="toggleExpenseVatMode()">
+                                        <span class="t-text" id="expense-vat-toggle-text">OFF</span>
+                                    </div>
                                 </div>
-                                <div style="text-align:right; background:rgba(0,0,0,0.3); padding:10px 20px; border-radius:8px; border:1px solid rgba(239, 68, 68, 0.2);">
-                                    <span style="color:#94a3b8; font-size:11px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Lost / Unclaimed</span><br>
-                                    <span style="color:#ef4444; font-size:18px; font-weight:800;">€ 840.50</span>
+                                <div id="expense-kpis" style="display:flex; gap:10px;">
+                                    <div style="text-align:right; background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:8px; border:1px solid rgba(34, 197, 94, 0.2);">
+                                        <span style="color:#94a3b8; font-size:10px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Reconciled</span><br>
+                                        <span style="color:#22c55e; font-size:15px; font-weight:800;">€ 14,250.00</span>
+                                    </div>
+                                    <div style="text-align:right; background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:8px; border:1px solid rgba(239, 68, 68, 0.2);">
+                                        <span style="color:#94a3b8; font-size:10px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Lost</span><br>
+                                        <span style="color:#ef4444; font-size:15px; font-weight:800;">€ 840.50</span>
+                                    </div>
                                 </div>
-                                <select class="f-input" id="expense-time-filter" style="width: auto; padding: 12px; margin-left: 10px;" onchange="renderExpenseTable(this.value)">
-                                    <option value="este_ano">This Year</option>
-                                    <option value="este_trimestre">This Quarter</option>
-                                    <option value="trimestre_anterior">Previous Quarter</option>
-                                    <option value="ano_anterior">Previous Year</option>
-                                </select>
-                                <button class="btn-yellow-outline" style="padding: 12px 20px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #ef4444;" onclick="loadMoloniView('Dashboard')">✖ Close</button>
+                                <button class="f-btn-cancel" style="padding: 8px 20px;" onclick="loadMoloniView('Dashboard')">← Back</button>
                             </div>
                         </div>
 
-                        <div style="width:100%; height:300px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:20px; box-sizing:border-box; margin-bottom:30px;">
+                        <div id="expense-chart-container" style="width:100%; height:300px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:20px; padding-top:40px; box-sizing:border-box; margin-bottom:30px; position:relative; transition: all 0.4s ease;">
+                            <select class="f-input" id="expense-time-filter" style="width: auto; padding: 6px 10px; font-size: 11px; background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.1); position:absolute; top: 15px; right: 20px; z-index: 10;" onchange="renderExpenseTable(this.value)">
+                                <option value="este_mes">This Month</option>
+                                <option value="mes_anterior">Last Month</option>
+                                <option value="este_trimestre">This Quarter</option>
+                                <option value="trimestre_anterior">Previous Quarter</option>
+                                <option value="este_ano" selected>This Year</option>
+                                <option value="ano_anterior">Previous Year</option>
+                            </select>
                             <canvas id="expenseAnalyticsChart"></canvas>
                         </div>
                         
@@ -1052,9 +1110,376 @@
                     renderExpenseTable('este_ano'); // Initial load
                 }, 50);
             }
+            else if (viewName === 'Invoice Recon') {
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                            <div>
+                                <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">Invoice Reconciliation</h2>
+                                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Monitor AI OCR automation and Drive PDF sync status</p>
+                            </div>
+                            <button class="f-btn-cancel" onclick="loadMoloniView('Dashboard')" style="padding: 10px 20px;">← Back</button>
+                        </div>
+                        
+                        <div class="f-section" style="background: rgba(248, 250, 252, 0.02);">
+                            <div style="display:flex; justify-content: space-between; align-items: center; padding-bottom: 10px;">
+                                <span style="color:#3b82f6; font-size: 14px;">Sync Status Filter</span>
+                                <select class="f-input" style="width:200px; padding: 6px;">
+                                    <option>All Documents</option>
+                                    <option selected>Missing PDF Only</option>
+                                    <option>Sync Failed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="moloni-table-container">
+                            <table class="moloni-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th><th>Source File</th><th>Extracted Supplier</th>
+                                        <th class="text-center">Row Created</th><th class="text-center">PDF Attached</th><th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="background: rgba(239, 68, 68, 0.05); border-left: 3px solid #ef4444; transition: background 0.3s ease;">
+                                        <td>2026-07-11</td>
+                                        <td style="color:#cbd5e1;">aws_hosting_july.pdf</td>
+                                        <td>Amazon Web Services</td>
+                                        <td class="text-center"><span style="color:#22c55e; font-weight:800;">✓ Yes</span></td>
+                                        <td class="text-center" id="pdf-status-1"><span style="color:#ef4444; font-weight:800;">⚠️ Missing</span></td>
+                                        <td class="text-center" id="action-cell-1">
+                                            <button class="btn-yellow-outline" style="padding:4px 10px; font-size:11px; border-color:#ef4444; color:#ef4444;" onclick="forceSyncPDF(this, 'pdf-status-1', 'action-cell-1')">Force Sync PDF</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2026-07-10</td>
+                                        <td style="color:#cbd5e1;">receipt_wework_0711.pdf</td>
+                                        <td>WeWork Lisbon</td>
+                                        <td class="text-center"><span style="color:#22c55e; font-weight:800;">✓ Yes</span></td>
+                                        <td class="text-center"><span style="color:#22c55e; font-weight:800;">✓ Yes</span></td>
+                                        <td class="text-center"><span style="color:#888; font-size:11px;">Synced</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (viewName === 'Sales Report' || viewName === 'Purchase Report') {
+                var isSales = viewName === 'Sales Report';
+                var title = isSales ? 'Sales Extract' : 'Purchase Report';
+                var subtitle = isSales ? 'In this section you can list, filter and export an extract of your sales' : 'In this section you can list, filter and export an extract of your purchases';
+                
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                            <div>
+                                <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">${title}</h2>
+                                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">${subtitle}</p>
+                            </div>
+                            <button class="f-btn-cancel" onclick="loadMoloniView('Dashboard')" style="padding: 10px 20px;">← Back</button>
+                        </div>
+                        
+                        <div class="f-section" style="background: rgba(248, 250, 252, 0.02);">
+                            <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px;">
+                                <span style="color:#3b82f6; font-size: 14px;">Filter</span>
+                                <div style="display:flex; align-items:center; gap: 10px; font-size: 12px; color: #e2e8f0;">
+                                    Date range <span class="f-help" style="background:#22c55e;">?</span>
+                                    Start <input type="date" class="f-input" style="width:130px; padding: 6px;">
+                                    End <input type="date" class="f-input" style="width:130px; padding: 6px;">
+                                    Or
+                                    <select class="f-input" style="width:150px; padding: 6px;">
+                                        <option>Previous Quarter</option>
+                                        <option>This Quarter</option>
+                                        <option>This Month</option>
+                                        <option>Last Month</option>
+                                        <option>This Year</option>
+                                        <option>Previous Year</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="color: #cbd5e1; font-size: 13px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">Target by <strong>${isSales ? 'Clients' : 'Suppliers'}</strong></div>
+                            ${isSales ? `<div style="color: #cbd5e1; font-size: 13px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">Target by <strong>Payment Methods</strong></div>` : ''}
+                            <div style="color: #cbd5e1; font-size: 13px; padding: 8px 0;">Target by <strong>Documents and Series</strong></div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
+                            <span style="font-size:12px; color:#888;">Record(s) 1 to 16 of a total of 16 <span style="background:#3b82f6; color:#fff; padding:2px 8px; border-radius:4px; margin-left:5px;">1</span></span>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-yellow-outline" style="width:auto; padding: 10px 20px;">CSV</button>
+                                <button class="btn-yellow-outline" style="width:auto; padding: 10px 20px;">XLSX</button>
+                                <button class="btn-primary btn" style="width:auto; padding: 10px 20px; margin-bottom:0;">Filter Documents</button>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-container">
+                            <div class="kpi-box"><span class="kpi-title">Total Liq.</span><span class="kpi-value">12,450.00 €</span></div>
+                            <div class="kpi-box"><span class="kpi-title">Impostos</span><span class="kpi-value">2,863.50 €</span></div>
+                            <div class="kpi-box"><span class="kpi-title" style="color:#facc15;">Total</span><span class="kpi-value" style="color:#facc15;">15,313.50 €</span></div>
+                        </div>
+
+                        <div class="moloni-table-container">
+                            <table class="moloni-table">
+                                <thead>
+                                    <tr>
+                                        <th>Doc Type</th><th>Doc No.</th><th>Issue Date</th><th>${isSales ? 'Client Data' : 'Supplier Data'}</th>
+                                        <th class="text-right">Net Total</th><th class="text-right">Taxes</th><th class="text-right">Total</th><th class="text-right">Accumulated</th><th class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>FT</td><td>2026/45</td><td>2026-07-08</td><td>Global Media SA</td>
+                                        <td class="text-right">800.00 €</td><td class="text-right">184.00 €</td><td class="text-right" style="font-weight:700;">984.00 €</td><td class="text-right">984.00 €</td>
+                                        <td class="text-center"><a class="action-link" style="color:#3b82f6;">Open</a> | <a class="action-link" style="color:#3b82f6;">Download</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>RCPT</td><td>2026/1</td><td>2026-07-10</td><td>Tech Innovation LDA</td>
+                                        <td class="text-right">1500.00 €</td><td class="text-right">345.00 €</td><td class="text-right" style="font-weight:700;">1845.00 €</td><td class="text-right">2829.00 €</td>
+                                        <td class="text-center"><a class="action-link" style="color:#3b82f6;">Open</a> | <a class="action-link" style="color:#3b82f6;">Download</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (viewName === 'Sales VAT' || viewName === 'Purchase VAT') {
+                var isSales = viewName === 'Sales VAT';
+                var title = isSales ? 'VAT Maps - Sales' : 'VAT Reports - Purchases';
+                var subtitle = isSales ? 'In this section you can list, filter and export a map of VAT rates of your sales' : 'In this section you can list, filter and export a map of VAT on your purchases';
+                
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
+                        <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">${title}</h2>
+                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 20px;">${subtitle}</p>
+                        
+                        <div class="f-section" style="background: rgba(248, 250, 252, 0.02);">
+                            <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px;">
+                                <span style="color:#3b82f6; font-size: 14px;">Filter</span>
+                                <div style="display:flex; align-items:center; gap: 10px;">
+                                    <button class="f-btn-cancel" onclick="loadMoloniView('Dashboard')" style="padding: 8px 20px;">← Back</button>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:flex-end; align-items:center; gap: 10px; font-size: 12px; color: #e2e8f0; margin-bottom:15px;">
+                                Date range <span class="f-help" style="background:#22c55e;">?</span>
+                                Start <input type="date" class="f-input" style="width:130px; padding: 6px;">
+                                End <input type="date" class="f-input" style="width:130px; padding: 6px;">
+                                Or
+                                <select class="f-input" style="width:150px; padding: 6px;">
+                                    <option>Last Month</option>
+                                    <option>This Quarter</option>
+                                    <option>This Year</option>
+                                </select>
+                            </div>
+                            <div style="color: #cbd5e1; font-size: 13px; padding: 8px 0;">Target by <strong>Documents and Series</strong></div>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; gap: 10px; margin-bottom: 20px;">
+                            <button class="f-btn-cancel" style="padding: 8px 20px; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">Filter</button>
+                            <div style="position:relative;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
+                                <button class="btn-primary btn" style="width:auto; padding: 8px 20px; margin-bottom:0;">Export ▾</button>
+                                <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:120px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; margin-top:5px;">
+                                    <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">Export CSV</a>
+                                    <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">Export XLSX</a>
+                                    <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer;">Export PDF</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="moloni-table-container">
+                            <table class="moloni-table">
+                                <thead>
+                                    <tr>
+                                        <th>Designation</th><th class="text-right">Value</th><th class="text-center">Fiscal Zone</th><th class="text-right">Incidence</th><th class="text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>IVA Normal</td><td class="text-right">23%</td><td class="text-center">PT</td><td class="text-right">59,575.00 €</td><td class="text-right">13,702.25 €</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Isento Artigo 14.º do CIVA</td><td class="text-right">0%</td><td class="text-center">---</td><td class="text-right">22,320.00 €</td><td class="text-right">0.00 €</td>
+                                    </tr>
+                                    <tr style="border-top: 2px solid rgba(255,255,255,0.1);">
+                                        <td colspan="3"></td>
+                                        <td class="text-right" style="font-weight:800; font-size:15px;">81,895.00 €</td>
+                                        <td class="text-right" style="font-weight:800; font-size:15px;">13,702.25 €</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (viewName === 'VAT Maps') {
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box; transition: background 0.5s ease;" id="reconciliation-container">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                            <div>
+                                <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">VAT Encounter Map (Reconciliation)</h2>
+                                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">List, filter and export a map of encountering VAT values (Sales and Purchases)</p>
+                            </div>
+                            <div style="display:flex; align-items:center; gap: 10px; background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(250,204,21,0.2);">
+                                <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:#94a3b8;">Reconciliation Mode</span>
+                                <div class="toggle-btn" style="padding: 6px 12px; margin:0;" onclick="toggleReconciliation(this)">
+                                    <span class="t-text">OFF</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="f-section" style="background: rgba(248, 250, 252, 0.02);">
+                            <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px;">
+                                <span style="color:#3b82f6; font-size: 14px;">Filter</span>
+                                <div style="display:flex; align-items:center; gap: 10px;">
+                                    <button class="f-btn-cancel" onclick="loadMoloniView('Dashboard')" style="padding: 8px 20px;">← Back</button>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:flex-end; align-items:center; gap: 10px; font-size: 12px; color: #e2e8f0; margin-bottom:15px;">
+                                Date range
+                                Start <input type="date" class="f-input" style="width:130px; padding: 6px;">
+                                End <input type="date" class="f-input" style="width:130px; padding: 6px;">
+                                Or
+                                <select class="f-input" style="width:150px; padding: 6px;">
+                                    <option>Previous Quarter</option>
+                                </select>
+                            </div>
+                            <div style="color: #cbd5e1; font-size: 13px; padding: 8px 0;">Target by <strong>Documents and Series</strong></div>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; gap: 10px; margin-bottom: 20px;">
+                            <button class="f-btn-cancel" style="padding: 8px 20px; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">Filter</button>
+                            <div style="position:relative;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
+                                <button class="btn-primary btn" style="width:auto; padding: 8px 20px; margin-bottom:0;">Export ▾</button>
+                                <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:120px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; margin-top:5px;">
+                                    <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">Export CSV</a>
+                                    <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">Export XLSX</a>
+                                    <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer;">Export PDF</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="recon-kpis" style="display:none; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <div class="kpi-box" style="border-color:rgba(59, 130, 246, 0.3);"><span class="kpi-title">VAT Collected (Sales)</span><span class="kpi-value" style="color:#3b82f6;">13,702.25 €</span></div>
+                            <div class="kpi-box" style="border-color:rgba(34, 197, 94, 0.3);"><span class="kpi-title">VAT Deductible (Purchases)</span><span class="kpi-value" style="color:#22c55e;">4,150.00 €</span></div>
+                            <div class="kpi-box" style="border-color:rgba(239, 68, 68, 0.3);"><span class="kpi-title">Lost VAT (Missing Invoices)</span><span class="kpi-value" style="color:#ef4444;">193.31 €</span></div>
+                            <div class="kpi-box" style="background: rgba(250,204,21,0.1); border-color:#facc15;"><span class="kpi-title" style="color:#facc15;">Estimated VAT to Pay</span><span class="kpi-value" style="color:#facc15; font-size:20px;">9,552.25 €</span></div>
+                        </div>
+
+                        <div class="moloni-table-container">
+                            <table class="moloni-table">
+                                <thead>
+                                    <tr>
+                                        <th>Designation</th><th class="text-right">Value</th><th class="text-center">Fiscal Zone</th><th class="text-right">Total</th><th class="text-right">Accumulated</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="background: rgba(255,255,255,0.02);"><td colspan="5" style="font-weight:700; color:#f8fafc; padding:8px 10px;">Sales</td></tr>
+                                    <tr>
+                                        <td>IVA Normal</td><td class="text-right">23%</td><td class="text-center">PT</td><td class="text-right">13,702.25 €</td><td class="text-right">13,702.25 €</td>
+                                    </tr>
+                                    <tr style="background: rgba(255,255,255,0.02);"><td colspan="5" style="font-weight:700; color:#f8fafc; padding:8px 10px; border-top:1px solid rgba(255,255,255,0.1);">Purchases</td></tr>
+                                    <tr>
+                                        <td>IVA Normal</td><td class="text-right">23%</td><td class="text-center">PT</td><td class="text-right">4,150.00 €</td><td class="text-right">4,150.00 €</td>
+                                    </tr>
+                                    <tr style="border-top: 2px solid rgba(255,255,255,0.1);">
+                                        <td colspan="3"></td>
+                                        <td class="text-right" style="font-weight:700; color:#94a3b8;">Difference:</td>
+                                        <td class="text-right" style="font-weight:800; font-size:16px; color:#facc15;">9,552.25 €</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
             else {
                 ws.innerHTML = `<div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;"><h2 style="color:#f8fafc; font-weight:400; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-top:0;">${viewName}</h2><div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); padding: 40px; text-align: center; border-radius: 8px; color: #888;"><span style="font-size: 24px;">🚧</span><br><br>Interface for <b>${viewName}</b> ready.<br>Awaiting data binding from Invoice Node.</div></div>`;
             }
+        }
+        
+        function forceSyncPDF(btn, statusId, actionId) {
+            // Visual loading state
+            btn.innerText = "Syncing...";
+            btn.style.color = "#facc15";
+            btn.style.borderColor = "#facc15";
+            
+            // Simulate the Apps Script taking 1.5 seconds to retry the PDF upload
+            setTimeout(() => {
+                // Update the missing tag to a green checkmark
+                document.getElementById(statusId).innerHTML = '<span style="color:#22c55e; font-weight:800;">✓ Yes</span>';
+                
+                // Replace the button with "Resolved" text
+                document.getElementById(actionId).innerHTML = '<span style="color:#888; font-size:11px;">Resolved</span>';
+                
+                // Find nearest table row and remove the red alert background
+                btn.closest('tr').style.background = 'transparent';
+                btn.closest('tr').style.borderLeft = 'none';
+                
+                // Fire off the confirmation pop-up
+                simulateSave('PDF successfully synced from Drive to Moloni!', 'Invoice Recon');
+            }, 1500);
+        }
+        
+        function toggleReconciliation(btn) {
+            reconciliationMode = !reconciliationMode;
+            var container = document.getElementById('reconciliation-container');
+            var kpis = document.getElementById('recon-kpis');
+            var text = btn.querySelector('.t-text');
+            
+            if(reconciliationMode) {
+                btn.classList.add('active');
+                text.innerText = "ON";
+                container.style.background = "radial-gradient(circle at top, rgba(250,204,21,0.05) 0%, transparent 70%)";
+                kpis.style.display = "flex";
+            } else {
+                btn.classList.remove('active');
+                text.innerText = "OFF";
+                container.style.background = "transparent";
+                kpis.style.display = "none";
+            }
+        }
+
+        function toggleExpenseVatMode() {
+            expenseVatMode = !expenseVatMode;
+            var btn = document.getElementById('expense-vat-toggle');
+            var text = document.getElementById('expense-vat-toggle-text');
+            var kpis = document.getElementById('expense-kpis');
+            var chartContainer = document.getElementById('expense-chart-container');
+            
+            if (expenseVatMode) {
+                btn.classList.add('active');
+                text.innerText = "ON";
+                chartContainer.style.background = "radial-gradient(circle at top, rgba(250,204,21,0.05) 0%, rgba(0,0,0,0.2) 70%)";
+                chartContainer.style.borderColor = "rgba(250,204,21,0.3)";
+                
+                kpis.innerHTML = `
+                    <div style="text-align:right; background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:8px; border:1px solid rgba(250, 204, 21, 0.2);">
+                        <span style="color:#94a3b8; font-size:10px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">VAT Recovered</span><br>
+                        <span style="color:#facc15; font-size:15px; font-weight:800;">€ 3,250.00</span>
+                    </div>
+                    <div style="text-align:right; background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:8px; border:1px solid rgba(239, 68, 68, 0.2);">
+                        <span style="color:#94a3b8; font-size:10px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Pending VAT (No Doc)</span><br>
+                        <span style="color:#ef4444; font-size:15px; font-weight:800;">€ 193.31</span>
+                    </div>
+                `;
+            } else {
+                btn.classList.remove('active');
+                text.innerText = "OFF";
+                chartContainer.style.background = "rgba(0,0,0,0.2)";
+                chartContainer.style.borderColor = "rgba(255,255,255,0.05)";
+                
+                kpis.innerHTML = `
+                    <div style="text-align:right; background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:8px; border:1px solid rgba(34, 197, 94, 0.2);">
+                        <span style="color:#94a3b8; font-size:10px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Reconciled</span><br>
+                        <span style="color:#22c55e; font-size:15px; font-weight:800;">€ 14,250.00</span>
+                    </div>
+                    <div style="text-align:right; background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:8px; border:1px solid rgba(239, 68, 68, 0.2);">
+                        <span style="color:#94a3b8; font-size:10px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Lost</span><br>
+                        <span style="color:#ef4444; font-size:15px; font-weight:800;">€ 840.50</span>
+                    </div>
+                `;
+            }
+            renderExpenseAnalyticsChart();
         }
 
         // --- BRAIN: AUTO-SUGGEST & MODALS ---
@@ -1295,7 +1720,7 @@
                             <td class="text-right">46.00 €</td>
                             <td class="text-right" style="font-weight:700; color:#fff;">246.00 €</td>
                             <td class="text-center">
-                                <button class="btn-yellow-outline" style="padding:4px 10px; font-size:11px;" onclick="confirmFinalizeExpense('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'receipt_wework_0711.pdf', 'WeWork Lisbon', 'FT-2026/8991', '2026-07-10', '200.00', '46.00', '246.00')">Review & Finalize</button>
+                                <button class="btn-yellow-outline" style="padding:4px 10px; font-size:11px; white-space:nowrap;" onclick="confirmFinalizeExpense('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'receipt_wework_0711.pdf', 'WeWork Lisbon', 'FT-2026/8991', '2026-07-10', '200.00', '46.00', '246.00')">Review & Finalize</button>
                             </td>
                         </tr>
                         <tr class="draft-row">
@@ -1307,7 +1732,7 @@
                             <td class="text-right">1.20 €</td>
                             <td class="text-right" style="font-weight:700; color:#fff;">18.50 €</td>
                             <td class="text-center">
-                                <button class="btn-yellow-outline" style="padding:4px 10px; font-size:11px;" onclick="confirmFinalizeExpense('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'uber_invoice_july.pdf', 'Uber B.V.', 'UB-88123', '2026-07-09', '17.30', '1.20', '18.50')">Review & Finalize</button>
+                                <button class="btn-yellow-outline" style="padding:4px 10px; font-size:11px; white-space:nowrap;" onclick="confirmFinalizeExpense('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'uber_invoice_july.pdf', 'Uber B.V.', 'UB-88123', '2026-07-09', '17.30', '1.20', '18.50')">Review & Finalize</button>
                             </td>
                         </tr>
                     </tbody>
@@ -1315,33 +1740,48 @@
             `;
 
             if (timeFilter === 'este_ano' || timeFilter === 'ano_anterior') {
+                var year = timeFilter === 'este_ano' ? '2026' : '2025';
                 container.innerHTML = `
-                    <h3 style="color:#e2e8f0; font-size:14px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">Awaiting Approval (Full Year)</h3>
-                    <div class="moloni-table-container">${tableHTML}</div>
+                    <h3 style="color:#e2e8f0; font-size:14px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">Awaiting Approval (${year})</h3>
+                    <button class="month-accordion-btn active" onclick="toggleExpenseAccordion(this)">Q3 - July ${year} <span class="arrow">▲</span></button>
+                    <div class="month-table-container" style="display:block;">${tableHTML}</div>
+                    
+                    <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">Q2 - June ${year} <span class="arrow">▼</span></button>
+                    <div class="month-table-container">${tableHTML.replace(/07/g, '06').replace(/July/g, 'June')}</div>
+                    
+                    <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">Q2 - May ${year} <span class="arrow">▼</span></button>
+                    <div class="month-table-container"><p style="color:#888; text-align:center; padding:10px;">All expenses reconciled for this month.</p></div>
                 `;
             } else if (timeFilter === 'este_trimestre') {
                 container.innerHTML = `
                     <h3 style="color:#e2e8f0; font-size:14px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">Awaiting Approval (Q3 2026)</h3>
                     <button class="month-accordion-btn active" onclick="toggleExpenseAccordion(this)">July 2026 <span class="arrow">▲</span></button>
-                    <div class="month-table-container" style="display:block; overflow-x:auto;">${tableHTML}</div>
+                    <div class="month-table-container" style="display:block;">${tableHTML}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">August 2026 <span class="arrow">▼</span></button>
-                    <div class="month-table-container" style="overflow-x:auto;">${tableHTML.replace(/07/g, '08').replace(/July/g, 'August')}</div>
+                    <div class="month-table-container">${tableHTML.replace(/07/g, '08').replace(/July/g, 'August')}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">September 2026 <span class="arrow">▼</span></button>
-                    <div class="month-table-container" style="overflow-x:auto;"><p style="color:#888; text-align:center; padding:10px;">No expenses logged for this month yet.</p></div>
+                    <div class="month-table-container"><p style="color:#888; text-align:center; padding:10px;">No expenses logged for this month yet.</p></div>
                 `;
             } else if (timeFilter === 'trimestre_anterior') {
                 container.innerHTML = `
                     <h3 style="color:#e2e8f0; font-size:14px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">Awaiting Approval (Q2 2026)</h3>
                     <button class="month-accordion-btn active" onclick="toggleExpenseAccordion(this)">April 2026 <span class="arrow">▲</span></button>
-                    <div class="month-table-container" style="display:block; overflow-x:auto;">${tableHTML.replace(/07/g, '04').replace(/July/g, 'April')}</div>
+                    <div class="month-table-container" style="display:block;">${tableHTML.replace(/07/g, '04').replace(/July/g, 'April')}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">May 2026 <span class="arrow">▼</span></button>
-                    <div class="month-table-container" style="overflow-x:auto;">${tableHTML.replace(/07/g, '05').replace(/July/g, 'May')}</div>
+                    <div class="month-table-container">${tableHTML.replace(/07/g, '05').replace(/July/g, 'May')}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">June 2026 <span class="arrow">▼</span></button>
-                    <div class="month-table-container" style="overflow-x:auto;">${tableHTML.replace(/07/g, '06').replace(/July/g, 'June')}</div>
+                    <div class="month-table-container">${tableHTML.replace(/07/g, '06').replace(/July/g, 'June')}</div>
+                `;
+            } else if (timeFilter === 'este_mes' || timeFilter === 'mes_anterior') {
+                var monthLabel = timeFilter === 'este_mes' ? 'July 2026' : 'June 2026';
+                var replaceMonth = timeFilter === 'este_mes' ? '07' : '06';
+                container.innerHTML = `
+                    <h3 style="color:#e2e8f0; font-size:14px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">Awaiting Approval (${monthLabel})</h3>
+                    <div class="moloni-table-container" style="padding-bottom:20px;">${tableHTML.replace(/07/g, replaceMonth)}</div>
                 `;
             }
         }
@@ -1379,30 +1819,62 @@
         function renderExpenseAnalyticsChart() {
             var ctx = document.getElementById('expenseAnalyticsChart');
             if(!ctx) return;
-            new Chart(ctx.getContext('2d'), {
+            
+            if(expenseAnalyticsChartInstance) {
+                expenseAnalyticsChartInstance.destroy();
+            }
+
+            var datasetsConfig = [];
+            
+            if (expenseVatMode) {
+                datasetsConfig = [
+                    {
+                        type: 'line',
+                        label: 'Pending VAT (No Doc) (€)',
+                        data: [10, 25, 0, 80, 5, 0, 46, 0, 0, 0, 0, 0],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Total Expense VAT (€)',
+                        data: [276, 345, 207, 506, 414, 483, 253, 0, 0, 0, 0, 0],
+                        backgroundColor: '#facc15',
+                        borderRadius: 4,
+                        yAxisID: 'y'
+                    }
+                ];
+            } else {
+                datasetsConfig = [
+                    {
+                        type: 'line',
+                        label: 'Lost / Unclaimed Money (€)',
+                        data: [50, 120, 0, 400, 20, 0, 250, 0, 0, 0, 0, 0],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Reconciled Expenses (€)',
+                        data: [1200, 1500, 900, 2200, 1800, 2100, 1100, 0, 0, 0, 0, 0],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4,
+                        yAxisID: 'y'
+                    }
+                ];
+            }
+
+            expenseAnalyticsChartInstance = new Chart(ctx.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: 'Lost / Unclaimed Money (€)',
-                            data: [50, 120, 0, 400, 20, 0, 250, 0, 0, 0, 0, 0],
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            yAxisID: 'y1'
-                        },
-                        {
-                            type: 'bar',
-                            label: 'Reconciled Expenses (€)',
-                            data: [1200, 1500, 900, 2200, 1800, 2100, 1100, 0, 0, 0, 0, 0],
-                            backgroundColor: '#3b82f6',
-                            borderRadius: 4,
-                            yAxisID: 'y'
-                        }
-                    ]
+                    datasets: datasetsConfig
                 },
                 options: {
                     responsive: true,
