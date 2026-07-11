@@ -8,11 +8,12 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#facc15">
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Swapped to Nunito for a clean, rounded, highly legible data font -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body { font-family:'Inter',sans-serif; background:#0a0a0a; background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%); color:#fff; padding:20px; display:flex; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; }
+        body { font-family:'Nunito', sans-serif; background:#0a0a0a; background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%); color:#fff; padding:20px; display:flex; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; }
         
         .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(250,204,21,0.15); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; transition: all 0.4s ease; }
         
@@ -22,7 +23,7 @@
         p { color:#888; font-size:13px; font-weight:300; margin-bottom:25px; }
         
         .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
-        .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color:#facc15; font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; }
+        .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color:#facc15; font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; font-family:'Nunito', sans-serif; }
         .pin-box:focus { border-color:#facc15; box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
         
         #app-view { width:100%; max-width:1200px; flex-direction:column; gap:20px; display:none; }
@@ -31,15 +32,15 @@
         .pane-left, .pane-right { max-width:100%; flex:1; display:flex; flex-direction:column; justify-content: flex-start; position: relative; overflow: hidden; }
         
         .input-group { display:flex; gap:10px; margin-bottom:20px; }
-        select { flex:1; appearance:none; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:10px; color:#ddd; padding:14px 12px; font-size:13px; outline:none; transition:border 0.3s ease; text-align:center; }
+        select { flex:1; appearance:none; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:10px; color:#ddd; padding:14px 12px; font-size:13px; outline:none; transition:border 0.3s ease; text-align:center; font-family:'Nunito', sans-serif;}
         select:focus { border-color:#facc15; color:#fff; }
         
         .toggle-btn { flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px 10px; color:#888; font-size:14px; text-align:center; cursor:pointer; transition:all 0.3s; box-sizing:border-box; user-select:none; }
         .toggle-btn.active { border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2); }
         .toggle-btn.active t-text { color:#facc15; font-weight:600; text-shadow:0 0 5px rgba(250,204,21,0.4); }
         
-        .btn { display:block; width:100%; background:transparent; color:#ddd; padding:16px; border-radius:12px; font-size:13px; font-weight:400; letter-spacing:1px; cursor:pointer; border:1px solid rgba(255, 255, 255, 0.1); transition:all 0.3s ease; margin-bottom:12px; box-sizing:border-box; text-transform:uppercase; }
-        .btn-primary { background:rgba(250, 204, 21, 0.9); color:#000; border:none; font-weight:600; }
+        .btn { display:block; width:100%; background:transparent; color:#ddd; padding:16px; border-radius:12px; font-size:13px; font-weight:600; letter-spacing:1px; cursor:pointer; border:1px solid rgba(255, 255, 255, 0.1); transition:all 0.3s ease; margin-bottom:12px; box-sizing:border-box; text-transform:uppercase; font-family:'Nunito', sans-serif;}
+        .btn-primary { background:rgba(250, 204, 21, 0.9); color:#000; border:none; }
         .btn:hover { background:rgba(255, 255, 255, 0.05); }
         .btn-primary:hover { background:#facc15; box-shadow:0 0 20px rgba(250, 204, 21, 0.4); }
         
@@ -50,58 +51,60 @@
         .loading-text { color:#facc15!important; }
         .preview-zone img { max-width:100%; max-height:140px; margin-top:10px; border-radius:8px; display:none; border:1px solid rgba(255,255,255,0.1); }
         
-        /* --- MOLONI INVOICE UI STYLES --- */
-        .moloni-header { display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 1px solid rgba(59, 130, 246, 0.3); padding-bottom: 15px; margin-bottom: 15px; }
-        .moloni-header h3 { color: #3b82f6; margin: 0; justify-content: flex-start; }
+        /* --- MOLONI INVOICE UI STYLES (Softened Pastel Theme) --- */
+        .moloni-header { display: flex; justify-content: space-between; align-items: center; width: 100%; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 15px; margin-bottom: 15px; }
+        .moloni-header h3 { color: #e2e8f0; margin: 0; justify-content: flex-start; font-weight: 500; letter-spacing: 1px;}
         
-        .moloni-expand-btn { background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .moloni-expand-btn:hover { background: #3b82f6; }
+        .moloni-expand-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); color: #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; font-family:'Nunito', sans-serif;}
+        .moloni-expand-btn:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
 
         .moloni-nav { display: none; width: 100%; justify-content: space-around; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-        .m-nav-item { position: relative; padding: 10px 0; font-size: 13px; font-weight: 500; color: #ccc; cursor: pointer; }
-        .m-nav-item:hover { color: #3b82f6; }
+        .m-nav-item { position: relative; padding: 10px 0; font-size: 14px; font-weight: 500; color: #cbd5e1; cursor: pointer; transition: color 0.2s;}
+        .m-nav-item:hover { color: #facc15; }
         
-        .m-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #1a1a1a; min-width: 200px; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 100; text-align: left; }
+        .m-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #1a1a1a; min-width: 200px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 100; text-align: left; overflow: hidden;}
         .m-nav-item:hover .m-dropdown { display: block; }
-        .m-dropdown a { display: block; padding: 12px 16px; color: #fff; text-decoration: none; border-left: 2px solid transparent; transition: all 0.2s; }
-        .m-dropdown a:hover { background: rgba(255,255,255,0.05); border-left: 2px solid #3b82f6; }
-        .m-dropdown-title { color: #888; font-size: 10px; text-transform: uppercase; padding: 8px 16px 4px 16px; pointer-events: none; }
+        .m-dropdown a { display: block; padding: 12px 16px; color: #e2e8f0; text-decoration: none; border-left: 2px solid transparent; transition: all 0.2s; font-size: 13px;}
+        .m-dropdown a:hover { background: rgba(255,255,255,0.05); border-left: 2px solid #facc15; color: #fff;}
+        .m-dropdown-title { color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 10px 16px 4px 16px; pointer-events: none; }
 
         #moloni-workspace { flex: 1; width: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
 
-        /* Dynamic Table Overrides */
+        /* Dynamic Table Overrides - Enhanced Legibility */
         .moloni-table-container { width: 100%; overflow-x: auto; }
-        .moloni-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; color: #ccc; }
-        .moloni-table th { border-bottom: 1px solid rgba(59, 130, 246, 0.3); padding: 10px 8px; font-weight: 600; color: #3b82f6; white-space: nowrap; }
-        .moloni-table td { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 10px 8px; white-space: nowrap; }
-        .moloni-table tr:hover { background: rgba(255,255,255,0.02); }
-        .action-link { color: #3b82f6; cursor: pointer; text-decoration: none; transition: 0.2s; }
-        .action-link:hover { text-decoration: underline; color: #fff; }
+        .moloni-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; color: #cbd5e1; }
+        .moloni-table th { border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding: 12px 10px; font-weight: 600; color: #e2e8f0; white-space: nowrap; }
+        .moloni-table td { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 12px 10px; white-space: nowrap; }
+        .moloni-table tr:hover { background: rgba(255,255,255,0.03); }
+        .action-link { color: #94a3b8; cursor: pointer; text-decoration: none; transition: 0.2s; font-weight: 600;}
+        .action-link:hover { text-decoration: underline; color: #facc15; }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         
-        .m-toolbar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; gap: 10px; }
-        .m-search { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 11px; outline: none; }
-        .m-btn { background: #3b82f6; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; }
+        .m-toolbar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; gap: 10px; }
+        .m-search { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; padding: 8px 12px; border-radius: 6px; font-size: 12px; outline: none; font-family:'Nunito', sans-serif;}
+        .m-search:focus { border-color: rgba(255,255,255,0.3); }
+        .m-btn { background: rgba(255,255,255,0.1); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; font-family:'Nunito', sans-serif;}
+        .m-btn:hover { background: rgba(255,255,255,0.2); color: #fff;}
 
         /* TICKER STYLES */
         .ticker-wrap { width: 100%; height: 160px; overflow: hidden; position: relative; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2); margin-top: 15px; }
         .ticker-move { position: absolute; width: 100%; animation: ticker-scroll 12s linear infinite; }
         .ticker-move:hover { animation-play-state: paused; }
-        .ticker-item { padding: 12px; border-bottom: 1px solid rgba(239, 68, 68, 0.1); display: flex; justify-content: space-between; font-size: 12px; align-items: center; }
-        .ticker-client { font-weight: 500; color: #ccc; text-align: left;}
-        .ticker-amt { font-weight: 600; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 4px 8px; border-radius: 6px; }
+        .ticker-item { padding: 14px 16px; border-bottom: 1px solid rgba(239, 68, 68, 0.1); display: flex; justify-content: space-between; font-size: 13px; align-items: center; }
+        .ticker-client { font-weight: 500; color: #e2e8f0; text-align: left;}
+        .ticker-amt { font-weight: 700; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px;}
         @keyframes ticker-scroll { 0% { top: 100%; } 100% { top: -100%; } }
 
         /* DASHBOARD SPLIT STYLES */
         .dash-split { display: flex; width: 100%; height: 100%; gap: 20px; }
         .dash-left { flex: 1.2; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 15px; overflow-y: auto; text-align: left; }
         .dash-right { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        .dash-title { color: #fff; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(59, 130, 246, 0.3); padding-bottom: 8px; margin-top: 0; margin-bottom: 10px; width: 100%; }
+        .dash-title { color: #e2e8f0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 8px; margin-top: 0; margin-bottom: 12px; width: 100%; }
 
         .expanded-moloni .pane-right { display: none !important; }
         .expanded-moloni .bottom-grid { height: 60vh; min-height: 500px; }
-        .expanded-moloni .pane-left { border-color: rgba(59, 130, 246, 0.4); }
+        .expanded-moloni .pane-left { border-color: rgba(255, 255, 255, 0.2); }
         .expanded-moloni .moloni-nav { display: flex; }
 
         @media (max-width: 768px) {
@@ -140,7 +143,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:10px;">
                 <h3 style="margin:0;">
                     FINANCIAL OASIS 
-                    <span style="font-size:12px; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:8px; margin-left:10px;">🔴 <span id="dash-red-count">0</span> To Reconcile</span>
+                    <span style="font-size:12px; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:8px; margin-left:10px; font-weight: 500;">🔴 <span id="dash-red-count">0</span> To Reconcile</span>
                 </h3>
                 <button id="refresh-graph-btn" onclick="fetchDashboardData(true)" style="background:transparent; border:none; font-size:18px; cursor:pointer; opacity:0.7; transition:opacity 0.3s;" title="Force Live Refresh">🔄</button>
             </div>
@@ -175,7 +178,7 @@
                             <a onclick="loadMoloniView('Sales Report')">Sales Report</a>
                             <a onclick="loadMoloniView('Sales VAT')">VAT Reports</a>
                             <a onclick="loadMoloniView('VAT Maps')">VATs Reconciliation Maps</a>
-                            <div class="m-dropdown-title" style="border-top:1px solid #333; margin-top:5px;">Purchases</div>
+                            <div class="m-dropdown-title" style="border-top:1px solid rgba(255,255,255,0.1); margin-top:5px;">Purchases</div>
                             <a onclick="loadMoloniView('Purchase Report')">Purchase Report</a>
                             <a onclick="loadMoloniView('Purchase VAT')">VAT Reports</a>
                         </div>
@@ -360,11 +363,11 @@
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [
-                        { label: 'Earnings (Moloni)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#3b82f6', tension: 0.4 },
+                        { label: 'Earnings (Moloni)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#cbd5e1', backgroundColor: 'rgba(203, 213, 225, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#cbd5e1', tension: 0.4 },
                         { label: 'Expenses (Drive)', data: [0,0,0,0,0,0,0,0,0,0,0,0], borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#facc15', tension: 0.4 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888', font: {family: 'Nunito'} } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'} } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'} } } } }
             });
             fetchDashboardData(false); 
         }
@@ -446,17 +449,17 @@
                     <div style="text-align: center; margin-top: 30px;">
                         <span style="font-size:32px; display:block; margin-bottom:10px;">💼</span>
                         <div class="success-text" style="font-weight:600; margin-bottom:5px;">ALL CLEAR</div>
-                        <p style="font-size: 11px; margin-top:0;">No 100% unpaid invoices found.</p>
+                        <p style="font-size: 12px; margin-top:0; color:#888;">No 100% unpaid invoices found.</p>
                     </div>`;
                 return;
             }
 
-            var html = `<div style="width:100%; text-align:left; margin-bottom:8px; font-size:11px; color:#888; text-transform:uppercase; letter-spacing:1px;">⚠️ Missing Payments</div>`;
+            var html = `<div style="width:100%; text-align:left; margin-bottom:8px; font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; font-weight:600;">⚠️ Missing Payments</div>`;
             html += `<div class="ticker-wrap"><div class="ticker-move">`;
             unpaid.forEach(inv => {
                 var clientName = inv.client.length > 18 ? inv.client.substring(0,18) + '...' : inv.client;
                 html += `<div class="ticker-item">
-                            <span class="ticker-client">${clientName}<br><span style="font-size:10px; color:#666;">${inv.date}</span></span>
+                            <span class="ticker-client">${clientName}<br><span style="font-size:11px; color:#888;">${inv.date}</span></span>
                             <span class="ticker-amt">${inv.pending.toFixed(2)} €</span>
                          </div>`;
             });
@@ -471,8 +474,8 @@
                 ws.innerHTML = `
                     <div class="dash-split">
                         <div class="dash-left">
-                            <h4 class="dash-title" style="border-color: rgba(59, 130, 246, 0.4);">Open Balances</h4>
-                            <div id="expanded-invoice-list" style="font-size:11px;">Carregando...</div>
+                            <h4 class="dash-title">Open Balances</h4>
+                            <div id="expanded-invoice-list" style="font-size:12px;">Carregando...</div>
                         </div>
                         <div class="dash-right">
                             <h4 class="dash-title" style="border-color: rgba(250, 204, 21, 0.4); text-align:right;">Expense Breakdown</h4>
@@ -488,16 +491,16 @@
             else if (viewName === 'Invoice') {
                 ws.innerHTML = `
                     <div style="text-align:left; width:100%; padding: 10px 20px; box-sizing: border-box;">
-                        <h2 style="color:#fff; font-weight:300; margin-top:0; margin-bottom: 5px;">Faturas</h2>
-                        <p style="color:#888; font-size: 12px; margin-top:0; margin-bottom: 15px;">Nesta secção pode administrar as faturas</p>
+                        <h2 style="color:#f8fafc; font-weight:400; margin-top:0; margin-bottom: 5px;">Faturas</h2>
+                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 15px;">Nesta secção pode administrar as faturas</p>
                         
                         <div class="m-toolbar">
-                            <div style="display: flex; gap: 5px;">
+                            <div style="display: flex; gap: 8px;">
                                 <select class="m-search" style="width: auto; padding: 6px;"><option>Insira palavras para pesquisar</option></select>
                                 <input type="text" class="m-search" placeholder="Pesquisar">
-                                <button class="m-btn" style="background: transparent; border: 1px solid #3b82f6; color: #3b82f6;">Pesquisar</button>
+                                <button class="m-btn">Pesquisar</button>
                             </div>
-                            <button class="m-btn">+ Adicionar Fatura</button>
+                            <button class="m-btn" style="color:#facc15; border-color:rgba(250,204,21,0.3);">+ Adicionar Fatura</button>
                         </div>
                         
                         <div class="moloni-table-container">
@@ -527,8 +530,8 @@
             } else {
                 ws.innerHTML = `
                     <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
-                        <h2 style="color:#fff; font-weight:300; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-top:0;">${viewName}</h2>
-                        <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(59,130,246,0.3); padding: 40px; text-align: center; border-radius: 8px; color: #888;">
+                        <h2 style="color:#f8fafc; font-weight:400; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-top:0;">${viewName}</h2>
+                        <div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); padding: 40px; text-align: center; border-radius: 8px; color: #888;">
                             <span style="font-size: 24px;">🚧</span><br><br>
                             Interface for <b>${viewName}</b> ready.<br>
                             Awaiting data binding from Invoice Node.
@@ -553,10 +556,10 @@
                 var color = isPartial ? '#facc15' : '#ef4444'; 
                 var clientName = inv.client.length > 20 ? inv.client.substring(0,20) + '...' : inv.client;
                 html += `<tr>
-                    <td style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); color:#ccc;">
-                        ${clientName}<br><span style="font-size:9px; color:#666;">${inv.date} | ${inv.serie}-${inv.number}</span>
+                    <td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); color:#e2e8f0; font-size: 13px;">
+                        ${clientName}<br><span style="font-size:11px; color:#888;">${inv.date} | ${inv.serie}-${inv.number}</span>
                     </td>
-                    <td style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600; color:${color};">
+                    <td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:700; color:${color}; font-size: 13px;">
                         ${inv.pending.toFixed(2)} €
                     </td>
                 </tr>`;
@@ -572,14 +575,15 @@
             var labels = []; var data = [];
             var totals = window.globalCategoryTotals || {};
             
+            // Soft Pastel Palette
             var colorMap = {
-                "Equipa Externa": "#3b82f6", 
-                "Subcontratação": "#6366f1", 
-                "Alojamento": "#a855f7",     
-                "Alimentação": "#ec4899",    
-                "Consumíveis e Operações": "#8b5cf6", 
-                "Equipamento": "#facc15",    
-                "Transportes e Deslocações": "#10b981" 
+                "Equipa Externa": "#93c5fd", 
+                "Subcontratação": "#c4b5fd", 
+                "Alojamento": "#f9a8d4",     
+                "Alimentação": "#fca5a5",    
+                "Consumíveis e Operações": "#fdba74", 
+                "Equipamento": "#fde047",    
+                "Transportes e Deslocações": "#86efac" 
             };
             var bgColors = [];
 
@@ -592,7 +596,7 @@
             }
 
             if(labels.length === 0) {
-                labels = ["No Data"]; data = [1]; bgColors = ["#333"];
+                labels = ["No Data"]; data = [1]; bgColors = ["rgba(255,255,255,0.05)"];
             }
 
             if(expensePieChartInstance) expensePieChartInstance.destroy();
@@ -613,7 +617,7 @@
                     maintainAspectRatio: false,
                     cutout: '65%',
                     plugins: { 
-                        legend: { position: 'right', labels: { color: '#ccc', font: {size: 10, family: 'Inter'}, boxWidth:12, padding: 15 } } 
+                        legend: { position: 'right', labels: { color: '#ccc', font: {size: 11, family: 'Nunito'}, boxWidth:12, padding: 15 } } 
                     }
                 }
             });
@@ -642,8 +646,8 @@
                         <td title="${inv.client}">${clientName}</td>
                         <td class="text-right">${net.toFixed(2)} €</td>
                         <td class="text-right">${taxes.toFixed(2)} €</td>
-                        <td class="text-right" style="font-weight:600; color:#fff;">${inv.total.toFixed(2)} €</td>
-                        <td class="text-right" style="color: ${isDebt ? '#ef4444' : '#22c55e'}; font-weight:600;">${inv.pending.toFixed(2)} €</td>
+                        <td class="text-right" style="font-weight:700; color:#fff;">${inv.total.toFixed(2)} €</td>
+                        <td class="text-right" style="color: ${isDebt ? '#ef4444' : '#22c55e'}; font-weight:700;">${inv.pending.toFixed(2)} €</td>
                         <td class="text-center">
                             <a class="action-link">Ver</a> | <a class="action-link" style="color:#ef4444;">Eliminar</a>
                         </td>
