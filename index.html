@@ -416,11 +416,11 @@
         </div>
     </div>
 
-    <!-- MODAL: New Client -->
+    <!-- MODAL: Edit Supplier / Client -->
     <div class="modal-overlay" id="new-client-modal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('new-client-modal')">×</button>
-            <h2 class="f-title" style="margin-bottom:20px;">Create Client</h2>
+            <h2 class="f-title" id="client-modal-title" style="margin-bottom:20px;">Create Client / Supplier</h2>
             
             <div class="modal-tabs">
                 <div class="modal-tab active" onclick="switchTab(this, 'tab-fiscal')">Fiscal Details</div>
@@ -438,7 +438,7 @@
                         </div>
                     </div>
                     <div class="f-group" style="flex:1;">
-                        <label class="f-label">Client Code</label>
+                        <label class="f-label">Code</label>
                         <input type="text" class="f-input" value="10066" disabled>
                     </div>
                 </div>
@@ -510,7 +510,7 @@
 
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
                 <button class="f-btn-cancel" onclick="closeModal('new-client-modal')">Cancel</button>
-                <button class="f-btn-save" onclick="saveNewClient()">Save Client</button>
+                <button class="f-btn-save" onclick="saveNewClient()">Save</button>
             </div>
         </div>
     </div>
@@ -521,7 +521,10 @@
             <div class="pdf-header">
                 <h3 id="pdf-modal-title" style="justify-content:flex-start;">Preview Document</h3>
                 <div style="display:flex; gap:15px; align-items:center;">
-                    <a id="pdf-download-btn" href="#" download class="minimal-download-btn">DOWNLOAD</a>
+                    <a id="pdf-download-btn" href="#" download class="minimal-download-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Download
+                    </a>
                     <button class="modal-close" style="position:static;" onclick="closeModal('pdf-preview-modal')">×</button>
                 </div>
             </div>
@@ -540,7 +543,10 @@
             <div class="review-left">
                 <div class="review-header">
                     <h3 id="review-pdf-title" style="justify-content:flex-start;">Preview Document</h3>
-                    <a id="review-pdf-download" href="#" download class="minimal-download-btn">DOWNLOAD</a>
+                    <a id="review-pdf-download" href="#" download class="minimal-download-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Download
+                    </a>
                 </div>
                 <iframe id="review-pdf-iframe" style="width:100%; height:100%; border:none; background:#2a2a2a;"></iframe>
             </div>
@@ -611,6 +617,42 @@
             if(moloniState === 0) renderRetractedTicker();
         }
 
+        // Custom Chart.js Plugin for VAT Warnings (Main Dashboard)
+        const vatWarningPlugin = {
+            id: 'vatWarningPlugin',
+            afterDraw: (chart) => {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    if (dataset.label === 'Missing VAT (No Doc)') {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        meta.data.forEach((point, index) => {
+                            const value = dataset.data[index];
+                            if (value > 0) { // Only draw if missing VAT exists
+                                const x = point.x;
+                                const y = point.y;
+                                
+                                // Draw yellow warning circle
+                                ctx.beginPath();
+                                ctx.arc(x, y - 15, 8, 0, 2 * Math.PI);
+                                ctx.fillStyle = '#facc15';
+                                ctx.fill();
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = '#1e1e1e';
+                                ctx.stroke();
+                                
+                                // Draw exclamation mark text
+                                ctx.fillStyle = '#000';
+                                ctx.font = 'bold 10px Nunito';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText('!', x, y - 14);
+                            }
+                        });
+                    }
+                });
+            }
+        };
+
         // State Machine Controller
         function toggleMoloniMode() {
             if (moloniState === 2) setMoloniState(1);
@@ -649,14 +691,6 @@
             
             headerActions.innerHTML = '';
             
-            if(isListMode) {
-                headerActions.innerHTML = `
-                    <button class="moloni-expand-btn" style="background:transparent; border-color:rgba(255,255,255,0.1); color:#94a3b8;" title="Export CSV">CSV</button>
-                    <button class="moloni-expand-btn" style="background:transparent; border-color:rgba(255,255,255,0.1); color:#94a3b8;" title="Export PDF">PDF</button>
-                `;
-            }
-            
-            // Add Stats button dynamically if we are in expanded mode
             if (state > 0) {
                 var statsBtn = document.createElement('button');
                 statsBtn.className = 'moloni-expand-btn';
@@ -670,10 +704,31 @@
                 statsBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>';
                 statsBtn.title = "View Dashboard Stats";
                 statsBtn.onclick = function() { loadMoloniView('Dashboard'); };
-                headerActions.appendChild(statsBtn); // Add Stats
+                headerActions.appendChild(statsBtn); 
+            }
+
+            if(isListMode) {
+                var exportCsv = document.createElement('button');
+                exportCsv.className = 'moloni-expand-btn';
+                exportCsv.style.background = 'transparent';
+                exportCsv.style.borderColor = 'rgba(255,255,255,0.1)';
+                exportCsv.style.color = '#94a3b8';
+                exportCsv.title = 'Export CSV';
+                exportCsv.innerText = 'CSV';
+                
+                var exportPdf = document.createElement('button');
+                exportPdf.className = 'moloni-expand-btn';
+                exportPdf.style.background = 'transparent';
+                exportPdf.style.borderColor = 'rgba(255,255,255,0.1)';
+                exportPdf.style.color = '#94a3b8';
+                exportPdf.title = 'Export PDF';
+                exportPdf.innerText = 'PDF';
+                
+                headerActions.appendChild(exportCsv);
+                headerActions.appendChild(exportPdf);
             }
             
-            headerActions.appendChild(btn); // Ensure Expand/Collapse is on the far right
+            headerActions.appendChild(btn); 
         }
 
         function initPlaceholderGraph() {
@@ -684,10 +739,23 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [
                         { label: 'Earnings (Moloni)', data: [1200,2100,1800,3200,2500,2800,1500,0,0,0,0,0], borderColor: '#cbd5e1', backgroundColor: 'rgba(203, 213, 225, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#cbd5e1', tension: 0.4 },
-                        { label: 'Expenses (Drive)', data: [800,1500,1200,2000,1800,1900,900,0,0,0,0,0], borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#facc15', tension: 0.4 }
+                        { label: 'Expenses (Drive)', data: [800,1500,1200,2000,1800,1900,900,0,0,0,0,0], borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#facc15', tension: 0.4 },
+                        { label: 'Missing VAT (No Doc)', data: [0,0,0,0,0,0,193.31,0,0,0,0,0], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 2, pointBackgroundColor: '#ef4444', borderDash: [5, 5], tension: 0.1 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#888', font: {family: 'Nunito'} } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'} } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'} } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { labels: { color: '#888', font: {family: 'Nunito'} } },
+                        tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += new Intl.NumberFormat('en-PT', { style: 'currency', currency: 'EUR' }).format(context.parsed.y); } return label; } } }
+                    }, 
+                    scales: { 
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'} } }, 
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'}, callback: function(value, index, values) { return value + ' €'; } } } 
+                    } 
+                },
+                plugins: [vatWarningPlugin]
             });
             window.globalCategoryTotals = {"Equipa Externa": 500, "Subcontratação": 1200, "Consumíveis e Operações": 420, "Equipamento": 850};
         }
@@ -724,7 +792,7 @@
 
         function loadMoloniView(viewName, isInternalCall = false) {
             // Determine required state
-            var isFocusMode = viewName.startsWith('Create ') || viewName === 'Expense' || viewName.includes('Report') || viewName.includes('VAT') || viewName === 'Invoice Recon';
+            var isFocusMode = viewName.startsWith('Create ') || viewName === 'Expense' || viewName.includes('Report') || viewName.includes('VAT') || viewName === 'Invoice Recon' || viewName === 'Suppliers';
             
             if (!isInternalCall) {
                 if (viewName === 'Dashboard') {
@@ -1077,19 +1145,19 @@
                                 <div id="expense-kpis" style="display:flex; gap:10px;">
                                     <div style="text-align:right; background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:8px; border:1px solid rgba(34, 197, 94, 0.2);">
                                         <span style="color:#94a3b8; font-size:10px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Reconciled</span><br>
-                                        <span style="color:#22c55e; font-size:15px; font-weight:800;">€ 14,250.00</span>
+                                        <span style="color:#22c55e; font-size:15px; font-weight:800;">14,250.00 €</span>
                                     </div>
                                     <div style="text-align:right; background:rgba(0,0,0,0.3); padding:8px 15px; border-radius:8px; border:1px solid rgba(239, 68, 68, 0.2);">
                                         <span style="color:#94a3b8; font-size:10px; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Lost</span><br>
-                                        <span style="color:#ef4444; font-size:15px; font-weight:800;">€ 840.50</span>
+                                        <span style="color:#ef4444; font-size:15px; font-weight:800;">840.50 €</span>
                                     </div>
                                 </div>
-                                <button class="f-btn-cancel" style="padding: 8px 20px;" onclick="loadMoloniView('Dashboard')">← Back</button>
+                                <button class="f-btn-cancel" style="padding: 10px 15px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #ef4444; font-size: 11px;" onclick="loadMoloniView('Dashboard')">← Back</button>
                             </div>
                         </div>
 
-                        <div id="expense-chart-container" style="width:100%; height:300px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:20px; padding-top:40px; box-sizing:border-box; margin-bottom:30px; position:relative; transition: all 0.4s ease;">
-                            <select class="f-input" id="expense-time-filter" style="width: auto; padding: 6px 10px; font-size: 11px; background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.1); position:absolute; top: 15px; right: 20px; z-index: 10;" onchange="renderExpenseTable(this.value)">
+                        <div id="expense-chart-container" style="position:relative; width:100%; height:300px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:20px; padding-top:40px; box-sizing:border-box; margin-bottom:30px; transition: all 0.4s ease;">
+                            <select class="f-input" id="expense-time-filter" style="position:absolute; top: 15px; left: 60px; z-index: 10; width: auto; padding: 6px; font-size: 11px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;" onchange="renderExpenseTable(this.value)">
                                 <option value="este_mes">This Month</option>
                                 <option value="mes_anterior">Last Month</option>
                                 <option value="este_trimestre">This Quarter</option>
@@ -1391,6 +1459,14 @@
                         </div>
                     </div>
                 `;
+            }
+            else if (viewName === 'Suppliers') {
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;" id="suppliers-main-container">
+                        <!-- Supplier Grid injected here -->
+                    </div>
+                `;
+                renderSupplierCategories();
             }
             else {
                 ws.innerHTML = `<div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;"><h2 style="color:#f8fafc; font-weight:400; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-top:0;">${viewName}</h2><div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); padding: 40px; text-align: center; border-radius: 8px; color: #888;"><span style="font-size: 24px;">🚧</span><br><br>Interface for <b>${viewName}</b> ready.<br>Awaiting data binding from Invoice Node.</div></div>`;
@@ -1786,7 +1862,127 @@
             }
         }
 
-        // --- DASHBOARD LISTS ---
+        // --- SUPPLIERS VAULT LOGIC --- //
+        
+        function generateSupplierNode(name, count, svgIcon) {
+            return `
+                <div class="glass-panel" style="padding:20px; text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:15px; border-color:rgba(255,255,255,0.05); transition: all 0.2s ease;" onclick="openSupplierCategory('${name}')" onmouseover="this.style.borderColor='#facc15'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.transform='translateY(0)';">
+                    <div style="width:40px; height:40px; background:rgba(250,204,21,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#facc15;">
+                        ${svgIcon}
+                    </div>
+                    <div>
+                        <h4 style="margin:0; color:#e2e8f0; font-size:15px; font-weight:600;">${name}</h4>
+                        <span style="color:#888; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">${count} Registered</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSupplierCategories() {
+            var container = document.getElementById('suppliers-main-container');
+            if(!container) return;
+            
+            var svgs = {
+                'Equipa Externa': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+                'Subcontratação': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
+                'Alojamento': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+                'Alimentação': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>',
+                'Consumíveis e Operações': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>',
+                'Equipamento': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>',
+                'Transportes e Deslocações': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="8" rx="2" ry="2"></rect><circle cx="6.5" cy="19.5" r="1.5"></circle><circle cx="17.5" cy="19.5" r="1.5"></circle><path d="M3 11l2-5h10l2 5"></path></svg>'
+            };
+
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
+                    <div>
+                        <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">Suppliers Vault</h2>
+                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Organized vendor routing based on operational categories.</p>
+                    </div>
+                    <button class="f-btn-cancel" onclick="loadMoloniView('Dashboard')" style="padding: 8px 20px;">← Back</button>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 20px;">
+                    ${generateSupplierNode('Equipa Externa', 14, svgs['Equipa Externa'])}
+                    ${generateSupplierNode('Subcontratação', 8, svgs['Subcontratação'])}
+                    ${generateSupplierNode('Alojamento', 22, svgs['Alojamento'])}
+                    ${generateSupplierNode('Alimentação', 45, svgs['Alimentação'])}
+                    ${generateSupplierNode('Consumíveis e Operações', 31, svgs['Consumíveis e Operações'])}
+                    ${generateSupplierNode('Equipamento', 12, svgs['Equipamento'])}
+                    ${generateSupplierNode('Transportes e Deslocações', 5, svgs['Transportes e Deslocações'])}
+                </div>
+                
+                <div style="display:flex; gap: 10px; align-items: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                    <input type="text" class="input-transparent" placeholder="Global Search..." style="width:250px;">
+                    <button class="btn-primary btn" style="width:auto; padding: 10px 20px; margin-bottom:0;" onclick="document.getElementById('new-client-modal').style.display='flex'">+ New Supplier</button>
+                </div>
+            `;
+        }
+
+        function openSupplierCategory(categoryName) {
+            var container = document.getElementById('suppliers-main-container');
+            if(!container) return;
+            
+            // Mock Data Injection based on Category
+            var mockSuppliers = [];
+            if(categoryName === 'Equipamento') {
+                mockSuppliers = [
+                    { name: 'Amazon EU SARL', address: '5 Rue Plaetis, Luxembourg', email: 'billing@amazon.eu', spent: '4,250.00' },
+                    { name: 'Worten Equipamentos', address: 'Rua João Mendonça 505, Sra da Hora', email: 'apoio@worten.pt', spent: '1,120.50' },
+                    { name: 'PCDIGA', address: 'Estrada Nacional 10, Leiria', email: 'vendas@pcdiga.com', spent: '890.00' }
+                ];
+            } else {
+                mockSuppliers = [
+                    { name: 'Mock Supplier LDA', address: 'Rua Exemplo 123, Lisboa', email: 'contato@exemplo.pt', spent: '1,500.00' },
+                    { name: 'Generic Vendor S.A.', address: 'Av Principal 45, Porto', email: 'billing@generic.pt', spent: '850.25' }
+                ];
+            }
+
+            var tbodyHtml = '';
+            mockSuppliers.forEach(sup => {
+                tbodyHtml += `
+                    <tr>
+                        <td style="color:#fff; font-weight:600;">${sup.name}</td>
+                        <td style="color:#cbd5e1;">${sup.address}</td>
+                        <td style="color:#3b82f6;">${sup.email}</td>
+                        <td class="text-right" style="color:#facc15; font-weight:700;">${sup.spent} €</td>
+                        <td class="text-center">
+                            <button class="btn-yellow-outline" style="padding:4px 12px; font-size:11px;" onclick="document.getElementById('new-client-modal').style.display='flex'">Edit Contact</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <h2 style="color:#facc15; font-weight:600; margin-top:0; margin-bottom: 5px;">${categoryName}</h2>
+                        </div>
+                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Filtered contacts roster for this category</p>
+                    </div>
+                    <button class="f-btn-cancel" onclick="renderSupplierCategories()" style="padding: 8px 20px;">← Back to Categories</button>
+                </div>
+
+                <div class="moloni-table-container">
+                    <table class="moloni-table">
+                        <thead>
+                            <tr>
+                                <th>Supplier Name</th>
+                                <th>Address</th>
+                                <th>Email</th>
+                                <th class="text-right">Total Spent YTD</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tbodyHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // --- DASHBOARD & INVOICE LISTS --- //
 
         function renderExpandedInvoiceList() {
             var listEl = document.getElementById('expanded-invoice-list');
@@ -1830,7 +2026,7 @@
                 datasetsConfig = [
                     {
                         type: 'line',
-                        label: 'Pending VAT (No Doc) (€)',
+                        label: 'Pending VAT (No Doc)',
                         data: [10, 25, 0, 80, 5, 0, 46, 0, 0, 0, 0, 0],
                         borderColor: '#ef4444',
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -1840,7 +2036,7 @@
                     },
                     {
                         type: 'bar',
-                        label: 'Total Expense VAT (€)',
+                        label: 'Total Expense VAT',
                         data: [276, 345, 207, 506, 414, 483, 253, 0, 0, 0, 0, 0],
                         backgroundColor: '#facc15',
                         borderRadius: 4,
@@ -1851,7 +2047,7 @@
                 datasetsConfig = [
                     {
                         type: 'line',
-                        label: 'Lost / Unclaimed Money (€)',
+                        label: 'Lost / Unclaimed Money',
                         data: [50, 120, 0, 400, 20, 0, 250, 0, 0, 0, 0, 0],
                         borderColor: '#ef4444',
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -1861,7 +2057,7 @@
                     },
                     {
                         type: 'bar',
-                        label: 'Reconciled Expenses (€)',
+                        label: 'Reconciled Expenses',
                         data: [1200, 1500, 900, 2200, 1800, 2100, 1100, 0, 0, 0, 0, 0],
                         backgroundColor: '#3b82f6',
                         borderRadius: 4,
@@ -1880,19 +2076,20 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: '#e2e8f0', font: {family: 'Nunito'} } }
+                        legend: { labels: { color: '#e2e8f0', font: {family: 'Nunito'} } },
+                        tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + new Intl.NumberFormat('en-PT', { style: 'currency', currency: 'EUR' }).format(context.parsed.y); } } }
                     },
                     scales: {
                         x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: {family: 'Nunito'} } },
                         y: { 
                             type: 'linear', display: true, position: 'left',
                             grid: { color: 'rgba(255,255,255,0.05)' }, 
-                            ticks: { color: '#94a3b8', font: {family: 'Nunito'} } 
+                            ticks: { color: '#94a3b8', font: {family: 'Nunito'}, callback: function(value) { return value + ' €'; } } 
                         },
                         y1: {
                             type: 'linear', display: true, position: 'right',
                             grid: { drawOnChartArea: false },
-                            ticks: { color: '#ef4444', font: {family: 'Nunito'} }
+                            ticks: { color: '#ef4444', font: {family: 'Nunito'}, callback: function(value) { return value + ' €'; } }
                         }
                     }
                 }
@@ -1952,6 +2149,7 @@
             });
             tbody.innerHTML = html;
         }
+
     </script>
 </body>
 </html>
