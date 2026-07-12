@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
-    <title>Vault Scanner</title>
+    <title>RC Input - Command Center</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#facc15">
@@ -12,7 +12,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body { font-family:'Nunito', sans-serif; background:#0a0a0a; background-image:radial-gradient(circle at top right,#2a2a2a 0%,#0a0a0a 60%); color:#fff; padding:20px; display:flex; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; overflow-x: hidden;}
+        :root {
+            --theme-primary: #facc15;
+            --theme-secondary: #3b82f6;
+            --theme-bg-gradient: radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%);
+        }
+
+        .marketing-theme {
+            --theme-primary: #c084fc; /* Purple */
+            --theme-secondary: #2dd4bf; /* Cyan/Teal */
+            --theme-bg-gradient: radial-gradient(circle at top left, #1e1b4b 0%, #0a0a0a 60%);
+        }
+
+        body { font-family:'Nunito', sans-serif; background:#0a0a0a; background-image: var(--theme-bg-gradient); color:#fff; padding:20px; display:flex; flex-direction: column; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; overflow-x: hidden;}
         
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -31,41 +43,77 @@
         ::-webkit-calendar-picker-indicator:hover { opacity: 1; }
         option { background: #1e1e1e; color: #fff; }
 
-        .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(250,204,21,0.15); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; transition: all 0.4s ease; }
+        .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; transition: all 0.4s ease; }
         
         #login-wrapper { width:100%; max-width:360px; }
         
-        h3 { color:#facc15; font-size:16px; font-weight:700; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+        h3 { color: var(--theme-primary); font-size:16px; font-weight:700; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; align-items:center; gap:8px; transition: color 0.4s;}
         p { color:#888; font-size:13px; font-weight:300; margin-bottom:25px; }
         
         .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
-        .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color:#facc15; font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; font-family:'Nunito', sans-serif; }
-        .pin-box:focus { border-color:#facc15; box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
+        .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color: var(--theme-primary); font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; font-family:'Nunito', sans-serif; }
+        .pin-box:focus { border-color: var(--theme-primary); box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
+        .marketing-theme .pin-box:focus { box-shadow:0 0 15px rgba(192, 132, 252, 0.2); }
+
+        /* OS LAUNCHER SCREEN */
+        #os-launcher { display: none; width: 100%; max-width: 900px; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; animation: fadeIn 0.5s ease; }
+        .launcher-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; width: 100%; padding: 20px; }
         
-        #app-view { width:100%; max-width:1200px; flex-direction:column; gap:20px; display:none; }
+        .app-icon { background: rgba(30, 30, 30, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);}
+        .app-icon:hover { transform: translateY(-5px); }
         
-        .pane-top { max-width:100%; display:flex; flex-direction:column; height:35vh; min-height:250px; justify-content:flex-start; position:relative; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
+        .app-icon.vault-app:hover { border-color: #facc15; box-shadow: 0 20px 40px rgba(250, 204, 21, 0.15); }
+        .app-icon.noiz-app:hover { border-color: #c084fc; box-shadow: 0 20px 40px rgba(192, 132, 252, 0.15); }
+        .app-icon.kinetic-app:hover { border-color: #f87171; box-shadow: 0 20px 40px rgba(248, 113, 113, 0.15); }
+        .app-icon.airscreen-app:hover { border-color: #2dd4bf; box-shadow: 0 20px 40px rgba(45, 212, 191, 0.15); }
+
+        .app-svg-wrapper { width: 70px; height: 70px; border-radius: 18px; display: flex; justify-content: center; align-items: center; }
+        .vault-app .app-svg-wrapper { background: linear-gradient(135deg, rgba(250,204,21,0.2), rgba(59,130,246,0.1)); color: #facc15; }
+        .noiz-app .app-svg-wrapper { background: linear-gradient(135deg, rgba(192,132,252,0.2), rgba(45,212,191,0.1)); color: #c084fc; }
+        .kinetic-app .app-svg-wrapper { background: linear-gradient(135deg, rgba(248,113,113,0.2), rgba(251,146,60,0.1)); color: #f87171; }
+        .airscreen-app .app-svg-wrapper { background: linear-gradient(135deg, rgba(45,212,191,0.2), rgba(56,189,248,0.1)); color: #2dd4bf; }
+
+        .app-title { font-size: 16px; font-weight: 800; color: #f8fafc; letter-spacing: 1px; }
+        .app-subtitle { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: -10px;}
+
+        /* GLOBAL APP HEADER */
+        .global-app-header { display: none; width: 100%; max-width: 1200px; justify-content: flex-start; align-items: center; margin-bottom: 20px; animation: fadeInDown 0.4s ease;}
+        .home-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 12px; padding: 10px 15px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; font-weight: 700; font-family: 'Nunito'; font-size: 13px;}
+        .home-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+        .main-container { width: 100%; max-width: 1200px; display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease;}
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Financial Vault Specific */
+        #financial-vault { width:100%; display: flex; flex-direction:column; gap:20px; transition: opacity 0.3s ease;}
+        
+        .pane-top { max-width:100%; display:flex; flex-direction:column; height:35vh; min-height:250px; justify-content:flex-start; position:relative; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; border-color: rgba(250,204,21,0.15);}
         .chart-container { transition: all 0.4s ease; opacity: 1; height: calc(100% - 40px); width: 100%; }
         
         .sleek-icon-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 8px; padding: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 1px; font-family: 'Nunito'; text-decoration: none;}
         .sleek-icon-btn:hover { background: rgba(250,204,21,0.15); border-color: #facc15; color: #facc15; box-shadow: 0 0 10px rgba(250,204,21,0.2); }
         
         .bottom-grid { display:flex; gap:20px; width:100%; height:45vh; min-height:400px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .pane-left, .pane-right { max-width:100%; flex:1; display:flex; flex-direction:column; justify-content: flex-start; position: relative; overflow: hidden; }
+        .pane-left, .pane-right { max-width:100%; flex:1; display:flex; flex-direction:column; justify-content: flex-start; position: relative; overflow: hidden; border-color: rgba(255,255,255,0.05);}
         
         .input-group { display:flex; gap:10px; margin-bottom:20px; }
         select { flex:1; appearance:none; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:10px; color:#ddd; padding:14px 12px; font-size:13px; outline:none; transition:border 0.3s ease; text-align:center; font-family:'Nunito', sans-serif;}
-        select:focus { border-color:#facc15; color:#fff; }
+        select:focus { border-color: var(--theme-primary); color:#fff; }
         
         .toggle-btn { flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:14px 10px; color:#888; font-size:14px; text-align:center; cursor:pointer; transition:all 0.3s; box-sizing:border-box; user-select:none; }
-        .toggle-btn.active { border-color:#facc15; box-shadow:0 0 10px rgba(250,204,21,0.2); }
-        .toggle-btn.active .t-text { color:#facc15; font-weight:700; text-shadow:0 0 5px rgba(250,204,21,0.4); }
-        
+        .toggle-btn.active { border-color: var(--theme-primary); box-shadow:0 0 10px rgba(250,204,21,0.2); }
+        .toggle-btn.active .t-text { color: var(--theme-primary); font-weight:700; text-shadow:0 0 5px rgba(250,204,21,0.4); }
+        .marketing-theme .toggle-btn.active { box-shadow:0 0 10px rgba(192,132,252,0.2); text-shadow:0 0 5px rgba(192,132,252,0.4); }
+
         .btn { display:block; width:100%; background:transparent; color:#ddd; padding:16px; border-radius:12px; font-size:13px; font-weight:700; letter-spacing:1px; cursor:pointer; border:1px solid rgba(255, 255, 255, 0.1); transition:all 0.3s ease; margin-bottom:12px; box-sizing:border-box; text-transform:uppercase; font-family:'Nunito', sans-serif;}
         .btn-primary { background:rgba(250, 204, 21, 0.9); color:#000; border:none; }
+        .marketing-theme .btn-primary { background: rgba(192,132,252,0.9); color: #fff; }
         .btn:hover { background:rgba(255, 255, 255, 0.05); }
-        .btn-primary:hover { background:#facc15; box-shadow:0 0 20px rgba(250, 204, 21, 0.4); }
-        
+        .btn-primary:hover { background: var(--theme-primary); box-shadow:0 0 20px rgba(250, 204, 21, 0.4); }
+        .marketing-theme .btn-primary:hover { box-shadow:0 0 20px rgba(192, 132, 252, 0.4); }
+
         input[type='file'] { display: none; }
         img[src=""] { display: none; } /* Hides broken image icon when preview is empty */
         #status { margin-top:20px; font-size:13px; color:#888; font-weight:500; line-height: 1.6; }
@@ -155,7 +203,7 @@
         .modal-tabs { display:flex; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:20px; gap:20px;}
         .modal-tab { padding:10px 0; color:#888; cursor:pointer; font-weight:600; font-size:14px; position:relative; }
         .modal-tab.active { color:#fff; }
-        .modal-tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:#facc15; }
+        .modal-tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background: var(--theme-primary); transition: background 0.4s; }
         .modal-tab-content { display:none; }
         .modal-tab-content.active { display:block; }
         
@@ -220,8 +268,10 @@
         .pdf-body { flex: 1; background: #2a2a2a; position: relative; display:flex; justify-content:center; align-items:center;}
         .pdf-iframe { width: 100%; height: 100%; border: none; }
 
-        .minimal-download-btn { display: flex; align-items: center; gap: 8px; background: transparent; border: none; color: #cbd5e1; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; transition: color 0.2s ease; cursor: pointer; font-family: 'Nunito'; }
-        .minimal-download-btn:hover { color: #facc15; }
+        .minimal-download-btn { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; text-decoration: none; transition: all 0.3s ease; font-family: 'Nunito', sans-serif; }
+        .minimal-download-btn:hover { background: rgba(250,204,21,0.1); border-color: rgba(250,204,21,0.3); color: #facc15; }
+        .minimal-download-btn svg { transition: transform 0.3s ease; }
+        .minimal-download-btn:hover svg { transform: translateY(2px); }
 
         /* SPLIT REVIEW MODAL */
         #expense-review-modal .modal-content { max-width: 1000px; height: 85vh; display: flex; flex-direction: row; padding: 0; overflow: hidden; background: #1a1a1a;}
@@ -241,6 +291,20 @@
         .kpi-title { color: #94a3b8; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
         .kpi-value { color: #e2e8f0; font-size: 16px; font-weight: 800; }
 
+        /* MARKETING HUB SPECIFIC */
+        #marketing-hub { width: 100%; display: flex; flex-direction: column; gap: 20px; display: none;}
+        .mkt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 10px; }
+        .mkt-node { background: rgba(20, 20, 30, 0.6); border: 1px solid rgba(192, 132, 252, 0.2); border-radius: 16px; padding: 25px; text-align: left; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;}
+        .mkt-node:hover { transform: translateY(-5px); border-color: #c084fc; box-shadow: 0 10px 30px rgba(192, 132, 252, 0.15); }
+        .mkt-node::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #c084fc, #2dd4bf); opacity: 0; transition: opacity 0.3s ease;}
+        .mkt-node:hover::before { opacity: 1; }
+        
+        .mkt-icon-wrap { width: 48px; height: 48px; background: rgba(192, 132, 252, 0.1); border-radius: 12px; display: flex; justify-content: center; align-items: center; color: #c084fc; margin-bottom: 15px; }
+        .mkt-title { color: #f8fafc; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+        .mkt-desc { color: #94a3b8; font-size: 13px; line-height: 1.5; margin-bottom: 20px; min-height: 40px;}
+        .mkt-launch { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; color: #2dd4bf; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
+        .mkt-launch span { display: flex; align-items: center; gap: 5px; }
+        
         @media (max-width: 768px) {
             body { align-items: flex-start; padding: 15px; }
             .bottom-grid { flex-direction: column; height: auto; min-height: unset; }
@@ -264,12 +328,12 @@
 </head>
 <body>
     
+    <!-- LOGIN SCREEN -->
     <div class='glass-panel' id='login-wrapper'>
         <div id='login-view'>
             <h3 style="justify-content: center;">SECURE VAULT</h3>
             <p>Restricted Access</p>
             <div class="pin-container" id="pin-container">
-                <!-- Sandbox auto-login ready -->
                 <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="2">
                 <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="0">
                 <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="1">
@@ -278,130 +342,258 @@
             <div id='login-status' style='margin-top:15px;color:#ef4444;font-size:13px;'></div>
         </div>
     </div>
+    
+    <!-- OS LAUNCHER (HOME SCREEN) -->
+    <div id="os-launcher">
+        <h1 style="color: #f8fafc; font-size: 32px; font-weight: 800; letter-spacing: 2px; margin-bottom: 10px;">RC COMMAND</h1>
+        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 40px;">Select an operational environment to launch.</p>
         
-    <div id='app-view'>
-        
-        <div class='glass-panel pane-top' style="padding: 20px;">
-            <div class="top-header-row" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:15px;">
-                <h3 style="margin:0;">
-                    FINANCIAL OASIS 
-                </h3>
-                <button id="refresh-graph-btn" onclick="fetchDashboardData(true)" class="sleek-icon-btn" title="Force Live Refresh">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-8.21l5.67-5.67"/></svg>
-                </button>
+        <div class="launcher-grid">
+            <!-- Vault App -->
+            <div class="app-icon vault-app" onclick="launchApp('vault')">
+                <div class="app-svg-wrapper">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                </div>
+                <div>
+                    <div class="app-title">VAULT</div>
+                    <div class="app-subtitle">Financial Core</div>
+                </div>
             </div>
-            <div class="chart-container" style="position: relative; width: 100%;">
-                <canvas id="dashboardChart"></canvas>
+
+            <!-- Noiz App -->
+            <div class="app-icon noiz-app" onclick="launchApp('noiz')">
+                <div class="app-svg-wrapper">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                </div>
+                <div>
+                    <div class="app-title">NOIZ</div>
+                    <div class="app-subtitle">Marketing Hub</div>
+                </div>
+            </div>
+
+            <!-- Kinetic App -->
+            <div class="app-icon kinetic-app" onclick="alert('Kinetic Studio OS is currently offline or deploying.')">
+                <div class="app-svg-wrapper">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </div>
+                <div>
+                    <div class="app-title">KINETIC</div>
+                    <div class="app-subtitle">Video Production</div>
+                </div>
+            </div>
+
+            <!-- AirScreen App -->
+            <div class="app-icon airscreen-app" onclick="alert('AirScreen OS is currently offline or deploying.')">
+                <div class="app-svg-wrapper">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                </div>
+                <div>
+                    <div class="app-title">AIRSCREEN</div>
+                    <div class="app-subtitle">Event Control</div>
+                </div>
             </div>
         </div>
+    </div>
         
-        <div class="bottom-grid">
-            
-            <div class='glass-panel pane-left' id="moloni-pane">
-                <div class="moloni-header">
-                    <h3>MOLONI BILLING</h3>
-                    <div style="display:flex; gap: 8px;" id="moloni-header-actions">
-                        <button class="moloni-expand-btn" id="m-toggle-btn" onclick="toggleMoloniMode()">Expand</button>
-                    </div>
-                </div>
+    <!-- GLOBAL APP HEADER (Visible when an app is open) -->
+    <div class="global-app-header" id="global-header">
+        <button class="home-btn" onclick="returnToHome()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            OS Home
+        </button>
+    </div>
 
-                <div class="moloni-nav" id="m-nav">
-                    <div class="m-nav-item">Create ▾
-                        <div class="m-dropdown">
-                            <a onclick="loadMoloniView('Invoice')">Invoice</a>
-                            <a onclick="loadMoloniView('Estimate')">Estimate</a>
-                            <a onclick="loadMoloniView('Pro Forma')">Pro Forma Invoices</a>
-                            <a onclick="loadMoloniView('Receipts')">Receipts</a>
-                            <a onclick="loadMoloniView('Expense')">Expense</a>
-                        </div>
-                    </div>
-                    <div class="m-nav-item">Queries ▾
-                        <div class="m-dropdown">
-                            <div class="m-dropdown-title">Sales</div>
-                            <a onclick="loadMoloniView('Sales Report')">Sales Report</a>
-                            <a onclick="loadMoloniView('Sales VAT')">VAT Reports</a>
-                            <div class="m-dropdown-title" style="border-top:1px solid rgba(255,255,255,0.1); margin-top:5px;">Purchases</div>
-                            <a onclick="loadMoloniView('Purchase Report')">Purchase Report</a>
-                            <a onclick="loadMoloniView('Purchase VAT')">VAT Reports</a>
-                            <div class="m-dropdown-title" style="border-top:1px solid rgba(255,255,255,0.1); margin-top:5px;">Reconciliation Maps</div>
-                            <a onclick="loadMoloniView('VAT Maps')">VATs</a>
-                            <a onclick="loadMoloniView('Invoice Recon')">Invoices</a>
-                        </div>
-                    </div>
-                    <div class="m-nav-item">CRM ▾
-                        <div class="m-dropdown">
-                            <a onclick="loadMoloniView('Clients')">Clients</a>
-                            <a onclick="loadMoloniView('Suppliers')">Suppliers</a>
-                            <a onclick="loadMoloniView('Products')">Categories & Products</a>
-                        </div>
-                    </div>
-                    <div class="m-nav-item">TAX ▾
-                        <div class="m-dropdown">
-                            <a onclick="loadMoloniView('SAFT')">SAF-T(PT) File</a>
-                        </div>
-                    </div>
+    <!-- ========================================== -->
+    <!-- FINANCIAL VAULT ENVIRONMENT (Existing App) -->
+    <!-- ========================================== -->
+    <div id='app-view' class="main-container">
+        
+        <div id="financial-vault">
+            <div class='glass-panel pane-top'>
+                <div class="top-header-row" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:15px;">
+                    <h3 style="margin:0;">
+                        FINANCIAL OASIS 
+                    </h3>
+                    <button id="refresh-graph-btn" onclick="fetchDashboardData(true)" class="sleek-icon-btn" title="Force Live Refresh">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-8.21l5.67-5.67"/></svg>
+                    </button>
                 </div>
-
-                <div id="moloni-workspace">
-                    <div style="text-align: center; margin-top: 40px; color:#facc15; font-size: 13px;">
-                        Scanning Ledger... 🔄
-                    </div>
+                <div class="chart-container" style="position: relative; width: 100%;">
+                    <canvas id="dashboardChart"></canvas>
                 </div>
             </div>
             
-            <div class='glass-panel pane-right' id="expense-pane" style="justify-content: flex-start; text-align: center;">
-                <div style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom: 25px; position: relative;">
-                    <h3 style="margin:0; justify-content: center;">EXPENSE SCAN</h3>
-                    <span onclick="window.open('YOUR_DRIVE_FOLDER_LINK_HERE', '_blank')" style="cursor:pointer; font-size:20px; position:absolute; right:0;" title="2026 Private Archive Viewer">📁</span>
-                </div>
+            <div class="bottom-grid">
                 
-                <div class="input-group">
-                    <select id='monthOverride'>
-                        <option value='auto'>Auto Month</option>
-                        <option value='1'>January</option>
-                        <option value='2'>February</option>
-                        <option value='3'>March</option>
-                        <option value='4'>April</option>
-                        <option value='5'>May</option>
-                        <option value='6'>June</option>
-                        <option value='7'>July</option>
-                        <option value='8'>August</option>
-                        <option value='9'>September</option>
-                        <option value='10'>October</option>
-                        <option value='11'>November</option>
-                        <option value='12'>December</option>
-                    </select>
-                </div>
-                
-                <div class="input-group" style="margin-bottom:25px;">
-                    <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()">
-                        <span class="t-text" id="text-digital">Digital?</span>
+                <div class='glass-panel pane-left' id="moloni-pane">
+                    <div class="moloni-header">
+                        <h3>MOLONI BILLING</h3>
+                        <div style="display:flex; gap: 8px;" id="moloni-header-actions">
+                            <button class="moloni-expand-btn" id="m-toggle-btn" onclick="toggleMoloniMode()">Expand</button>
+                        </div>
                     </div>
-                    <div class="toggle-btn" id="btn-cash" onclick="toggleCash()">
-                        <span class="t-text" id="text-cash">In Cash?</span>
-                    </div>
-                </div>
-                
-                <div id='inputContainer'>
-                    <label class='btn btn-primary'>Open Camera
-                        <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
-                    </label>
-                    <label class='btn'>Open Gallery / Folder
-                        <input type='file' accept='*/*' onchange='handleFile(this)'>
-                    </label>
-                </div>
-                
-                <div class='preview-zone'>
-                    <img id='preview' src='' alt='Preview'>
-                </div>
 
-                <button id='uploadBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Upload to Vault</button>
-                <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Try Again</button>
-                <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
+                    <div class="moloni-nav" id="m-nav">
+                        <div class="m-nav-item">Create ▾
+                            <div class="m-dropdown">
+                                <a onclick="loadMoloniView('Invoice')">Invoice</a>
+                                <a onclick="loadMoloniView('Estimate')">Estimate</a>
+                                <a onclick="loadMoloniView('Pro Forma')">Pro Forma Invoices</a>
+                                <a onclick="loadMoloniView('Receipts')">Receipts</a>
+                                <a onclick="loadMoloniView('Expense')">Expense</a>
+                            </div>
+                        </div>
+                        <div class="m-nav-item">Queries ▾
+                            <div class="m-dropdown">
+                                <div class="m-dropdown-title">Sales</div>
+                                <a onclick="loadMoloniView('Sales Report')">Sales Report</a>
+                                <a onclick="loadMoloniView('Sales VAT')">VAT Reports</a>
+                                <div class="m-dropdown-title" style="border-top:1px solid rgba(255,255,255,0.1); margin-top:5px;">Purchases</div>
+                                <a onclick="loadMoloniView('Purchase Report')">Purchase Report</a>
+                                <a onclick="loadMoloniView('Purchase VAT')">VAT Reports</a>
+                                <div class="m-dropdown-title" style="border-top:1px solid rgba(255,255,255,0.1); margin-top:5px;">Reconciliation Maps</div>
+                                <a onclick="loadMoloniView('VAT Maps')">VATs</a>
+                                <a onclick="loadMoloniView('Invoice Recon')">Invoices</a>
+                            </div>
+                        </div>
+                        <div class="m-nav-item">CRM ▾
+                            <div class="m-dropdown">
+                                <a onclick="loadMoloniView('Clients')">Clients</a>
+                                <a onclick="loadMoloniView('Suppliers')">Suppliers</a>
+                                <a onclick="loadMoloniView('Products')">Categories & Products</a>
+                            </div>
+                        </div>
+                        <div class="m-nav-item">TAX ▾
+                            <div class="m-dropdown">
+                                <a onclick="loadMoloniView('SAFT')">SAF-T(PT) File</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="moloni-workspace">
+                        <div style="text-align: center; margin-top: 40px; color:#facc15; font-size: 13px;">
+                            Scanning Ledger... 🔄
+                        </div>
+                    </div>
+                </div>
                 
-                <div id='status'>Awaiting Document...</div>
+                <div class='glass-panel pane-right' id="expense-pane" style="justify-content: flex-start; text-align: center;">
+                    <div style="display:flex; justify-content:center; align-items:center; width:100%; margin-bottom: 25px; position: relative;">
+                        <h3 style="margin:0; justify-content: center;">EXPENSE SCAN</h3>
+                        <span onclick="window.open('YOUR_DRIVE_FOLDER_LINK_HERE', '_blank')" style="cursor:pointer; font-size:20px; position:absolute; right:0;" title="2026 Private Archive Viewer">📁</span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <select id='monthOverride'>
+                            <option value='auto'>Auto Month</option>
+                            <option value='1'>January</option>
+                            <option value='2'>February</option>
+                            <option value='3'>March</option>
+                            <option value='4'>April</option>
+                            <option value='5'>May</option>
+                            <option value='6'>June</option>
+                            <option value='7'>July</option>
+                            <option value='8'>August</option>
+                            <option value='9'>September</option>
+                            <option value='10'>October</option>
+                            <option value='11'>November</option>
+                            <option value='12'>December</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group" style="margin-bottom:25px;">
+                        <div class="toggle-btn" id="btn-digital" onclick="toggleDigital()">
+                            <span class="t-text" id="text-digital">Digital?</span>
+                        </div>
+                        <div class="toggle-btn" id="btn-cash" onclick="toggleCash()">
+                            <span class="t-text" id="text-cash">In Cash?</span>
+                        </div>
+                    </div>
+                    
+                    <div id='inputContainer'>
+                        <label class='btn btn-primary'>Open Camera
+                            <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
+                        </label>
+                        <label class='btn'>Open Gallery / Folder
+                            <input type='file' accept='*/*' onchange='handleFile(this)'>
+                        </label>
+                    </div>
+                    
+                    <div class='preview-zone'>
+                        <img id='preview' src='' alt='Preview'>
+                    </div>
+
+                    <button id='uploadBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Upload to Vault</button>
+                    <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='triggerUpload()'>Try Again</button>
+                    <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
+                    
+                    <div id='status'>Awaiting Document...</div>
+                </div>
             </div>
         </div>
+
+        <!-- ========================================== -->
+        <!-- MARKETING HUB ENVIRONMENT (NOIZ)           -->
+        <!-- ========================================== -->
+        <div id="marketing-hub">
+            <div style="text-align:left; width:100%; padding: 0 20px; box-sizing: border-box; margin-bottom: 10px;">
+                <h2 style="color:#c084fc; font-weight:800; margin-top:0; margin-bottom: 5px; font-size: 24px; text-transform:uppercase; letter-spacing: 1px;">Marketing Core</h2>
+                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">AI Outbound & Generative Execution Nodes</p>
+            </div>
+
+            <div class="mkt-grid">
+                <!-- Node 1 -->
+                <div class="mkt-node" onclick="alert('Opening Auto-Blog & SEO Generator...')">
+                    <div class="mkt-icon-wrap">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    </div>
+                    <div class="mkt-title">Auto-Blog & SEO</div>
+                    <div class="mkt-desc">Generate optimized web articles from project metadata or stack details.</div>
+                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
+                </div>
+
+                <!-- Node 2 -->
+                <div class="mkt-node" onclick="alert('Opening Multi-Platform Social Stack...')">
+                    <div class="mkt-icon-wrap">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                    </div>
+                    <div class="mkt-title">Social Stack</div>
+                    <div class="mkt-desc">Convert briefs into multi-platform threads, carousels, and visual captions.</div>
+                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
+                </div>
+
+                <!-- Node 3 -->
+                <div class="mkt-node" onclick="alert('Opening B2B Targeted Campaigns...')">
+                    <div class="mkt-icon-wrap">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+                    </div>
+                    <div class="mkt-title">B2B Campaigns</div>
+                    <div class="mkt-desc">Scrape target companies to draft hyper-personalized cold outreach sequences.</div>
+                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
+                </div>
+
+                <!-- Node 4 -->
+                <div class="mkt-node" onclick="alert('Opening Lead Nurture Engine...')">
+                    <div class="mkt-icon-wrap">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    </div>
+                    <div class="mkt-title">Lead Nurture</div>
+                    <div class="mkt-desc">Turn raw website inquiries into polished replies designed to book discovery calls.</div>
+                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
+                </div>
+
+                <!-- Node 5 -->
+                <div class="mkt-node" onclick="alert('Opening Branding & Design Curation...')">
+                    <div class="mkt-icon-wrap">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    </div>
+                    <div class="mkt-title">Brand & Gallery Curation</div>
+                    <div class="mkt-desc">Generate creative direction, prompt engineering, and portfolio layout strategies.</div>
+                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- MODAL: Custom Alert -->
@@ -416,7 +608,7 @@
         </div>
     </div>
 
-    <!-- MODAL: Edit Supplier / Client -->
+    <!-- MODAL: New Client / Supplier -->
     <div class="modal-overlay" id="new-client-modal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('new-client-modal')">×</button>
@@ -438,7 +630,7 @@
                         </div>
                     </div>
                     <div class="f-group" style="flex:1;">
-                        <label class="f-label">Code</label>
+                        <label class="f-label">Client Code</label>
                         <input type="text" class="f-input" value="10066" disabled>
                     </div>
                 </div>
@@ -579,7 +771,46 @@
         var expenseAnalyticsChartInstance = null;
         var reconciliationMode = false;
         var expenseVatMode = false;
+        var isDigital = false;
+        var isCash = false;
+        var currentActiveApp = null;
         
+        // Custom Chart.js Plugin for VAT Warnings (Main Dashboard)
+        const vatWarningPlugin = {
+            id: 'vatWarningPlugin',
+            afterDraw: (chart) => {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    if (dataset.label.includes('Missing VAT')) {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        meta.data.forEach((point, index) => {
+                            const value = dataset.data[index];
+                            if (value > 0) { 
+                                const x = point.x;
+                                const y = point.y;
+                                
+                                // Draw yellow warning circle
+                                ctx.beginPath();
+                                ctx.arc(x, y - 15, 8, 0, 2 * Math.PI);
+                                ctx.fillStyle = '#facc15';
+                                ctx.fill();
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = '#1e1e1e';
+                                ctx.stroke();
+                                
+                                // Draw exclamation mark text
+                                ctx.fillStyle = '#000';
+                                ctx.font = 'bold 10px Nunito';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText('!', x, y - 14);
+                            }
+                        });
+                    }
+                });
+            }
+        };
+
         // --- DEV SANDBOX MOCK DATA --- //
         var nextInvoiceNumber = "2026/46";
         window.globalInvoices = [
@@ -610,50 +841,51 @@
 
         function unlockApp(){
             document.getElementById('login-wrapper').style.display = 'none';
-            document.getElementById('app-view').style.display = 'flex';
+            document.getElementById('os-launcher').style.display = 'flex';
             document.body.style.alignItems = 'flex-start';
-            
-            initPlaceholderGraph();
-            if(moloniState === 0) renderRetractedTicker();
         }
 
-        // Custom Chart.js Plugin for VAT Warnings (Main Dashboard)
-        const vatWarningPlugin = {
-            id: 'vatWarningPlugin',
-            afterDraw: (chart) => {
-                const ctx = chart.ctx;
-                chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    if (dataset.label === 'Missing VAT (No Doc)') {
-                        const meta = chart.getDatasetMeta(datasetIndex);
-                        meta.data.forEach((point, index) => {
-                            const value = dataset.data[index];
-                            if (value > 0) { // Only draw if missing VAT exists
-                                const x = point.x;
-                                const y = point.y;
-                                
-                                // Draw yellow warning circle
-                                ctx.beginPath();
-                                ctx.arc(x, y - 15, 8, 0, 2 * Math.PI);
-                                ctx.fillStyle = '#facc15';
-                                ctx.fill();
-                                ctx.lineWidth = 2;
-                                ctx.strokeStyle = '#1e1e1e';
-                                ctx.stroke();
-                                
-                                // Draw exclamation mark text
-                                ctx.fillStyle = '#000';
-                                ctx.font = 'bold 10px Nunito';
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'middle';
-                                ctx.fillText('!', x, y - 14);
-                            }
-                        });
-                    }
-                });
-            }
-        };
+        // --- OS ROUTING LOGIC ---
+        function launchApp(appId) {
+            currentActiveApp = appId;
+            var launcher = document.getElementById('os-launcher');
+            var appView = document.getElementById('app-view');
+            var globalHeader = document.getElementById('global-header');
+            var vault = document.getElementById('financial-vault');
+            var mkt = document.getElementById('marketing-hub');
+            var body = document.body;
 
-        // State Machine Controller
+            launcher.style.display = 'none';
+            appView.style.display = 'flex';
+            globalHeader.style.display = 'flex';
+
+            if (appId === 'noiz') {
+                body.classList.add('marketing-theme');
+                vault.style.display = 'none';
+                mkt.style.display = 'flex';
+            } else if (appId === 'vault') {
+                body.classList.remove('marketing-theme');
+                mkt.style.display = 'none';
+                vault.style.display = 'flex';
+                initPlaceholderGraph();
+                if(moloniState === 0) renderRetractedTicker();
+            }
+        }
+
+        function returnToHome() {
+            var launcher = document.getElementById('os-launcher');
+            var appView = document.getElementById('app-view');
+            var globalHeader = document.getElementById('global-header');
+            var body = document.body;
+
+            appView.style.display = 'none';
+            globalHeader.style.display = 'none';
+            launcher.style.display = 'flex';
+            body.classList.remove('marketing-theme');
+            currentActiveApp = null;
+        }
+
+        // --- STATE MACHINE ---
         function toggleMoloniMode() {
             if (moloniState === 2) setMoloniState(1);
             else if (moloniState === 1) setMoloniState(0);
@@ -691,6 +923,7 @@
             
             headerActions.innerHTML = '';
             
+            // Add Stats button dynamically if we are in expanded mode (state > 0)
             if (state > 0) {
                 var statsBtn = document.createElement('button');
                 statsBtn.className = 'moloni-expand-btn';
@@ -704,31 +937,31 @@
                 statsBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>';
                 statsBtn.title = "View Dashboard Stats";
                 statsBtn.onclick = function() { loadMoloniView('Dashboard'); };
-                headerActions.appendChild(statsBtn); 
+                headerActions.appendChild(statsBtn); // Add Stats First
             }
 
             if(isListMode) {
-                var exportCsv = document.createElement('button');
-                exportCsv.className = 'moloni-expand-btn';
-                exportCsv.style.background = 'transparent';
-                exportCsv.style.borderColor = 'rgba(255,255,255,0.1)';
-                exportCsv.style.color = '#94a3b8';
-                exportCsv.title = 'Export CSV';
-                exportCsv.innerText = 'CSV';
-                
-                var exportPdf = document.createElement('button');
-                exportPdf.className = 'moloni-expand-btn';
-                exportPdf.style.background = 'transparent';
-                exportPdf.style.borderColor = 'rgba(255,255,255,0.1)';
-                exportPdf.style.color = '#94a3b8';
-                exportPdf.title = 'Export PDF';
-                exportPdf.innerText = 'PDF';
-                
-                headerActions.appendChild(exportCsv);
-                headerActions.appendChild(exportPdf);
+                headerActions.innerHTML += `
+                    <button class="moloni-expand-btn" style="background:transparent; border-color:rgba(255,255,255,0.1); color:#94a3b8;" title="Export CSV">CSV</button>
+                    <button class="moloni-expand-btn" style="background:transparent; border-color:rgba(255,255,255,0.1); color:#94a3b8;" title="Export PDF">PDF</button>
+                `;
             }
             
-            headerActions.appendChild(btn); 
+            headerActions.appendChild(btn); // Ensure Expand/Collapse is on the far right
+        }
+
+        function toggleDigital() {
+            isDigital = !isDigital;
+            var btn = document.getElementById('btn-digital');
+            if(isDigital) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+
+        function toggleCash() {
+            isCash = !isCash;
+            var btn = document.getElementById('btn-cash');
+            if(isCash) btn.classList.add('active');
+            else btn.classList.remove('active');
         }
 
         function initPlaceholderGraph() {
@@ -738,9 +971,9 @@
                 data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [
-                        { label: 'Earnings (Moloni)', data: [1200,2100,1800,3200,2500,2800,1500,0,0,0,0,0], borderColor: '#cbd5e1', backgroundColor: 'rgba(203, 213, 225, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#cbd5e1', tension: 0.4 },
-                        { label: 'Expenses (Drive)', data: [800,1500,1200,2000,1800,1900,900,0,0,0,0,0], borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#facc15', tension: 0.4 },
-                        { label: 'Missing VAT (No Doc)', data: [0,0,0,0,0,0,193.31,0,0,0,0,0], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 2, pointBackgroundColor: '#ef4444', borderDash: [5, 5], tension: 0.1 }
+                        { label: 'Earnings (Moloni) (€)', data: [1200,2100,1800,3200,2500,2800,1500,0,0,0,0,0], borderColor: '#cbd5e1', backgroundColor: 'rgba(203, 213, 225, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#cbd5e1', tension: 0.4 },
+                        { label: 'Expenses (Drive) (€)', data: [800,1500,1200,2000,1800,1900,900,0,0,0,0,0], borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', borderWidth: 1.5, pointBackgroundColor: '#facc15', tension: 0.4 },
+                        { label: 'Missing VAT (No Doc) (€)', data: [0,0,0,0,0,0,193.31,0,0,0,0,0], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 2, pointBackgroundColor: '#ef4444', borderDash: [5, 5], tension: 0.1 }
                     ]
                 },
                 options: { 
@@ -748,11 +981,11 @@
                     maintainAspectRatio: false, 
                     plugins: { 
                         legend: { labels: { color: '#888', font: {family: 'Nunito'} } },
-                        tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += new Intl.NumberFormat('en-PT', { style: 'currency', currency: 'EUR' }).format(context.parsed.y); } return label; } } }
+                        tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label = label.replace(' (€)', '') + ': '; } if (context.parsed.y !== null) { label += new Intl.NumberFormat('en-PT', { style: 'currency', currency: 'EUR' }).format(context.parsed.y); } return label; } } }
                     }, 
                     scales: { 
                         x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'} } }, 
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'}, callback: function(value, index, values) { return value + ' €'; } } } 
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Nunito'}, callback: function(value) { return value + ' €'; } } } 
                     } 
                 },
                 plugins: [vatWarningPlugin]
@@ -792,7 +1025,7 @@
 
         function loadMoloniView(viewName, isInternalCall = false) {
             // Determine required state
-            var isFocusMode = viewName.startsWith('Create ') || viewName === 'Expense' || viewName.includes('Report') || viewName.includes('VAT') || viewName === 'Invoice Recon' || viewName === 'Suppliers';
+            var isFocusMode = viewName.startsWith('Create ') || viewName === 'Expense' || viewName.includes('Report') || viewName.includes('VAT') || viewName === 'Invoice Recon' || viewName === 'Suppliers' || viewName === 'Clients';
             
             if (!isInternalCall) {
                 if (viewName === 'Dashboard') {
@@ -1468,6 +1701,41 @@
                 `;
                 renderSupplierCategories();
             }
+            else if (viewName === 'Clients') {
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
+                            <div>
+                                <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">Clients & Prospects</h2>
+                                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Manage your active billing entities and future leads.</p>
+                            </div>
+                            <button class="f-btn-cancel" onclick="loadMoloniView('Dashboard')" style="padding: 8px 20px;">← Back</button>
+                        </div>
+                        
+                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+                            <div class="glass-panel" style="padding:25px; text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:15px; border-color:rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05); transition: all 0.2s ease;" onclick="alert('Opening Active Clients List...')" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                                <div style="width:48px; height:48px; background:rgba(34, 197, 94, 0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; color:#22c55e;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 style="margin:0; color:#f8fafc; font-size:16px; font-weight:700; margin-bottom:4px;">Active Clients</h4>
+                                    <span style="color:#94a3b8; font-size:12px;">24 Entities with billing history</span>
+                                </div>
+                            </div>
+                            
+                            <div class="glass-panel" style="padding:25px; text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:15px; border-color:rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); transition: all 0.2s ease;" onclick="alert('Opening Prospect Vault...')" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                                <div style="width:48px; height:48px; background:rgba(59, 130, 246, 0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; color:#3b82f6;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 16 16 12 12 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 style="margin:0; color:#f8fafc; font-size:16px; font-weight:700; margin-bottom:4px;">Prospect Vault</h4>
+                                    <span style="color:#94a3b8; font-size:12px;">85 Leads awaiting conversion</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
             else {
                 ws.innerHTML = `<div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;"><h2 style="color:#f8fafc; font-weight:400; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-top:0;">${viewName}</h2><div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); padding: 40px; text-align: center; border-radius: 8px; color: #888;"><span style="font-size: 24px;">🚧</span><br><br>Interface for <b>${viewName}</b> ready.<br>Awaiting data binding from Invoice Node.</div></div>`;
             }
@@ -1556,6 +1824,131 @@
                 `;
             }
             renderExpenseAnalyticsChart();
+        }
+
+        // --- SUPPLIERS VAULT LOGIC --- //
+        
+        function generateSupplierNode(name, count, svgIcon) {
+            return `
+                <div class="glass-panel" style="padding:20px; text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:15px; border-color:rgba(255,255,255,0.05); transition: all 0.2s ease;" onclick="openSupplierCategory('${name}')" onmouseover="this.style.borderColor='#facc15'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.transform='translateY(0)';">
+                    <div style="width:40px; height:40px; background:rgba(250,204,21,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#facc15;">
+                        ${svgIcon}
+                    </div>
+                    <div>
+                        <h4 style="margin:0; color:#e2e8f0; font-size:15px; font-weight:600;">${name}</h4>
+                        <span style="color:#888; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">${count} Registered</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSupplierCategories() {
+            var container = document.getElementById('suppliers-main-container');
+            if(!container) return;
+            
+            var svgs = {
+                'Equipa Externa': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+                'Subcontratação': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
+                'Alojamento': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+                'Alimentação': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>',
+                'Consumíveis e Operações': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>',
+                'Equipamento': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>',
+                'Transportes e Deslocações': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="8" rx="2" ry="2"></rect><circle cx="6.5" cy="19.5" r="1.5"></circle><circle cx="17.5" cy="19.5" r="1.5"></circle><path d="M3 11l2-5h10l2 5"></path></svg>'
+            };
+
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
+                    <div>
+                        <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">Suppliers Vault</h2>
+                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Organized vendor routing based on operational categories.</p>
+                    </div>
+                    <button class="f-btn-cancel" onclick="loadMoloniView('Dashboard')" style="padding: 8px 20px;">← Back</button>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 20px; margin-bottom: 40px;">
+                    ${generateSupplierNode('Equipa Externa', 14, svgs['Equipa Externa'])}
+                    ${generateSupplierNode('Subcontratação', 8, svgs['Subcontratação'])}
+                    ${generateSupplierNode('Alojamento', 22, svgs['Alojamento'])}
+                    ${generateSupplierNode('Alimentação', 45, svgs['Alimentação'])}
+                    ${generateSupplierNode('Consumíveis e Operações', 31, svgs['Consumíveis e Operações'])}
+                    ${generateSupplierNode('Equipamento', 12, svgs['Equipamento'])}
+                    ${generateSupplierNode('Transportes e Deslocações', 5, svgs['Transportes e Deslocações'])}
+                </div>
+                
+                <div style="display:flex; gap: 10px; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; margin-bottom: 20px;">
+                    <input type="text" class="input-transparent" placeholder="Global Search..." style="width:250px;">
+                    <button class="btn-primary btn" style="width:auto; padding: 10px 20px; margin-bottom:0;" onclick="document.getElementById('new-client-modal').style.display='flex'">+ New Supplier</button>
+                </div>
+            `;
+        }
+
+        function openSupplierCategory(categoryName) {
+            var container = document.getElementById('suppliers-main-container');
+            if(!container) return;
+            
+            // Mock Data Injection based on Category
+            var mockSuppliers = [];
+            if(categoryName === 'Equipamento') {
+                mockSuppliers = [
+                    { name: 'Amazon EU SARL', address: '5 Rue Plaetis, Luxembourg', email: 'billing@amazon.eu', spent: '4,250.00' },
+                    { name: 'Worten Equipamentos', address: 'Rua João Mendonça 505, Sra da Hora', email: 'apoio@worten.pt', spent: '1,120.50' },
+                    { name: 'PCDIGA', address: 'Estrada Nacional 10, Leiria', email: 'vendas@pcdiga.com', spent: '890.00' }
+                ];
+            } else {
+                mockSuppliers = [
+                    { name: 'Mock Supplier LDA', address: 'Rua Exemplo 123, Lisboa', email: 'contato@exemplo.pt', spent: '1,500.00' },
+                    { name: 'Generic Vendor S.A.', address: 'Av Principal 45, Porto', email: 'billing@generic.pt', spent: '850.25' }
+                ];
+            }
+
+            var tbodyHtml = '';
+            mockSuppliers.forEach(sup => {
+                tbodyHtml += `
+                    <tr>
+                        <td style="color:#fff; font-weight:600;">${sup.name}</td>
+                        <td style="color:#cbd5e1;">${sup.address}</td>
+                        <td style="color:#3b82f6;">${sup.email}</td>
+                        <td class="text-right" style="color:#facc15; font-weight:700;">${sup.spent} €</td>
+                        <td class="text-center">
+                            <button class="btn-yellow-outline" style="padding:4px 12px; font-size:11px;" onclick="document.getElementById('new-client-modal').style.display='flex'">Edit Contact</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <h2 style="color:#facc15; font-weight:600; margin-top:0; margin-bottom: 5px;">${categoryName}</h2>
+                        </div>
+                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Filtered contacts roster for this category</p>
+                    </div>
+                    <button class="f-btn-cancel" onclick="renderSupplierCategories()" style="padding: 8px 20px;">← Back to Categories</button>
+                </div>
+
+                <div class="moloni-table-container" style="margin-bottom: 40px;">
+                    <table class="moloni-table">
+                        <thead>
+                            <tr>
+                                <th>Supplier Name</th>
+                                <th>Address</th>
+                                <th>Email</th>
+                                <th class="text-right">Total Spent YTD</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tbodyHtml}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="display:flex; gap: 10px; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                    <input type="text" class="input-transparent" placeholder="Search in ${categoryName}..." style="width:250px;">
+                    <button class="btn-primary btn" style="width:auto; padding: 10px 20px; margin-bottom:0;" onclick="document.getElementById('new-client-modal').style.display='flex'">+ New Supplier</button>
+                </div>
+            `;
         }
 
         // --- BRAIN: AUTO-SUGGEST & MODALS ---
@@ -1820,169 +2213,49 @@
                 container.innerHTML = `
                     <h3 style="color:#e2e8f0; font-size:14px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">Awaiting Approval (${year})</h3>
                     <button class="month-accordion-btn active" onclick="toggleExpenseAccordion(this)">Q3 - July ${year} <span class="arrow">▲</span></button>
-                    <div class="month-table-container" style="display:block;">${tableHTML}</div>
+                    <div class="month-table-container" style="display:block; overflow-x:auto;">${tableHTML}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">Q2 - June ${year} <span class="arrow">▼</span></button>
-                    <div class="month-table-container">${tableHTML.replace(/07/g, '06').replace(/July/g, 'June')}</div>
+                    <div class="month-table-container" style="overflow-x:auto;">${tableHTML.replace(/07/g, '06').replace(/July/g, 'June')}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">Q2 - May ${year} <span class="arrow">▼</span></button>
-                    <div class="month-table-container"><p style="color:#888; text-align:center; padding:10px;">All expenses reconciled for this month.</p></div>
+                    <div class="month-table-container" style="overflow-x:auto;"><p style="color:#888; text-align:center; padding:10px;">All expenses reconciled for this month.</p></div>
                 `;
             } else if (timeFilter === 'este_trimestre') {
                 container.innerHTML = `
                     <h3 style="color:#e2e8f0; font-size:14px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">Awaiting Approval (Q3 2026)</h3>
                     <button class="month-accordion-btn active" onclick="toggleExpenseAccordion(this)">July 2026 <span class="arrow">▲</span></button>
-                    <div class="month-table-container" style="display:block;">${tableHTML}</div>
+                    <div class="month-table-container" style="display:block; overflow-x:auto;">${tableHTML}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">August 2026 <span class="arrow">▼</span></button>
-                    <div class="month-table-container">${tableHTML.replace(/07/g, '08').replace(/July/g, 'August')}</div>
+                    <div class="month-table-container" style="overflow-x:auto;">${tableHTML.replace(/07/g, '08').replace(/July/g, 'August')}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">September 2026 <span class="arrow">▼</span></button>
-                    <div class="month-table-container"><p style="color:#888; text-align:center; padding:10px;">No expenses logged for this month yet.</p></div>
+                    <div class="month-table-container" style="overflow-x:auto;"><p style="color:#888; text-align:center; padding:10px;">No expenses logged for this month yet.</p></div>
                 `;
             } else if (timeFilter === 'trimestre_anterior') {
                 container.innerHTML = `
                     <h3 style="color:#e2e8f0; font-size:14px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">Awaiting Approval (Q2 2026)</h3>
                     <button class="month-accordion-btn active" onclick="toggleExpenseAccordion(this)">April 2026 <span class="arrow">▲</span></button>
-                    <div class="month-table-container" style="display:block;">${tableHTML.replace(/07/g, '04').replace(/July/g, 'April')}</div>
+                    <div class="month-table-container" style="display:block; overflow-x:auto;">${tableHTML.replace(/07/g, '04').replace(/July/g, 'April')}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">May 2026 <span class="arrow">▼</span></button>
-                    <div class="month-table-container">${tableHTML.replace(/07/g, '05').replace(/July/g, 'May')}</div>
+                    <div class="month-table-container" style="overflow-x:auto;">${tableHTML.replace(/07/g, '05').replace(/July/g, 'May')}</div>
                     
                     <button class="month-accordion-btn" onclick="toggleExpenseAccordion(this)">June 2026 <span class="arrow">▼</span></button>
-                    <div class="month-table-container">${tableHTML.replace(/07/g, '06').replace(/July/g, 'June')}</div>
+                    <div class="month-table-container" style="overflow-x:auto;">${tableHTML.replace(/07/g, '06').replace(/July/g, 'June')}</div>
                 `;
             } else if (timeFilter === 'este_mes' || timeFilter === 'mes_anterior') {
                 var monthLabel = timeFilter === 'este_mes' ? 'July 2026' : 'June 2026';
                 var replaceMonth = timeFilter === 'este_mes' ? '07' : '06';
                 container.innerHTML = `
                     <h3 style="color:#e2e8f0; font-size:14px; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;">Awaiting Approval (${monthLabel})</h3>
-                    <div class="moloni-table-container" style="padding-bottom:20px;">${tableHTML.replace(/07/g, replaceMonth)}</div>
+                    <div class="moloni-table-container" style="padding-bottom:20px; overflow-x:auto;">${tableHTML.replace(/07/g, replaceMonth)}</div>
                 `;
             }
         }
 
-        // --- SUPPLIERS VAULT LOGIC --- //
-        
-        function generateSupplierNode(name, count, svgIcon) {
-            return `
-                <div class="glass-panel" style="padding:20px; text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:15px; border-color:rgba(255,255,255,0.05); transition: all 0.2s ease;" onclick="openSupplierCategory('${name}')" onmouseover="this.style.borderColor='#facc15'; this.style.transform='translateY(-3px)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.05)'; this.style.transform='translateY(0)';">
-                    <div style="width:40px; height:40px; background:rgba(250,204,21,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#facc15;">
-                        ${svgIcon}
-                    </div>
-                    <div>
-                        <h4 style="margin:0; color:#e2e8f0; font-size:15px; font-weight:600;">${name}</h4>
-                        <span style="color:#888; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">${count} Registered</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSupplierCategories() {
-            var container = document.getElementById('suppliers-main-container');
-            if(!container) return;
-            
-            var svgs = {
-                'Equipa Externa': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
-                'Subcontratação': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
-                'Alojamento': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
-                'Alimentação': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>',
-                'Consumíveis e Operações': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>',
-                'Equipamento': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>',
-                'Transportes e Deslocações': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="8" rx="2" ry="2"></rect><circle cx="6.5" cy="19.5" r="1.5"></circle><circle cx="17.5" cy="19.5" r="1.5"></circle><path d="M3 11l2-5h10l2 5"></path></svg>'
-            };
-
-            container.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
-                    <div>
-                        <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">Suppliers Vault</h2>
-                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Organized vendor routing based on operational categories.</p>
-                    </div>
-                    <button class="f-btn-cancel" onclick="loadMoloniView('Dashboard')" style="padding: 8px 20px;">← Back</button>
-                </div>
-
-                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 20px;">
-                    ${generateSupplierNode('Equipa Externa', 14, svgs['Equipa Externa'])}
-                    ${generateSupplierNode('Subcontratação', 8, svgs['Subcontratação'])}
-                    ${generateSupplierNode('Alojamento', 22, svgs['Alojamento'])}
-                    ${generateSupplierNode('Alimentação', 45, svgs['Alimentação'])}
-                    ${generateSupplierNode('Consumíveis e Operações', 31, svgs['Consumíveis e Operações'])}
-                    ${generateSupplierNode('Equipamento', 12, svgs['Equipamento'])}
-                    ${generateSupplierNode('Transportes e Deslocações', 5, svgs['Transportes e Deslocações'])}
-                </div>
-                
-                <div style="display:flex; gap: 10px; align-items: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
-                    <input type="text" class="input-transparent" placeholder="Global Search..." style="width:250px;">
-                    <button class="btn-primary btn" style="width:auto; padding: 10px 20px; margin-bottom:0;" onclick="document.getElementById('new-client-modal').style.display='flex'">+ New Supplier</button>
-                </div>
-            `;
-        }
-
-        function openSupplierCategory(categoryName) {
-            var container = document.getElementById('suppliers-main-container');
-            if(!container) return;
-            
-            // Mock Data Injection based on Category
-            var mockSuppliers = [];
-            if(categoryName === 'Equipamento') {
-                mockSuppliers = [
-                    { name: 'Amazon EU SARL', address: '5 Rue Plaetis, Luxembourg', email: 'billing@amazon.eu', spent: '4,250.00' },
-                    { name: 'Worten Equipamentos', address: 'Rua João Mendonça 505, Sra da Hora', email: 'apoio@worten.pt', spent: '1,120.50' },
-                    { name: 'PCDIGA', address: 'Estrada Nacional 10, Leiria', email: 'vendas@pcdiga.com', spent: '890.00' }
-                ];
-            } else {
-                mockSuppliers = [
-                    { name: 'Mock Supplier LDA', address: 'Rua Exemplo 123, Lisboa', email: 'contato@exemplo.pt', spent: '1,500.00' },
-                    { name: 'Generic Vendor S.A.', address: 'Av Principal 45, Porto', email: 'billing@generic.pt', spent: '850.25' }
-                ];
-            }
-
-            var tbodyHtml = '';
-            mockSuppliers.forEach(sup => {
-                tbodyHtml += `
-                    <tr>
-                        <td style="color:#fff; font-weight:600;">${sup.name}</td>
-                        <td style="color:#cbd5e1;">${sup.address}</td>
-                        <td style="color:#3b82f6;">${sup.email}</td>
-                        <td class="text-right" style="color:#facc15; font-weight:700;">${sup.spent} €</td>
-                        <td class="text-center">
-                            <button class="btn-yellow-outline" style="padding:4px 12px; font-size:11px;" onclick="document.getElementById('new-client-modal').style.display='flex'">Edit Contact</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            container.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
-                    <div>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <h2 style="color:#facc15; font-weight:600; margin-top:0; margin-bottom: 5px;">${categoryName}</h2>
-                        </div>
-                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Filtered contacts roster for this category</p>
-                    </div>
-                    <button class="f-btn-cancel" onclick="renderSupplierCategories()" style="padding: 8px 20px;">← Back to Categories</button>
-                </div>
-
-                <div class="moloni-table-container">
-                    <table class="moloni-table">
-                        <thead>
-                            <tr>
-                                <th>Supplier Name</th>
-                                <th>Address</th>
-                                <th>Email</th>
-                                <th class="text-right">Total Spent YTD</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tbodyHtml}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        // --- DASHBOARD & INVOICE LISTS --- //
+        // --- DASHBOARD LISTS ---
 
         function renderExpandedInvoiceList() {
             var listEl = document.getElementById('expanded-invoice-list');
@@ -2009,7 +2282,19 @@
             for(var key in totals) { if(totals[key] > 0) { labels.push(key); data.push(totals[key]); bgColors.push(colorMap[key] || "#ef4444"); } }
             if(labels.length === 0) { labels = ["No Data"]; data = [1]; bgColors = ["rgba(255,255,255,0.05)"]; }
             if(expensePieChartInstance) expensePieChartInstance.destroy();
-            expensePieChartInstance = new Chart(ctx.getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 2, borderColor: '#1e1e1e', hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { position: 'right', labels: { color: '#e2e8f0', font: {size: 12, family: 'Nunito', weight: '600'}, boxWidth:8, padding: 20, usePointStyle: true, pointStyle: 'circle' } } } } });
+            expensePieChartInstance = new Chart(ctx.getContext('2d'), { 
+                type: 'doughnut', 
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 2, borderColor: '#1e1e1e', hoverOffset: 4 }] }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '80%', 
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#e2e8f0', font: {size: 12, family: 'Nunito', weight: '600'}, boxWidth:8, padding: 20, usePointStyle: true, pointStyle: 'circle' } },
+                        tooltip: { callbacks: { label: function(context) { return ' ' + new Intl.NumberFormat('en-PT', { style: 'currency', currency: 'EUR' }).format(context.parsed); } } } 
+                    } 
+                } 
+            });
         }
 
         function renderExpenseAnalyticsChart() {
@@ -2026,7 +2311,7 @@
                 datasetsConfig = [
                     {
                         type: 'line',
-                        label: 'Pending VAT (No Doc)',
+                        label: 'Pending VAT (No Doc) (€)',
                         data: [10, 25, 0, 80, 5, 0, 46, 0, 0, 0, 0, 0],
                         borderColor: '#ef4444',
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -2036,7 +2321,7 @@
                     },
                     {
                         type: 'bar',
-                        label: 'Total Expense VAT',
+                        label: 'Total Expense VAT (€)',
                         data: [276, 345, 207, 506, 414, 483, 253, 0, 0, 0, 0, 0],
                         backgroundColor: '#facc15',
                         borderRadius: 4,
@@ -2047,7 +2332,7 @@
                 datasetsConfig = [
                     {
                         type: 'line',
-                        label: 'Lost / Unclaimed Money',
+                        label: 'Lost / Unclaimed Money (€)',
                         data: [50, 120, 0, 400, 20, 0, 250, 0, 0, 0, 0, 0],
                         borderColor: '#ef4444',
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -2057,7 +2342,7 @@
                     },
                     {
                         type: 'bar',
-                        label: 'Reconciled Expenses',
+                        label: 'Reconciled Expenses (€)',
                         data: [1200, 1500, 900, 2200, 1800, 2100, 1100, 0, 0, 0, 0, 0],
                         backgroundColor: '#3b82f6',
                         borderRadius: 4,
@@ -2077,7 +2362,7 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { labels: { color: '#e2e8f0', font: {family: 'Nunito'} } },
-                        tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + new Intl.NumberFormat('en-PT', { style: 'currency', currency: 'EUR' }).format(context.parsed.y); } } }
+                        tooltip: { callbacks: { label: function(context) { return ' ' + new Intl.NumberFormat('en-PT', { style: 'currency', currency: 'EUR' }).format(context.parsed.y); } } }
                     },
                     scales: {
                         x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: {family: 'Nunito'} } },
@@ -2149,7 +2434,6 @@
             });
             tbody.innerHTML = html;
         }
-
     </script>
 </body>
 </html>
