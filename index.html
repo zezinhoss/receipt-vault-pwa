@@ -843,7 +843,7 @@
         function unlockApp(){
             document.getElementById('login-wrapper').style.display = 'none';
             document.getElementById('os-launcher').style.display = 'flex';
-            document.body.style.alignItems = 'flex-start';
+            document.body.style.alignItems = 'center';
         }
 
         // --- OS ROUTING LOGIC ---
@@ -859,6 +859,7 @@
             launcher.style.display = 'none';
             appView.style.display = 'flex';
             globalHeader.style.display = 'flex';
+            body.style.alignItems = 'flex-start';
 
             if (appId === 'noiz') {
                 body.classList.add('marketing-theme');
@@ -883,6 +884,7 @@
             globalHeader.style.display = 'none';
             launcher.style.display = 'flex';
             body.classList.remove('marketing-theme');
+            body.style.alignItems = 'center';
             currentActiveApp = null;
         }
 
