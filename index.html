@@ -57,9 +57,9 @@
 
         /* OS LAUNCHER SCREEN */
         #os-launcher { display: none; width: 100%; max-width: 900px; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; animation: fadeIn 0.5s ease; }
-        .launcher-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; width: 100%; padding: 20px; }
+        .launcher-grid { display: grid; grid-template-columns: repeat(2, 240px); justify-content: center; gap: 30px; padding: 20px; }
         
-        .app-icon { width: 180px; background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(250, 204, 21, 0.15); border-radius: 24px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);}
+        .app-icon { background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(250, 204, 21, 0.15); border-radius: 24px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);}
         .app-icon:hover { transform: translateY(-5px); }
         
         .app-icon.vault-app:hover { border-color: #facc15; box-shadow: 0 20px 40px rgba(250, 204, 21, 0.15); }
@@ -307,6 +307,7 @@
         
         @media (max-width: 768px) {
             body { align-items: flex-start; padding: 15px; }
+            .launcher-grid { grid-template-columns: minmax(200px, 300px); }
             .bottom-grid { flex-direction: column; height: auto; min-height: unset; }
             .pane-left, .pane-right { height: auto; min-height: 400px; }
             .expanded-moloni .bottom-grid { height: auto; min-height: 85vh; }
@@ -345,7 +346,7 @@
     
     <!-- OS LAUNCHER (HOME SCREEN) -->
     <div id="os-launcher">
-        <img src="icon.png" alt="RC Command Logo" style="height: 60px; margin-bottom: 10px; object-fit: contain;">
+        <img src="icon.png" alt="RC Command Logo" style="height: 80px; margin-bottom: 15px; object-fit: contain;">
         <p style="color: #94a3b8; font-size: 14px; margin-bottom: 40px; text-align: center;">Select an operational environment to launch.</p>
         
         <div class="launcher-grid">
