@@ -844,6 +844,7 @@
             document.getElementById('login-wrapper').style.display = 'none';
             document.getElementById('os-launcher').style.display = 'flex';
             document.body.style.alignItems = 'center';
+            document.body.style.justifyContent = 'center';
         }
 
         // --- OS ROUTING LOGIC ---
@@ -859,7 +860,10 @@
             launcher.style.display = 'none';
             appView.style.display = 'flex';
             globalHeader.style.display = 'flex';
-            body.style.alignItems = 'flex-start';
+            
+            // Keep horizontally centered, but start from the top vertically
+            body.style.alignItems = 'center';
+            body.style.justifyContent = 'flex-start';
 
             if (appId === 'noiz') {
                 body.classList.add('marketing-theme');
@@ -884,7 +888,10 @@
             globalHeader.style.display = 'none';
             launcher.style.display = 'flex';
             body.classList.remove('marketing-theme');
+            
+            // Return to dead center for the OS Launcher
             body.style.alignItems = 'center';
+            body.style.justifyContent = 'center';
             currentActiveApp = null;
         }
 
