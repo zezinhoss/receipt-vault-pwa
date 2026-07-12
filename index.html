@@ -9,11 +9,9 @@
     <meta name="theme-color" content="#facc15">
     
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* ========================================== */
-        /* GLOBAL OS VARIABLES & THEMES               */
-        /* ========================================== */
         :root {
             --theme-primary: #facc15;
             --theme-secondary: #3b82f6;
@@ -34,11 +32,19 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
+        /* Remove arrows from number inputs */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* Force dark mode on native browser dropdowns and calendars */
+        input[type="date"], select { color-scheme: dark; }
+        ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; opacity: 0.7; transition: 0.2s; }
+        ::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+        option { background: #1e1e1e; color: #fff; }
+
         .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; transition: all 0.4s ease; }
         
-        /* ========================================== */
-        /* LOGIN / PIN GATE                           */
-        /* ========================================== */
         #login-wrapper { width:100%; max-width:360px; }
         
         h3 { color: var(--theme-primary); font-size:16px; font-weight:700; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; align-items:center; gap:8px; transition: color 0.4s;}
@@ -47,10 +53,14 @@
         .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
         .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color: var(--theme-primary); font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; font-family:'Nunito', sans-serif; }
         .pin-box:focus { border-color: var(--theme-primary); box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
+        .marketing-theme .pin-box:focus { box-shadow:0 0 15px rgba(192, 132, 252, 0.2); }
 
-        /* ========================================== */
-        /* OS SIDEBAR (DOCK)                          */
-        /* ========================================== */
+        .main-container { width: 100%; max-width: 1400px; display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; padding-left: 80px; box-sizing: border-box; transition: padding-left 0.3s ease;}
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* OS SIDEBAR (NEW DOCK) */
         #os-sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 80px; background: rgba(10, 10, 10, 0.8); border-right: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: none; flex-direction: column; align-items: center; padding: 20px 0; z-index: 9000; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; white-space: nowrap; box-shadow: 10px 0 30px rgba(0,0,0,0.5);}
         #os-sidebar:hover { width: 240px; align-items: flex-start; }
         
@@ -58,9 +68,6 @@
         .sidebar-brand img { width: 40px; height: 40px; object-fit: contain; min-width: 40px;}
         .sidebar-brand span { margin-left: 15px; font-weight: 800; font-size: 14px; color: #fff; letter-spacing: 1px; opacity: 0; transition: opacity 0.2s; }
         #os-sidebar:hover .sidebar-brand span { opacity: 1; transition-delay: 0.1s;}
-
-        .sidebar-category { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.3); padding: 15px 20px 5px 20px; font-weight: 800; width: 100%; box-sizing: border-box; opacity: 0; transition: opacity 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 5px;}
-        #os-sidebar:hover .sidebar-category { opacity: 1; transition-delay: 0.1s;}
 
         .sidebar-item { display: flex; align-items: center; width: 100%; padding: 15px 20px; color: #94a3b8; cursor: pointer; transition: all 0.2s; box-sizing: border-box; position: relative; border-left: 3px solid transparent;}
         .sidebar-item:hover { color: #f8fafc; background: rgba(255,255,255,0.03); }
@@ -72,24 +79,30 @@
         .sidebar-label { margin-left: 15px; font-weight: 600; font-size: 13px; opacity: 0; transition: opacity 0.2s; letter-spacing: 0.5px;}
         #os-sidebar:hover .sidebar-label { opacity: 1; transition-delay: 0.1s;}
 
-        /* ========================================== */
-        /* SPLASH SCREEN (NEW HOME)                   */
-        /* ========================================== */
+        /* SPLASH SCREEN (NEW HOME) */
         #os-splash { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100vh; position: relative; padding-left: 80px; box-sizing: border-box; animation: fadeIn 0.8s ease;}
         .splash-logo-bg { position: absolute; width: 60vw; max-width: 800px; opacity: 0.05; pointer-events: none; top: 50%; left: calc(50% + 40px); transform: translate(-50%, -50%); filter: grayscale(100%) contrast(1000%);}
         .splash-content { position: relative; z-index: 10; text-align: center; }
         .splash-manifesto { font-size: 42px; font-weight: 800; letter-spacing: 2px; color: #f8fafc; margin-bottom: 10px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
         .splash-sub { font-size: 14px; color: #94a3b8; font-weight: 300; letter-spacing: 1px; }
 
-        /* App View Layout */
-        .main-container { width: 100%; max-width: 1200px; display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; padding-left: 80px; box-sizing: border-box; transition: padding-left 0.3s ease;}
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* IFRAME APP CONTAINERS */
+        .app-iframe-container {
+            width: 100%;
+            height: 90vh;
+            border-radius: 12px;
+            overflow: hidden;
+            background: transparent;
+        }
+        .app-iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+        }
 
         @media (max-width: 768px) {
             body { align-items: flex-start; padding: 15px; }
-            #os-sidebar { width: 60px; }
-            .main-container, #os-splash { padding-left: 60px; }
-            .splash-manifesto { font-size: 24px; }
         }
     </style>
 </head>
@@ -113,7 +126,7 @@
     <!-- OS SIDEBAR DOCK -->
     <nav id="os-sidebar">
         <div class="sidebar-brand" onclick="returnToHome()">
-            <img src="icon.png" alt="RC Logo" style="filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));">
+            <img src="icon.png" alt="RC Logo" style="filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));" onerror="this.style.display='none'">
             <span>COMMAND CENTER</span>
         </div>
 
@@ -133,18 +146,18 @@
             <span class="sidebar-label">KINETIC</span>
         </div>
 
-        <div class="sidebar-item" id="nav-vtx" onclick="alert('In production, this routes to VTxView.html')">
-            <div class="sidebar-icon" style="color: #2dd4bf;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <div class="sidebar-item" id="nav-vtx" onclick="launchApp('vtx')">
+            <div class="sidebar-icon" style="color: #facc15;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
             </div>
-            <span class="sidebar-label">VTx SCHEDULER</span>
+            <span class="sidebar-label">VTx</span>
         </div>
 
-        <div class="sidebar-item" id="nav-vtz" onclick="alert('In production, this routes to VTzView.html')">
-            <div class="sidebar-icon" style="color: #facc15;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <div class="sidebar-item" id="nav-vtz" onclick="launchApp('vtz')">
+            <div class="sidebar-icon" style="color: #3b82f6;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             </div>
-            <span class="sidebar-label">VTz SWITCHER</span>
+            <span class="sidebar-label">VTz</span>
         </div>
 
         <div class="sidebar-category"><span>Marketing</span></div>
@@ -166,7 +179,7 @@
         </div>
     </nav>
 
-    <!-- OS SPLASH SCREEN -->
+    <!-- NEW SPLASH SCREEN -->
     <div id="os-splash">
         <img src="icon.png" alt="Ghost Logo" class="splash-logo-bg" onerror="this.style.display='none'">
         <div class="splash-content">
@@ -176,54 +189,41 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- APP VIEW CONTAINER (Holds all injected apps) -->
+    <!-- APP VIEW CONTAINER (Holds all active apps) -->
     <!-- ========================================== -->
     <div id='app-view' class="main-container">
         
-        <!-- OPS CORE PLACEHOLDER -->
-        <div id="ops-core" style="display:none; width: 100%; flex-direction: column; gap: 20px;">
-            <div style="text-align:left; width:100%; padding: 0 20px; box-sizing: border-box; margin-bottom: 10px;">
-                <h2 style="color:#10b981; font-weight:800; margin-top:0; margin-bottom: 5px; font-size: 24px; text-transform:uppercase; letter-spacing: 1px;">Operations Core</h2>
-                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Project Management & Staging Area</p>
-            </div>
-            <div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); padding: 60px 40px; text-align: center; border-radius: 8px; color: #888;">
-                <span style="font-size: 32px; display:block; margin-bottom: 15px;">🏗️</span>
-                <span style="font-size: 16px; font-weight: 600; color: #cbd5e1;">OPS Core Environment Provisioned</span><br><br>
-                Ready to build the Project/Staffing layout here.
-            </div>
+        <!-- OPS CORE APP VIEW -->
+        <div id="ops-core" class="app-iframe-container" style="display:none;">
+            <iframe src="OpsView.html" title="Ops Core"></iframe>
         </div>
 
-        <!-- VAULT PLACEHOLDER (Google Script will inject VaultView.html here) -->
-        <div id="financial-vault" style="display:none; width:100%;">
-            <!-- NOTE: On Google Apps Script, you will replace the inner text below with: <?!= include('VaultView'); ?> -->
-            <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(250,204,21,0.2); padding: 60px 40px; text-align: center; border-radius: 8px; color: #facc15;">
-                <span style="font-size: 32px; display:block; margin-bottom: 15px;">🔗</span>
-                <span style="font-size: 16px; font-weight: 600;">Vault Node Connected</span><br><br>
-                <span style="color:#888; font-size:13px;">(In production, Google Apps Script injects <b>VaultView.html</b> into this exact container.)</span>
-            </div>
+        <!-- VTx APP VIEW -->
+        <div id="vtx-core" class="app-iframe-container" style="display:none;">
+            <iframe src="VTx.html" title="VTx Scheduler"></iframe>
         </div>
 
-        <!-- MARKETING HUB PLACEHOLDER -->
-        <div id="marketing-hub" style="display:none; width: 100%; flex-direction: column; gap: 20px;">
-            <div style="text-align:left; width:100%; padding: 0 20px; box-sizing: border-box; margin-bottom: 10px;">
-                <h2 style="color:#c084fc; font-weight:800; margin-top:0; margin-bottom: 5px; font-size: 24px; text-transform:uppercase; letter-spacing: 1px;">Marketing Core</h2>
-                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">AI Outbound & Generative Execution Nodes</p>
-            </div>
-            <div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(192, 132, 252, 0.2); padding: 60px 40px; text-align: center; border-radius: 8px; color: #c084fc;">
-                <span style="font-size: 32px; display:block; margin-bottom: 15px;">🌐</span>
-                <span style="font-size: 16px; font-weight: 600;">Marketing Nodes Connected</span>
-            </div>
+        <!-- VTz APP VIEW -->
+        <div id="vtz-core" class="app-iframe-container" style="display:none;">
+            <iframe src="VTz.html" title="VTz Switcher"></iframe>
+        </div>
+
+        <!-- NOIZ APP VIEW -->
+        <div id="noiz-core" class="app-iframe-container" style="display:none;">
+            <iframe src="NoizView.html" title="Noiz Core"></iframe>
+        </div>
+
+        <!-- VAULT APP VIEW -->
+        <div id="vault-core" class="app-iframe-container" style="display:none;">
+            <iframe src="VaultView.html" title="Financial Vault"></iframe>
         </div>
 
     </div>
 
-    <!-- ========================================== -->
-    <!-- MASTER OS JAVASCRIPT                       -->
-    <!-- ========================================== -->
     <script>
         var currentActiveApp = null;
 
-        // Auto-login for Sandbox
+        // Auto-login for Dev Sandbox
         setTimeout(unlockApp, 100);
 
         function unlockApp(){
@@ -234,15 +234,18 @@
             document.body.style.justifyContent = 'center';
         }
 
+        // --- OS ROUTING LOGIC ---
         function launchApp(appId) {
             if(currentActiveApp === appId) return;
             currentActiveApp = appId;
             
             var splash = document.getElementById('os-splash');
             var appView = document.getElementById('app-view');
-            var vault = document.getElementById('financial-vault');
-            var mkt = document.getElementById('marketing-hub');
             var ops = document.getElementById('ops-core');
+            var vtx = document.getElementById('vtx-core');
+            var vtz = document.getElementById('vtz-core');
+            var noiz = document.getElementById('noiz-core');
+            var vault = document.getElementById('vault-core');
             var body = document.body;
 
             // Manage Nav Active States
@@ -251,7 +254,6 @@
                 document.getElementById('nav-' + appId).classList.add('active');
             }
 
-            // Route OS Views
             splash.style.display = 'none';
             appView.style.display = 'flex';
             
@@ -260,24 +262,36 @@
             body.style.justifyContent = 'flex-start';
 
             // Hide all apps first
-            vault.style.display = 'none';
-            mkt.style.display = 'none';
             ops.style.display = 'none';
+            vtx.style.display = 'none';
+            vtz.style.display = 'none';
+            noiz.style.display = 'none';
+            vault.style.display = 'none';
             body.classList.remove('marketing-theme');
             
-            // Set dynamic theme colors and launch app
-            if (appId === 'noiz') {
-                body.classList.add('marketing-theme');
-                mkt.style.display = 'flex';
-            } else if (appId === 'vault') {
-                vault.style.display = 'flex';
-                // Trigger sub-functions if the injected Vault file loaded successfully
-                if (typeof initPlaceholderGraph === 'function') initPlaceholderGraph();
-                if (typeof renderRetractedTicker === 'function' && typeof moloniState !== 'undefined' && moloniState === 0) renderRetractedTicker();
-            } else if (appId === 'ops') {
+            // Set dynamic theme colors based on app
+            if (appId === 'ops') {
                 document.documentElement.style.setProperty('--theme-primary', '#10b981');
                 document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top center, #022c22 0%, #0a0a0a 60%)');
                 ops.style.display = 'flex';
+            } else if (appId === 'vtx') {
+                document.documentElement.style.setProperty('--theme-primary', '#facc15');
+                document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
+                vtx.style.display = 'block';
+            } else if (appId === 'vtz') {
+                document.documentElement.style.setProperty('--theme-primary', '#3b82f6');
+                document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top left, #1e3a8a 0%, #0a0a0a 60%)');
+                vtz.style.display = 'block';
+            } else if (appId === 'noiz') {
+                body.classList.add('marketing-theme');
+                noiz.style.display = 'block';
+            } else if (appId === 'vault') {
+                document.documentElement.style.setProperty('--theme-primary', '#facc15');
+                document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
+                vault.style.display = 'block';
+                if(typeof initPlaceholderGraph === 'function') {
+                    initPlaceholderGraph();
+                }
             }
         }
 
@@ -291,8 +305,6 @@
             appView.style.display = 'none';
             splash.style.display = 'flex';
             body.classList.remove('marketing-theme');
-            
-            // Reset to default Vault Yellow theme for OS Home
             document.documentElement.style.setProperty('--theme-primary', '#facc15');
             document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
             
@@ -301,6 +313,7 @@
             body.style.justifyContent = 'center';
             currentActiveApp = null;
         }
+
     </script>
 </body>
 </html>
