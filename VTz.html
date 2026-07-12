@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>VTz | LIVE SWITCHER</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --accent: #facc15; 
+            --accent-dim: rgba(250, 204, 21, 0.05); 
+            --bg-deep: #0a0a0a; 
+            --bg-panel: #1a1a1a; 
+            --bg-header: #222222;
+            --border-thin: rgba(255, 255, 255, 0.08);
+            --border-accent: rgba(250, 204, 21, 0.3); 
+            --text-primary: #F9F9FB;
+            --text-muted: #888888;
+            --alert-red: #ef4444;
+            --live-green: #22c55e;
+            --font-main: 'Nunito', sans-serif;
+        }
+
+        body { 
+            font-family: var(--font-main); 
+            background-color: var(--bg-deep); 
+            color: var(--text-primary); 
+            margin: 0; padding: 0; overflow-x: hidden; height: 100vh;
+        }
+
+        h1, h2, h3, h4 { font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.05em; }
+        
+        .btn-obs { background: #333; color: var(--text-primary); border: 1px solid var(--border-thin); padding: 6px 12px; cursor: pointer; font-size: 11px; font-weight: 700; transition: 0.2s; border-radius: 4px; font-family: var(--font-main); display: flex; justify-content: center; align-items: center; width: 100%;}
+        .btn-obs:hover { background: #444; border-color: rgba(255,255,255,0.2); }
+        .btn-obs-blue { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #3b82f6;}
+        .btn-obs-blue:hover { background: #3b82f6; color: #000;}
+
+        #vtz-app { display: flex; flex-direction: column; height: 100vh; padding: 10px; box-sizing: border-box; gap: 10px; }
+        
+        /* TOP SECTION: Monitors */
+        .vtz-top { display: flex; flex: 1.2; gap: 10px; min-height: 40vh; }
+        .vtz-monitor-container { flex: 1; display: flex; flex-direction: column; background: var(--bg-panel); border: 1px solid var(--border-thin); border-radius: 6px; overflow: hidden; }
+        .vtz-monitor-label { padding: 6px 12px; background: var(--bg-header); font-size: 11px; font-weight: 700; border-bottom: 1px solid var(--border-thin); display: flex; justify-content: space-between; align-items: center; }
+        .vtz-monitor { flex: 1; background: #000; margin: 10px; border: 1px solid var(--border-thin); display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden;}
+        
+        /* Active Monitor Outlines */
+        #preview-container { border-color: rgba(59, 130, 246, 0.3); }
+        #preview-monitor { border-color: #3b82f6; box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1); }
+        #program-container { border-color: rgba(239, 68, 68, 0.3); }
+        #program-monitor { border-color: var(--alert-red); box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.1); }
+
+        .vtz-transitions { width: 140px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; padding: 0 10px; }
+        
+        /* BOTTOM SECTION: 4 Panels */
+        .vtz-bottom { display: flex; flex: 1; gap: 10px; min-height: 30vh; }
+        .vtz-panel { flex: 1; background: var(--bg-panel); border: 1px solid var(--border-thin); border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; }
+        .vtz-panel-header { padding: 6px 12px; background: var(--bg-header); font-size: 11px; font-weight: 700; border-bottom: 1px solid var(--border-thin); display: flex; justify-content: space-between; align-items: center; }
+        .vtz-panel-content { flex: 1; overflow-y: auto; padding: 8px; }
+        
+        /* Media Sources List */
+        .source-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; font-size: 11px; color: var(--text-primary); border-bottom: 1px solid var(--border-thin); cursor: pointer; transition: 0.2s;}
+        .source-item:hover { background: rgba(255,255,255,0.05); }
+        .source-item.active { background: rgba(59, 130, 246, 0.2); border-left: 2px solid #3b82f6; }
+        .source-icons { color: var(--text-muted); font-size: 12px; display: flex; gap: 6px;}
+
+        /* Audio Mixer Mockup */
+        .audio-track { margin-bottom: 10px; }
+        .audio-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .audio-meter { height: 8px; background: #222; border-radius: 4px; overflow: hidden; display: flex; }
+        .meter-fill-g { background: var(--live-green); width: 60%; }
+        .meter-fill-y { background: var(--accent); width: 20%; }
+        .meter-fill-r { background: var(--alert-red); width: 0%; }
+        
+        .as-select { background: #000; border: 1px solid var(--border-thin); color: var(--text-primary); padding: 6px; font-family: var(--font-main); font-size: 11px; width: 100%; border-radius: 4px; outline: none; margin-bottom: 8px;}
+        
+        /* Launcher Overlay */
+        #launcher-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-deep); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .launcher-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 800px; margin-top: 40px; }
+        .glass-box { background: rgba(30, 30, 30, 0.5); border: 1px solid var(--border-thin); padding: 24px; border-radius: 12px; text-align: center;}
+        
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--bg-deep); padding: 12px 24px; font-size: 12px; font-weight: 800; text-transform: uppercase; display: none; z-index: 2000; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="toast" id="sys-toast">ACTION COMPLETED</div>
+    <input type="file" id="hidden-media-browser" style="display:none" onchange="handleMediaUpload(this)">
+
+    <div id="launcher-overlay">
+        <h1 style="font-size: 32px; letter-spacing: 0.2em; color: var(--accent);">VTz</h1>
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 8px;">LIVE SWITCHER (OBS ENGINE)</div>
+
+        <div class="launcher-grid">
+            <div class="glass-box">
+                <h3 style="margin-bottom: 15px;">New Live Session</h3>
+                <input type="text" id="new-sess-name" class="as-select" placeholder="e.g. Summit Live" style="padding: 10px; margin-bottom: 15px;">
+                <button class="btn-obs btn-obs-blue" style="padding: 10px;" onclick="openVTz()">Initialize Switcher</button>
+            </div>
+            <div class="glass-box">
+                <h3 style="margin-bottom: 15px;">Load Session</h3>
+                <select class="as-select" style="padding: 10px; margin-bottom: 15px;">
+                    <option>No saved sessions...</option>
+                </select>
+                <button class="btn-obs" style="padding: 10px;">Connect Engine</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="vtz-app" style="display: none;">
+        
+        <!-- Header Strip -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 5px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <h3 style="color: var(--accent); font-size: 14px;">VTz <span style="color:var(--text-muted); font-weight:400;">| STUDIO MODE</span></h3>
+            </div>
+            <div style="font-size: 11px; font-family: monospace; color: var(--text-muted);">
+                CPU: 2.1% | 60.00 FPS
+            </div>
+        </div>
+
+        <!-- TOP: Monitors & Transitions -->
+        <div class="vtz-top">
+            <!-- Preview Monitor -->
+            <div class="vtz-monitor-container" id="preview-container">
+                <div class="vtz-monitor-label">Preview: Scene <span>[STANDBY]</span></div>
+                <div class="vtz-monitor" id="preview-monitor">
+                    <span style="color:#3b82f6; font-weight:800; font-size:20px;" id="preview-text">NO MEDIA</span>
+                </div>
+            </div>
+
+            <!-- Transition Actions -->
+            <div class="vtz-transitions">
+                <button class="btn-obs" style="height: 40px; font-size: 14px; border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;" onclick="executeCut()">Cut</button>
+                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin: 5px 0;">Quick Transitions</div>
+                <button class="btn-obs">Fade to Black</button>
+                <button class="btn-obs">Fade (300ms)</button>
+                <div style="width: 100%; height: 1px; background: var(--border-thin); margin: 5px 0;"></div>
+                <input type="range" style="width: 100%;" min="0" max="100" value="0">
+            </div>
+
+            <!-- Program Monitor -->
+            <div class="vtz-monitor-container" id="program-container">
+                <div class="vtz-monitor-label">Program <span style="color:var(--alert-red);">[LIVE]</span></div>
+                <div class="vtz-monitor" id="program-monitor">
+                    <span style="color:#333; font-weight:800; font-size:20px;" id="program-text">OFF AIR</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM: 4 Panels -->
+        <div class="vtz-bottom">
+            
+            <!-- Sources (Media Bin) -->
+            <div class="vtz-panel">
+                <div class="vtz-panel-header">Sources <div style="display:flex; gap:5px;"><button class="btn-obs" style="padding:2px 6px;" onclick="document.getElementById('hidden-media-browser').click()">+</button></div></div>
+                <div class="vtz-panel-content" id="sources-list">
+                    <div class="source-item active" onclick="setPreview(this, 'Main Camera Feed')">
+                        <span>📸 Video Capture Device</span><div class="source-icons"><span>👁</span><span>🔓</span></div>
+                    </div>
+                    <div class="source-item" onclick="setPreview(this, 'Promo_Video.mp4')">
+                        <span>▶️ Media Source (Promo)</span><div class="source-icons"><span>👁</span><span>🔓</span></div>
+                    </div>
+                    <div class="source-item" onclick="setPreview(this, 'Sponsor_Logo.jpg')">
+                        <span>🖼️ Image Overlay</span><div class="source-icons"><span>👁</span><span>🔒</span></div>
+                    </div>
+                    <div class="source-item" onclick="setPreview(this, 'https://live-poll.com/x')">
+                        <span>🌐 Web Browser (Poll)</span><div class="source-icons"><span>👁</span><span>🔓</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Mixer -->
+            <div class="vtz-panel">
+                <div class="vtz-panel-header">Audio Mixer <span>⚙️</span></div>
+                <div class="vtz-panel-content">
+                    <div class="audio-track">
+                        <div class="audio-label"><span>Media Source</span><span>0.0 dB</span></div>
+                        <div class="audio-meter"><div class="meter-fill-g"></div><div class="meter-fill-y"></div><div class="meter-fill-r"></div></div>
+                        <input type="range" style="width: 100%; margin-top: 5px;" min="0" max="100" value="80">
+                    </div>
+                    <div class="audio-track">
+                        <div class="audio-label"><span>Mic/Aux</span><span>-15.0 dB</span></div>
+                        <div class="audio-meter"><div class="meter-fill-g" style="width:40%;"></div><div class="meter-fill-y" style="width:0%;"></div><div class="meter-fill-r"></div></div>
+                        <input type="range" style="width: 100%; margin-top: 5px;" min="0" max="100" value="40">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene Transitions -->
+            <div class="vtz-panel" style="flex: 0.8;">
+                <div class="vtz-panel-header">Scene Transitions</div>
+                <div class="vtz-panel-content">
+                    <select class="as-select"><option>Fade</option><option>Cut</option><option>Swipe</option></select>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px; align-items:center;">
+                        Duration <input type="number" class="as-select" value="300" style="width:60px; margin:0;"> ms
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="vtz-panel" style="flex: 0.8;">
+                <div class="vtz-panel-header">Controls</div>
+                <div class="vtz-panel-content" style="display:flex; flex-direction:column; gap:5px;">
+                    <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">Target Network Node</div>
+                    <select class="as-select" id="target-node"><option value="1">NODE_01</option><option value="2">NODE_02</option><option value="ALL">ALL NODES</option></select>
+                    <button class="btn-obs btn-obs-blue" style="padding: 8px;" onclick="executeCut()">GO LIVE OVERRIDE</button>
+                    <button class="btn-obs" style="padding: 8px; color: var(--live-green); border-color: rgba(34, 197, 94, 0.3);" onclick="releaseToXkeduler()">Release to VTx Scheduler</button>
+                    <div style="height: 1px; background: var(--border-thin); margin: 5px 0;"></div>
+                    <button class="btn-obs">Settings</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let previewMedia = "Main Camera Feed";
+        let programMedia = null;
+
+        function openVTz() {
+            document.getElementById('launcher-overlay').style.display = 'none';
+            document.getElementById('vtz-app').style.display = 'flex';
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('sys-toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        }
+
+        function handleMediaUpload(input) {
+            if(!input.files[0]) return;
+            const filename = input.files[0].name;
+            const list = document.getElementById('sources-list');
+            list.innerHTML += `
+                <div class="source-item" onclick="setPreview(this, '${filename}')">
+                    <span>📄 ${filename}</span><div class="source-icons"><span>👁</span><span>🔓</span></div>
+                </div>
+            `;
+            showToast("MEDIA ADDED TO BIN");
+        }
+
+        function setPreview(el, mediaName) {
+            document.querySelectorAll('.source-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            previewMedia = mediaName;
+            document.getElementById('preview-text').innerText = mediaName;
+            document.getElementById('preview-text').style.color = '#3b82f6';
+        }
+
+        function executeCut() {
+            if(!previewMedia) return;
+            programMedia = previewMedia;
+            document.getElementById('program-text').innerText = programMedia;
+            document.getElementById('program-text').style.color = '#fff';
+            
+            const node = document.getElementById('target-node').value;
+            console.log(`[VTz ENGINE] Cutting ${programMedia} to Node ${node}`);
+            showToast(`OVERRIDE LIVE ON NODE ${node}`);
+        }
+
+        function releaseToXkeduler() {
+            programMedia = null;
+            document.getElementById('program-text').innerText = "VTx SCHEDULE";
+            document.getElementById('program-text').style.color = '#22c55e';
+            const node = document.getElementById('target-node').value;
+            showToast(`NODE ${node} RELEASED TO SCHEDULE`);
+        }
+    </script>
+</body>
+</html>
