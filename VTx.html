@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>VTx | FLEET SCHEDULER</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        :root { 
+            --accent: #facc15; 
+            --accent-dim: rgba(250, 204, 21, 0.05); 
+            --bg-deep: #0a0a0a; 
+            --bg-panel: rgba(30, 30, 30, 0.5); 
+            --border-thin: rgba(255, 255, 255, 0.08);
+            --border-accent: rgba(250, 204, 21, 0.3); 
+            --text-primary: #F9F9FB;
+            --text-muted: #888888;
+            --alert-red: #ef4444;
+            --live-green: #22c55e;
+            --font-main: 'Nunito', sans-serif;
+        }
+
+        body { 
+            font-family: var(--font-main); 
+            background-color: var(--bg-deep); 
+            color: var(--text-primary); 
+            margin: 0; padding: 0; overflow-x: hidden;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 24px 24px; min-height: 100vh;
+        }
+
+        .bg-logo { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60vw; max-width: 600px; opacity: 0.03; filter: grayscale(100%); pointer-events: none; z-index: -1; }
+        h1, h2, h3, h4 { font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.05em; }
+        .text-micro { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+        
+        .glass-panel { background: var(--bg-panel); border: 1px solid var(--border-thin); backdrop-filter: blur(12px); padding: 24px; box-sizing: border-box; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 12px; }
+        
+        .btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border-thin); padding: 8px 16px; cursor: pointer; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; transition: 0.2s; border-radius: 6px; font-family: var(--font-main); }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+        .btn-outline.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+        
+        .btn-action { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--border-accent); padding: 8px 16px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; transition: all 0.2s ease; border-radius: 6px; font-family: var(--font-main); }
+        .btn-action:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--alert-red); border-color: rgba(239, 68, 68, 0.3); }
+        .btn-danger:hover { background: var(--alert-red); color: #000; border-color: var(--alert-red); }
+
+        .as-input, .as-select { background: rgba(0,0,0,0.4); border: 1px solid var(--border-thin); color: var(--text-primary); padding: 10px 14px; font-family: var(--font-main); font-size: 13px; outline: none; width: 100%; box-sizing: border-box; transition: all 0.2s; border-radius: 6px; }
+        .as-input:focus, .as-select:focus { border-color: var(--border-accent); background: rgba(0,0,0,0.6);}
+        .as-select option { background: #1a1a1a; color: #fff; }
+        
+        .custom-select { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23facc15%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+
+        #launcher-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100%; padding: 20px; box-sizing: border-box; animation: fadeIn 0.5s ease; }
+        .launcher-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 800px; margin-top: 40px; }
+        
+        #dashboard-screen { display: none; flex-direction: column; gap: 24px; padding: 40px 20px; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.5s ease; }
+        .header-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border-thin); padding-bottom: 20px; }
+        .local-clock { font-size: 24px; font-weight: 300; color: var(--text-primary); letter-spacing: 0.1em; }
+        
+        .tab-btn { padding: 8px 24px; background: transparent; border: 1px solid var(--border-thin); color: var(--text-muted); cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s ease; border-radius: 6px; font-weight: 700; font-family: var(--font-main); }
+        .tab-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--text-primary); }
+        .tab-btn.active { border-color: var(--border-thin); border-bottom-color: var(--accent); color: var(--text-primary); }
+
+        .node-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 20px; }
+        .node-card { border: 1px solid var(--border-accent); background: rgba(30, 30, 30, 0.4); display: flex; flex-direction: column; border-radius: 8px; }
+        .node-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border-thin); background: rgba(255,255,255,0.02); border-radius: 8px 8px 0 0; }
+        .node-body { transition: all 0.3s ease; overflow: hidden; }
+        .node-body.collapsed { display: none; }
+        .node-title-input { background: transparent; border: none; color: var(--text-primary); font-size: 16px; font-weight: 700; letter-spacing: 0.05em; outline: none; width: 140px; border-bottom: 1px solid transparent; transition: 0.2s; font-family: var(--font-main);}
+        .node-title-input:focus { border-bottom-color: var(--accent); }
+
+        .data-table-wrap { max-height: 400px; overflow-y: auto; padding: 0; }
+        table { width: 100%; border-collapse: collapse; }
+        th { position: sticky; top: 0; background: rgba(10, 10, 10, 0.95); text-align: left; font-size: 10px; color: var(--text-muted); padding: 12px 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border-thin); z-index: 10; }
+        td { padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+
+        .table-input { background: transparent; border: 1px solid var(--border-thin); color: var(--text-primary); padding: 8px 12px; font-family: var(--font-main); font-size: 12px; outline: none; width: 100%; box-sizing: border-box; transition: 0.2s; border-radius: 6px; }
+        .table-input:focus { border-color: var(--border-accent); }
+        .upload-btn { background: rgba(255,255,255,0.02); border: 1px dashed var(--border-thin); color: var(--text-muted); padding: 8px; width: 100%; cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; transition: 0.2s; border-radius: 6px; font-weight: 700; font-family: var(--font-main);}
+        .upload-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text-primary); }
+        .upload-btn.ready { border-style: solid; border-color: var(--border-accent); color: var(--accent); background: var(--accent-dim); }
+        .row-del { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; transition: 0.2s; padding: 4px; }
+        .row-del:hover { color: var(--alert-red); }
+
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--bg-deep); padding: 12px 24px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: none; z-index: 2000; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px;}
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body onload="initApp()">
+
+    <img src="icon.png" class="bg-logo" alt="RC_ICON" onerror="this.style.display='none'">
+    <div class="toast" id="sys-toast">ACTION COMPLETED</div>
+    <input type="file" id="hidden-file-browser" style="display:none" onchange="handleFileSelect(this)">
+    <input type="date" id="master-calendar" style="position: absolute; opacity: 0; pointer-events: none;" onchange="addMasterDate(this.value)">
+
+    <div id="launcher-screen">
+        <h1 style="font-size: 32px; letter-spacing: 0.2em; text-align: center; color: var(--accent);">VTx</h1>
+        <div class="text-micro" style="margin-top: 8px;">FLEET SCHEDULER</div>
+
+        <div class="launcher-grid">
+            <div class="glass-panel">
+                <h3 style="margin-bottom: 15px;">New Project</h3>
+                <input type="text" id="new-proj-name" class="as-input" placeholder="e.g. Summit 2026" style="margin-bottom: 15px;">
+                <button class="btn-action" style="width: 100%;" onclick="createNewProject()">Initialize Timeline</button>
+            </div>
+            <div class="glass-panel">
+                <h3 style="margin-bottom: 15px;">Saved Projects</h3>
+                <select id="load-proj-select" class="as-select custom-select" style="margin-bottom: 15px;">
+                    <option value="">No saved projects...</option>
+                </select>
+                <button class="btn-outline" style="width: 100%;" onclick="loadSelectedProject()">Load Setup</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-screen">
+        <div class="header-bar">
+            <div>
+                <div class="text-micro" style="margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
+                    <span style="width:6px; height:6px; background:var(--live-green); border-radius:50%; display:inline-block;"></span> VTx ONLINE
+                </div>
+                <div style="display:flex; align-items:center; gap: 15px;">
+                    <button class="btn-outline" style="padding: 4px 10px; font-size: 10px;" onclick="goToLauncher()">[ HOME ]</button>
+                    <h2>VTx SCHEDULER</h2>
+                    <span style="color:#444; margin: 0 10px;">|</span>
+                    <button class="btn-outline active" id="tab-assets" onclick="switchWorkspace('assets')">📁 ASSET HUB</button>
+                    <button class="btn-outline" id="tab-fleet" onclick="switchWorkspace('fleet')">📅 TIMELINE</button>
+                </div>
+                <div class="text-micro" style="margin-top: 8px; color:var(--accent);" id="active-proj-title">PROJECT_NAME</div>
+            </div>
+            <div class="text-right">
+                <div class="local-clock" id="master-clock">00:00:00</div>
+            </div>
+        </div>
+
+        <!-- Asset Workspace -->
+        <div id="asset-workspace" style="animation: fadeIn 0.4s ease;">
+            <div class="node-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="glass-panel">
+                    <h3>Project Notepad</h3>
+                    <textarea class="as-input" id="project-notepad" style="height: 300px; resize: vertical; margin-top: 15px;" oninput="saveNotepad()" placeholder="Paste Drive links, instructions, and master cues here..."></textarea>
+                </div>
+                
+                <div class="glass-panel">
+                    <h3 style="margin-bottom: 20px;">Asset Staging & Sync</h3>
+                    <div style="background: rgba(34, 197, 94, 0.05); padding: 15px; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px;">
+                        <div class="text-micro" style="margin-bottom: 10px; color: var(--live-green);">SPREADSHEET CUE LIST IMPORT (CSV / XLSX)</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">
+                            Format required: <strong>Node, Time, Type, File</strong><br>
+                        </div>
+                        <button class="btn-action" style="width: 100%; background: var(--live-green); color:#000; border-color: var(--live-green);" onclick="document.getElementById('spreadsheet-upload').click()">SYNC FROM SPREADSHEET</button>
+                        <input type="file" id="spreadsheet-upload" accept=".csv, .xlsx, .xls" style="display:none" onchange="processSpreadsheet(this)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fleet Workspace -->
+        <div id="fleet-workspace" style="display: none; animation: fadeIn 0.4s ease;">
+            <div class="glass-panel" style="padding: 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <span class="text-micro">SCHEDULE:</span>
+                    <div id="master-date-tabs" style="display:flex; gap:8px;"></div>
+                </div>
+                <div style="display: flex; gap: 16px;">
+                    <button class="btn-outline" onclick="document.getElementById('master-calendar').showPicker()">+ Add Date</button>
+                    <button class="btn-outline" onclick="addNewNode()">+ Add Node</button>
+                </div>
+            </div>
+            <div class="node-grid" id="node-grid-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let db = { projects: {} };
+        let activeProjId = null;
+        let activeDate = null;
+        let uploadTarget = { tvId: null, index: null };
+        const defaultSchedule = [{"time": "08:00:00", "type": "image", "value": ""}, {"time": "", "type": "url", "value": ""}];
+
+        function initApp() {
+            setInterval(() => { document.getElementById('master-clock').innerText = new Date().toTimeString().split(' ')[0]; }, 1000); 
+            const saved = localStorage.getItem('vtx_db_v1');
+            if (saved) { try { db = JSON.parse(saved); } catch(e) {} }
+            refreshLauncherDropdown();
+        }
+
+        function saveDB() {
+            if (activeProjId) saveCurrentUIToData();
+            localStorage.setItem('vtx_db_v1', JSON.stringify(db));
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('sys-toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        }
+
+        function switchWorkspace(mode) {
+            document.getElementById('fleet-workspace').style.display = 'none';
+            document.getElementById('asset-workspace').style.display = 'none';
+            document.getElementById('tab-fleet').classList.remove('active');
+            document.getElementById('tab-assets').classList.remove('active');
+            
+            if(mode === 'fleet') {
+                document.getElementById('fleet-workspace').style.display = 'block';
+                document.getElementById('tab-fleet').classList.add('active');
+            } else if(mode === 'assets') {
+                document.getElementById('asset-workspace').style.display = 'block';
+                document.getElementById('tab-assets').classList.add('active');
+                if(activeProjId) document.getElementById('project-notepad').value = db.projects[activeProjId].notepad || "";
+            }
+        }
+
+        function saveNotepad() {
+            if(!activeProjId) return;
+            db.projects[activeProjId].notepad = document.getElementById('project-notepad').value;
+            autoSave();
+        }
+
+        function goToLauncher() {
+            saveDB(); activeProjId = null;
+            document.getElementById('dashboard-screen').style.display = 'none';
+            document.getElementById('launcher-screen').style.display = 'flex';
+            refreshLauncherDropdown();
+        }
+
+        function refreshLauncherDropdown() {
+            const sel = document.getElementById('load-proj-select');
+            sel.innerHTML = '<option value="">Select a project...</option>';
+            for (const [id, proj] of Object.entries(db.projects)) { sel.innerHTML += `<option value="${id}">${proj.name}</option>`; }
+        }
+
+        function createNewProject() {
+            const name = document.getElementById('new-proj-name').value.trim();
+            if (!name) return showToast("PLEASE ENTER A PROJECT NAME");
+            const id = 'proj_' + Date.now();
+            const today = new Date().toISOString().split('T')[0];
+            db.projects[id] = { name: name, dates: [today], nodes: [1], nodeNames: { "1": "NODE_01" }, data: { "1": { [today]: JSON.parse(JSON.stringify(defaultSchedule)) } }, notepad: "" };
+            saveDB(); openProject(id, true);
+        }
+
+        function loadSelectedProject() {
+            const id = document.getElementById('load-proj-select').value;
+            if (!id) return; openProject(id, false);
+        }
+
+        function openProject(id, isNew) {
+            activeProjId = id; const proj = db.projects[id];
+            activeDate = proj.dates[0] || new Date().toISOString().split('T')[0];
+            document.getElementById('active-proj-title').innerText = proj.name;
+            document.getElementById('launcher-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').style.display = 'flex';
+            renderMasterTabs(); generateNodes();
+            if(isNew) { switchWorkspace('assets'); showToast("PROJECT INITIALIZED."); } 
+            else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
+        }
+
+        function processSpreadsheet(input) {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    const proj = db.projects[activeProjId];
+                    let rowsAdded = 0;
+
+                    json.forEach(row => {
+                        let nodeKey = Object.keys(row).find(k => k.toLowerCase().match(/(node|tv|ecr)/));
+                        let timeKey = Object.keys(row).find(k => k.toLowerCase().match(/(time|hora)/));
+                        let typeKey = Object.keys(row).find(k => k.toLowerCase().match(/(type|tipo)/));
+                        let valKey = Object.keys(row).find(k => k.toLowerCase().match(/(val|file|url)/));
+
+                        if(nodeKey && timeKey && valKey) {
+                            let nodeId = parseInt(row[nodeKey]); if(isNaN(nodeId)) return; 
+                            let time = row[timeKey].toString();
+                            if(typeof row[timeKey] === 'number') {
+                                let totalSeconds = Math.round(row[timeKey] * 86400);
+                                time = `${Math.floor(totalSeconds / 3600).toString().padStart(2, '0')}:${Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')}:00`;
+                            }
+                            let type = row[typeKey] ? row[typeKey].toString().toLowerCase().trim() : 'image';
+                            if(!proj.nodes.includes(nodeId)) {
+                                proj.nodes.push(nodeId); proj.nodeNames[nodeId] = `NODE_${nodeId.toString().padStart(2, '0')}`;
+                                proj.data[nodeId] = {}; proj.dates.forEach(d => proj.data[nodeId][d] = []);
+                            }
+                            if(!proj.data[nodeId]._xlsImported) { proj.data[nodeId][activeDate] = []; proj.data[nodeId]._xlsImported = true; }
+                            proj.data[nodeId][activeDate].push({ time: time, type: type, value: row[valKey].toString().trim() });
+                            rowsAdded++;
+                        }
+                    });
+                    proj.nodes.forEach(n => { delete proj.data[n]._xlsImported; if(proj.data[n][activeDate]) proj.data[n][activeDate].sort((a,b) => a.time.localeCompare(b.time)); });
+                    saveDB(); generateNodes(); showToast(`SYNC COMPLETE: ${rowsAdded} ROWS INJECTED`);
+                    switchWorkspace('fleet'); 
+                } catch (error) { showToast("ERROR PARSING SPREADSHEET"); }
+            };
+            reader.readAsArrayBuffer(file); input.value = "";
+        }
+
+        function renderMasterTabs() {
+            const proj = db.projects[activeProjId];
+            const bar = document.getElementById('master-date-tabs'); bar.innerHTML = "";
+            proj.dates.sort().forEach(date => {
+                const btn = document.createElement('button');
+                btn.className = `tab-btn ${activeDate === date ? 'active' : ''}`;
+                btn.innerText = date;
+                btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); };
+                bar.appendChild(btn);
+            });
+        }
+
+        function addMasterDate(date) {
+            if(!date) return;
+            const proj = db.projects[activeProjId];
+            if(proj.dates.includes(date)) return;
+            proj.dates.push(date);
+            proj.nodes.forEach(nodeId => { proj.data[nodeId][date] = JSON.parse(JSON.stringify(defaultSchedule)); });
+            activeDate = date; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("NEW ALLOCATION: " + date);
+        }
+
+        function addNewNode() {
+            const proj = db.projects[activeProjId]; saveCurrentUIToData();
+            const nextId = proj.nodes.length > 0 ? Math.max(...proj.nodes) + 1 : 1;
+            proj.nodes.push(nextId); proj.nodeNames[nextId] = `NODE_${nextId.toString().padStart(2, '0')}`;
+            proj.data[nextId] = {}; proj.dates.forEach(d => proj.data[nextId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
+            generateNodes(); saveDB(); showToast(`NODE ${nextId} ADDED`);
+        }
+
+        function generateNodes() {
+            const proj = db.projects[activeProjId];
+            const container = document.getElementById('node-grid-container'); container.innerHTML = "";
+            proj.nodes.forEach(id => {
+                const name = proj.nodeNames[id] || `NODE_${id}`;
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="node-card" id="container-${id}">
+                        <div class="node-header">
+                            <input type="text" class="node-title-input" id="node-name-${id}" value="${name}" oninput="updateLinkLabel(${id})">
+                            <button type="button" class="btn-action" onclick="showToast('SCHEDULE SAVED')">SAVE</button>
+                        </div>
+                        <div class="node-body">
+                            <div class="data-table-wrap">
+                                <form id="form-${id}">
+                                    <input type="hidden" name="tv_id" value="${id}">
+                                    <table>
+                                        <thead><tr><th style="width:90px;">Time</th><th style="width:70px;">Mode</th><th>Target File / URL</th><th style="width:30px;"></th></tr></thead>
+                                        <tbody id="tbody-${id}"></tbody>
+                                    </table>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                renderTable(id);
+            });
+        }
+
+        function refreshAllNodes() { db.projects[activeProjId].nodes.forEach(id => renderTable(id)); }
+
+        function renderTable(tvId) {
+            const proj = db.projects[activeProjId];
+            const tbody = document.getElementById('tbody-' + tvId); if(!tbody) return;
+            tbody.innerHTML = "";
+            const sched = (proj.data[tvId] && proj.data[tvId][activeDate]) ? proj.data[tvId][activeDate] : JSON.parse(JSON.stringify(defaultSchedule));
+            sched.sort((a,b) => a.time.localeCompare(b.time)).forEach((item, index) => { appendRowHTML(tvId, index, item.time, item.type, item.value); });
+        }
+
+        function appendRowHTML(tvId, index, time, type, val) {
+            const tbody = document.getElementById('tbody-' + tvId); const row = tbody.insertRow();
+            let sourceHtml = type === 'url' 
+                ? `<input type="text" class="table-input" name="value-${index}" value="${val}" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`
+                : `<input type="hidden" name="value-${index}" value="${val}"><button type="button" class="upload-btn ${val?'ready':''}" onclick="openBrowser(${tvId}, ${index})">${val||'SELECT FILE'}</button>`;
+            row.innerHTML = `
+                <td><input type="text" class="table-input" name="time-${index}" value="${time}" placeholder="HH:MM:SS" oninput="checkAutoAddRow(this, ${tvId}); autoSave()"></td>
+                <td><select class="table-input custom-select" name="type-${index}" onchange="changeType(${tvId}, ${index}, this.value, this); autoSave()"><option value="url" ${type==='url'?'selected':''}>URL</option><option value="image" ${type==='image'?'selected':''}>IMG</option><option value="video" ${type==='video'?'selected':''}>VID</option></select></td>
+                <td id="source-td-${tvId}-${index}">${sourceHtml}</td>
+                <td style="text-align:center;"><button type="button" class="row-del" onclick="removeRow(this, ${tvId})">×</button></td>`;
+        }
+
+        function checkAutoAddRow(el, tvId) {
+            const tr = el.closest('tr'); const tbody = tr.parentNode;
+            if (tr === tbody.lastElementChild) appendRowHTML(tvId, tbody.rows.length, "", "url", "");
+        }
+
+        function removeRow(btn, tvId) {
+            const tbody = btn.closest('tbody'); if (tbody.rows.length <= 1) return;
+            btn.closest('tr').remove(); saveCurrentUIToData(); renderTable(tvId); saveDB();
+        }
+
+        function changeType(tvId, index, newType, selectEl) {
+            const td = document.getElementById(`source-td-${tvId}-${index}`);
+            td.innerHTML = newType === 'url' ? `<input type="text" class="table-input" name="value-${index}" value="" oninput="checkAutoAddRow(this, ${tvId}); autoSave()">` : `<input type="hidden" name="value-${index}" value=""><button type="button" class="upload-btn" onclick="openBrowser(${tvId}, ${index})">SELECT FILE</button>`;
+            if(selectEl) checkAutoAddRow(selectEl, tvId);
+        }
+
+        function updateLinkLabel(id) { db.projects[activeProjId].nodeNames[id] = document.getElementById(`node-name-${id}`).value; autoSave(); }
+        function openBrowser(tvId, index) { uploadTarget = { tvId, index }; document.getElementById('hidden-file-browser').click(); }
+        
+        function handleFileSelect(input) {
+            if(!input.files[0]) return; const filename = input.files[0].name; const td = document.getElementById(`source-td-${uploadTarget.tvId}-${uploadTarget.index}`);
+            if(td) {
+                td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${filename}"><button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
+                const tr = td.closest('tr'); const tbody = tr.parentNode;
+                if (tr === tbody.lastElementChild) appendRowHTML(uploadTarget.tvId, tbody.rows.length, "", "url", "");
+            }
+            autoSave(); input.value = ""; showToast("FILE ATTACHED");
+        }
+
+        let saveTimeout; function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDB(); }, 800); }
+
+        function saveCurrentUIToData() {
+            if(!activeProjId) return; const proj = db.projects[activeProjId];
+            document.querySelectorAll('form[id^="form-"]').forEach(f => {
+                const tvId = parseInt(f.elements['tv_id'].value); const tb = document.getElementById('tbody-' + tvId); const slots = [];
+                for (let i = 0; i < tb.rows.length; i++) {
+                    const r = tb.rows[i]; const time = r.querySelector('input[name^="time-"]').value; const type = r.querySelector('select[name^="type-"]').value; const valEl = r.querySelector('[name^="value-"]');
+                    slots.push({ time, type, value: valEl ? valEl.value : "" });
+                }
+                if(!proj.data[tvId]) proj.data[tvId] = {}; proj.data[tvId][activeDate] = slots;
+            });
+        }
+    </script>
+</body>
+</html>
