@@ -55,36 +55,36 @@
         .pin-box:focus { border-color: var(--theme-primary); box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
         .marketing-theme .pin-box:focus { box-shadow:0 0 15px rgba(192, 132, 252, 0.2); }
 
-        /* OS LAUNCHER SCREEN */
-        #os-launcher { display: none; width: 100%; max-width: 900px; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; animation: fadeIn 0.5s ease; }
-        .launcher-grid { display: grid; grid-template-columns: repeat(2, 240px); justify-content: center; gap: 30px; padding: 20px; }
-        
-        .app-icon { background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(250, 204, 21, 0.15); border-radius: 24px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);}
-        .app-icon:hover { transform: translateY(-5px); }
-        
-        .app-icon.vault-app:hover { border-color: #facc15; box-shadow: 0 20px 40px rgba(250, 204, 21, 0.15); }
-        .app-icon.noiz-app:hover { border-color: #c084fc; box-shadow: 0 20px 40px rgba(192, 132, 252, 0.15); }
-        .app-icon.kinetic-app:hover { border-color: #f87171; box-shadow: 0 20px 40px rgba(248, 113, 113, 0.15); }
-        .app-icon.airscreen-app:hover { border-color: #2dd4bf; box-shadow: 0 20px 40px rgba(45, 212, 191, 0.15); }
-
-        .app-svg-wrapper { width: 70px; height: 70px; border-radius: 18px; display: flex; justify-content: center; align-items: center; }
-        .vault-app .app-svg-wrapper { background: linear-gradient(135deg, rgba(250,204,21,0.2), rgba(59,130,246,0.1)); color: #facc15; }
-        .noiz-app .app-svg-wrapper { background: linear-gradient(135deg, rgba(192,132,252,0.2), rgba(45,212,191,0.1)); color: #c084fc; }
-        .kinetic-app .app-svg-wrapper { background: linear-gradient(135deg, rgba(248,113,113,0.2), rgba(251,146,60,0.1)); color: #f87171; }
-        .airscreen-app .app-svg-wrapper { background: linear-gradient(135deg, rgba(45,212,191,0.2), rgba(56,189,248,0.1)); color: #2dd4bf; }
-
-        .app-title { font-size: 16px; font-weight: 800; color: #f8fafc; letter-spacing: 1px; }
-        .app-subtitle { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;}
-
-        /* GLOBAL APP HEADER */
-        .global-app-header { display: none; width: 100%; max-width: 1200px; justify-content: flex-start; align-items: center; margin-bottom: 20px; animation: fadeInDown 0.4s ease;}
-        .home-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; border-radius: 12px; padding: 10px 15px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; font-weight: 700; font-family: 'Nunito'; font-size: 13px;}
-        .home-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-
-        .main-container { width: 100%; max-width: 1200px; display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease;}
+        .main-container { width: 100%; max-width: 1200px; display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; padding-left: 80px; box-sizing: border-box; transition: padding-left 0.3s ease;}
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* OS SIDEBAR (NEW DOCK) */
+        #os-sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 80px; background: rgba(10, 10, 10, 0.8); border-right: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: none; flex-direction: column; align-items: center; padding: 20px 0; z-index: 9000; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; white-space: nowrap; box-shadow: 10px 0 30px rgba(0,0,0,0.5);}
+        #os-sidebar:hover { width: 240px; align-items: flex-start; }
+        
+        .sidebar-brand { display: flex; align-items: center; padding: 0 20px; margin-bottom: 40px; cursor: pointer; width: 100%; box-sizing: border-box;}
+        .sidebar-brand img { width: 40px; height: 40px; object-fit: contain; min-width: 40px;}
+        .sidebar-brand span { margin-left: 15px; font-weight: 800; font-size: 14px; color: #fff; letter-spacing: 1px; opacity: 0; transition: opacity 0.2s; }
+        #os-sidebar:hover .sidebar-brand span { opacity: 1; transition-delay: 0.1s;}
+
+        .sidebar-item { display: flex; align-items: center; width: 100%; padding: 15px 20px; color: #94a3b8; cursor: pointer; transition: all 0.2s; box-sizing: border-box; position: relative; border-left: 3px solid transparent;}
+        .sidebar-item:hover { color: #f8fafc; background: rgba(255,255,255,0.03); }
+        .sidebar-item.active { border-left-color: var(--theme-primary); color: var(--theme-primary); background: linear-gradient(90deg, rgba(250, 204, 21, 0.1) 0%, transparent 100%); }
+        .marketing-theme .sidebar-item.active { border-left-color: #c084fc; color: #c084fc; background: linear-gradient(90deg, rgba(192, 132, 252, 0.1) 0%, transparent 100%);}
+        
+        .sidebar-icon { width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; min-width: 40px; border-radius: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;}
+        .sidebar-item:hover .sidebar-icon { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
+        .sidebar-label { margin-left: 15px; font-weight: 600; font-size: 13px; opacity: 0; transition: opacity 0.2s; letter-spacing: 0.5px;}
+        #os-sidebar:hover .sidebar-label { opacity: 1; transition-delay: 0.1s;}
+
+        /* SPLASH SCREEN (NEW HOME) */
+        #os-splash { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100vh; position: relative; padding-left: 80px; box-sizing: border-box; animation: fadeIn 0.8s ease;}
+        .splash-logo-bg { position: absolute; width: 60vw; max-width: 800px; opacity: 0.05; pointer-events: none; top: 50%; left: calc(50% + 40px); transform: translate(-50%, -50%); filter: grayscale(100%) contrast(1000%);}
+        .splash-content { position: relative; z-index: 10; text-align: center; }
+        .splash-manifesto { font-size: 42px; font-weight: 800; letter-spacing: 2px; color: #f8fafc; margin-bottom: 10px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+        .splash-sub { font-size: 14px; color: #94a3b8; font-weight: 300; letter-spacing: 1px; }
 
         /* Financial Vault Specific */
         #financial-vault { width:100%; display: flex; flex-direction:column; gap:20px; transition: opacity 0.3s ease;}
@@ -344,71 +344,82 @@
         </div>
     </div>
     
-    <!-- OS LAUNCHER (HOME SCREEN) -->
-    <div id="os-launcher">
-        <img src="icon.png" alt="RC Command Logo" style="height: 80px; margin-bottom: 15px; object-fit: contain;">
-        <p style="color: #94a3b8; font-size: 14px; margin-bottom: 40px; text-align: center;">Select an operational environment to launch.</p>
-        
-        <div class="launcher-grid">
-            <!-- Vault App -->
-            <div class="app-icon vault-app" onclick="launchApp('vault')">
-                <div class="app-svg-wrapper">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                </div>
-                <div style="text-align: center; width: 100%;">
-                    <div class="app-title">VAULT</div>
-                    <div class="app-subtitle">Financial Core</div>
-                </div>
-            </div>
-
-            <!-- Noiz App -->
-            <div class="app-icon noiz-app" onclick="launchApp('noiz')">
-                <div class="app-svg-wrapper">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                </div>
-                <div style="text-align: center; width: 100%;">
-                    <div class="app-title">NOIZ</div>
-                    <div class="app-subtitle">Marketing Hub</div>
-                </div>
-            </div>
-
-            <!-- Kinetic App -->
-            <div class="app-icon kinetic-app" onclick="alert('Kinetic Studio OS is currently offline or deploying.')">
-                <div class="app-svg-wrapper">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                </div>
-                <div style="text-align: center; width: 100%;">
-                    <div class="app-title">KINETIC</div>
-                    <div class="app-subtitle">Video Production</div>
-                </div>
-            </div>
-
-            <!-- AirScreen App -->
-            <div class="app-icon airscreen-app" onclick="alert('AirScreen OS is currently offline or deploying.')">
-                <div class="app-svg-wrapper">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                </div>
-                <div style="text-align: center; width: 100%;">
-                    <div class="app-title">AIRSCREEN</div>
-                    <div class="app-subtitle">Event Control</div>
-                </div>
-            </div>
+    <!-- OS SIDEBAR DOCK -->
+    <nav id="os-sidebar">
+        <div class="sidebar-brand" onclick="returnToHome()">
+            <img src="icon.png" alt="RC Logo" style="filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));">
+            <span>COMMAND CENTER</span>
         </div>
-    </div>
-        
-    <!-- GLOBAL APP HEADER (Visible when an app is open) -->
-    <div class="global-app-header" id="global-header">
-        <button class="home-btn" onclick="returnToHome()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            OS Home
-        </button>
+
+        <div class="sidebar-category"><span>Production</span></div>
+
+        <div class="sidebar-item" id="nav-ops" onclick="launchApp('ops')">
+            <div class="sidebar-icon" style="color: #10b981;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            </div>
+            <span class="sidebar-label">OPS CORE</span>
+        </div>
+
+        <div class="sidebar-item" onclick="alert('Kinetic Studio OS is currently offline or deploying.')">
+            <div class="sidebar-icon" style="color: #f87171;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </div>
+            <span class="sidebar-label">KINETIC</span>
+        </div>
+
+        <div class="sidebar-item" onclick="alert('AirScreen OS is currently offline or deploying.')">
+            <div class="sidebar-icon" style="color: #2dd4bf;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            </div>
+            <span class="sidebar-label">AIRSCREEN</span>
+        </div>
+
+        <div class="sidebar-category"><span>Marketing</span></div>
+
+        <div class="sidebar-item" id="nav-noiz" onclick="launchApp('noiz')">
+            <div class="sidebar-icon" style="color: #c084fc;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
+            <span class="sidebar-label">NOIZ</span>
+        </div>
+
+        <div class="sidebar-category"><span>Finance</span></div>
+
+        <div class="sidebar-item" id="nav-vault" onclick="launchApp('vault')">
+            <div class="sidebar-icon" style="color: #facc15;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </div>
+            <span class="sidebar-label">VAULT</span>
+        </div>
+    </nav>
+
+    <!-- NEW SPLASH SCREEN -->
+    <div id="os-splash">
+        <img src="icon.png" alt="Ghost Logo" class="splash-logo-bg">
+        <div class="splash-content">
+            <div class="splash-manifesto">Production. Marketing. Finance.</div>
+            <div class="splash-sub">Select an operational environment to launch.</div>
+        </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- FINANCIAL VAULT ENVIRONMENT (Existing App) -->
+    <!-- APP VIEW CONTAINER (Holds all active apps) -->
     <!-- ========================================== -->
     <div id='app-view' class="main-container">
         
+        <!-- NEW: OPS CORE ENVIRONMENT -->
+        <div id="ops-core" style="display:none; width: 100%; flex-direction: column; gap: 20px;">
+            <div style="text-align:left; width:100%; padding: 0 20px; box-sizing: border-box; margin-bottom: 10px;">
+                <h2 style="color:#10b981; font-weight:800; margin-top:0; margin-bottom: 5px; font-size: 24px; text-transform:uppercase; letter-spacing: 1px;">Operations Core</h2>
+                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">Project Management & Staging Area</p>
+            </div>
+            <div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.1); padding: 60px 40px; text-align: center; border-radius: 8px; color: #888;">
+                <span style="font-size: 32px; display:block; margin-bottom: 15px;">🏗️</span>
+                <span style="font-size: 16px; font-weight: 600; color: #cbd5e1;">OPS Core Environment Provisioned</span><br><br>
+                Ready to build the Project/Staffing layout and the 'Auto-Match to Drive' integrations here.
+            </div>
+        </div>
+
         <div id="financial-vault">
             <div class='glass-panel pane-top'>
                 <div class="top-header-row" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:15px;">
@@ -842,52 +853,70 @@
 
         function unlockApp(){
             document.getElementById('login-wrapper').style.display = 'none';
-            document.getElementById('os-launcher').style.display = 'flex';
+            document.getElementById('os-sidebar').style.display = 'flex';
+            document.getElementById('os-splash').style.display = 'flex';
             document.body.style.alignItems = 'center';
             document.body.style.justifyContent = 'center';
         }
 
         // --- OS ROUTING LOGIC ---
         function launchApp(appId) {
+            if(currentActiveApp === appId) return;
             currentActiveApp = appId;
-            var launcher = document.getElementById('os-launcher');
+            
+            var splash = document.getElementById('os-splash');
             var appView = document.getElementById('app-view');
-            var globalHeader = document.getElementById('global-header');
             var vault = document.getElementById('financial-vault');
             var mkt = document.getElementById('marketing-hub');
+            var ops = document.getElementById('ops-core');
             var body = document.body;
 
-            launcher.style.display = 'none';
+            // Manage Nav Active States
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            if(document.getElementById('nav-' + appId)) {
+                document.getElementById('nav-' + appId).classList.add('active');
+            }
+
+            splash.style.display = 'none';
             appView.style.display = 'flex';
-            globalHeader.style.display = 'flex';
             
             // Keep horizontally centered, but start from the top vertically
             body.style.alignItems = 'center';
             body.style.justifyContent = 'flex-start';
 
+            // Hide all apps first
+            vault.style.display = 'none';
+            mkt.style.display = 'none';
+            ops.style.display = 'none';
+            body.classList.remove('marketing-theme');
+            
+            // Set dynamic theme colors based on app
             if (appId === 'noiz') {
                 body.classList.add('marketing-theme');
-                vault.style.display = 'none';
                 mkt.style.display = 'flex';
             } else if (appId === 'vault') {
-                body.classList.remove('marketing-theme');
-                mkt.style.display = 'none';
                 vault.style.display = 'flex';
                 initPlaceholderGraph();
                 if(moloniState === 0) renderRetractedTicker();
+            } else if (appId === 'ops') {
+                document.documentElement.style.setProperty('--theme-primary', '#10b981');
+                document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top center, #022c22 0%, #0a0a0a 60%)');
+                ops.style.display = 'flex';
             }
         }
 
         function returnToHome() {
-            var launcher = document.getElementById('os-launcher');
+            var splash = document.getElementById('os-splash');
             var appView = document.getElementById('app-view');
-            var globalHeader = document.getElementById('global-header');
             var body = document.body;
 
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
             appView.style.display = 'none';
-            globalHeader.style.display = 'none';
-            launcher.style.display = 'flex';
+            splash.style.display = 'flex';
             body.classList.remove('marketing-theme');
+            document.documentElement.style.setProperty('--theme-primary', '#facc15');
+            document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
             
             // Return to dead center for the OS Launcher
             body.style.alignItems = 'center';
@@ -1808,11 +1837,11 @@
                             <span style="font-size:12px; color:#888;">Record(s) 1 to 17 of a total of 17 <span style="background:#3b82f6; color:#fff; padding:2px 8px; border-radius:4px; margin-left:5px; font-weight:800;">1</span></span>
                             <div style="display:flex; gap:10px; align-items:center;">
                                 <button class="btn-yellow-outline" style="padding: 6px 15px; width:auto; margin:0; border-color:rgba(255,255,255,0.2); color:#cbd5e1; background:transparent;">Orphan Articles <span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; margin-left:5px;">2</span></button>
-                                <div style="position:relative;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
+                                <div style="position:relative; padding-bottom: 5px;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
                                     <button class="btn-primary btn" style="width:auto; padding: 6px 15px; margin:0;">Add ▾</button>
-                                    <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:140px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; margin-top:5px;">
+                                    <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:140px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; text-align:left;">
                                         <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">New Category</a>
-                                        <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer;">New Article</a>
+                                        <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer;" onclick="loadMoloniView('Create Article')">New Article</a>
                                     </div>
                                 </div>
                                 <span style="color:#ef4444; cursor:not-allowed; font-size:12px; margin-left:5px; padding:6px 10px;">Delete</span>
@@ -1984,7 +2013,7 @@
                                 <button class="btn-yellow-outline" style="padding: 6px 15px; width:auto; margin:0; border-color:rgba(255,255,255,0.2); color:#cbd5e1; background:transparent;">Orphan Articles <span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; margin-left:5px;">2</span></button>
                                 <div style="position:relative; padding-bottom: 5px;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
                                     <button class="btn-primary btn" style="width:auto; padding: 6px 15px; margin:0;">Add ▾</button>
-                                    <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:140px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; text-align:left; /* Removed margin-top */">
+                                    <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:140px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; text-align:left;">
                                         <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">New Category</a>
                                         <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer;" onclick="loadMoloniView('Create Article')">New Article</a>
                                     </div>
@@ -2019,117 +2048,69 @@
                             </div>
                         </div>
 
-                        <!-- TAB CONTENT: GENERAL -->
-                        <div id="content-art-general" class="edit-content-pane" style="display:block;">
-                            <div style="background: rgba(255,255,255,0.03); padding: 10px 15px; border-radius: 4px; border-left: 3px solid rgba(255,255,255,0.2); font-size: 12px; color:#cbd5e1; margin-bottom: 25px;">
-                                <strong>NOTE:</strong> All fields marked with (<span style="color:#ef4444;">*</span>) are required
-                            </div>
-
-                            <h4 style="color:#e2e8f0; font-weight:400; font-size:18px; margin-top:0; margin-bottom: 20px;">General Information</h4>
-
-                            <div style="display:flex; flex-direction:column; gap: 15px; max-width: 700px;">
-                                
-                                <div style="display:flex; align-items:center; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; font-weight:600;">Visibility</div>
-                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                                        <select class="f-input" style="width:100%;"><option selected>Active</option><option>Hidden</option></select>
-                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; align-items:center; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Category</div>
-                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                                        <select class="f-input" style="width:100%;"><option>Choose an option</option></select>
-                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; align-items:center; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Type</div>
-                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                                        <select class="f-input" style="width:100%;"><option>Choose an option</option><option>Product</option><option>Service</option></select>
-                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; align-items:flex-start; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; padding-top:10px;">Reference</div>
-                                    <div style="flex:1;">
-                                        <div style="color:#2dd4bf; font-size:11px; margin-bottom:4px;">Last Code: <i>PXM</i></div>
-                                        <div style="display:flex; align-items:center; gap:8px;">
-                                            <input type="text" class="f-input" value="PXN" style="width:100%;">
-                                            <span style="color:#ef4444; font-size:12px;">(*)</span>
-                                            <span style="width:16px; height:16px; background:#22c55e; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-size:10px; font-weight:800; cursor:help;">?</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; align-items:center; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">EAN (Barcode)</div>
-                                    <div style="flex:1;"><input type="text" class="f-input" style="width:100%;"></div>
-                                </div>
-
-                                <div style="display:flex; align-items:center; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Designation</div>
-                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                                        <input type="text" class="f-input" style="width:100%;">
-                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; align-items:flex-start; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; padding-top:10px;">Summary</div>
-                                    <div style="flex:1;"><textarea class="f-input" style="width:100%; height:80px; resize:vertical;"></textarea></div>
-                                </div>
-
-                                <div style="display:flex; align-items:flex-start; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; padding-top:10px;">Price</div>
-                                    <div style="flex:1;">
-                                        <div style="color:#888; font-size:11px; margin-bottom:4px;">Price without taxes & fees (<a href="#" style="color:#3b82f6; text-decoration:none;">Edit</a>)</div>
-                                        <div style="display:flex; align-items:center; gap:8px;">
-                                            <input type="text" class="f-input" value="0,00" style="width:120px; text-align:right;">
-                                            <button class="f-btn-cancel" style="background:rgba(255,255,255,0.05); padding:10px 15px;">Define Unit Price with VAT</button>
-                                            <span style="color:#ef4444; font-size:12px;">(*)</span>
-                                            <span style="width:16px; height:16px; background:#22c55e; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-size:10px; font-weight:800; cursor:help;">?</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; align-items:center; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Favorite in POS</div>
-                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                                        <input type="checkbox" style="cursor:pointer; accent-color:#facc15;"> <span style="font-size:13px; color:#94a3b8;">Yes</span>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; align-items:center; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Unit</div>
-                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                                        <select class="f-input" style="width:100%;"><option>Choose an option</option><option>Un</option><option>Hour</option><option>Kg</option></select>
-                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; align-items:center; gap: 15px; margin-top:10px;">
-                                    <div style="width:160px; text-align:right; font-size:12px; color:#e2e8f0; line-height:1.2;">Export observations in article sheets</div>
-                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                                        <input type="checkbox" style="cursor:pointer; accent-color:#facc15;"> <span style="font-size:13px; color:#94a3b8;">Yes. Add these observations in article sheets.</span>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; align-items:flex-start; gap: 15px;">
-                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; padding-top:10px;">Observations</div>
-                                    <div style="flex:1;"><textarea class="f-input" style="width:100%; height:80px; resize:vertical;"></textarea></div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <!-- TAB CONTENT: TAXES (Placeholder) -->
+                        <!-- TAB CONTENT: TAXES -->
                         <div id="content-art-taxes" class="edit-content-pane" style="display:none; width: 100%;">
-                            <h4 style="color:#e2e8f0; font-weight:400; font-size:18px; margin-top:0; margin-bottom: 20px;">Taxes Configuration</h4>
-                            <p style="color:#888; font-size:13px;">Advanced tax rules and exemptions will be mapped here.</p>
+                            <h4 style="color:#e2e8f0; font-weight:400; font-size:18px; margin-top:0; margin-bottom: 20px;">Impostos</h4>
+                            
+                            <div class="moloni-table-container" style="padding-bottom: 20px; overflow:visible;">
+                                <table class="moloni-table" style="width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:50%;">Imposto</th>
+                                            <th class="text-right" style="width:20%;">Valor</th>
+                                            <th class="text-center" style="width:15%;">Cumulativo</th>
+                                            <th class="text-center" style="width:15%;">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Add New Tax Row -->
+                                        <tr style="background: rgba(255,255,255,0.02);">
+                                            <td>
+                                                <select class="f-input" style="padding: 8px;"><option>Escolha uma opção</option><option>IVA Normal (23%)</option><option>IVA Intermédio (13%)</option><option>IVA Reduzido (6%)</option><option>Isento</option></select>
+                                            </td>
+                                            <td class="text-right">
+                                                <input type="text" class="f-input text-right" style="width:80px; display:inline-block; padding:8px; opacity:0.5; background:rgba(0,0,0,0.6);" disabled>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="checkbox" style="cursor:pointer; accent-color:#facc15;">
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn-yellow-outline" style="padding: 0; border-color: rgba(59, 130, 246, 0.4); color: #3b82f6; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; font-size: 16px; margin: 0 auto;" title="Adicionar Imposto">+</button>
+                                            </td>
+                                        </tr>
+                                        <!-- Existing Tax Row -->
+                                        <tr>
+                                            <td style="color:#cbd5e1; text-align:right; font-size:13px; padding-right:15px;">IVA Normal</td>
+                                            <td class="text-right">
+                                                <div style="display:flex; justify-content:flex-end; align-items:center; gap:5px;">
+                                                    <input type="text" class="f-input text-right" value="0,00" style="width:80px; padding:8px; opacity:0.5; background:rgba(0,0,0,0.6);" disabled>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="checkbox" style="cursor:pointer; accent-color:#facc15;">
+                                            </td>
+                                            <td class="text-center">
+                                                <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
+                                                    <div style="color:#3b82f6; cursor:pointer; font-size:16px; width: 24px; height: 24px; border: 1px solid rgba(59,130,246,0.3); border-radius: 50%; display:flex; justify-content:center; align-items:center;">↑</div>
+                                                    <div style="color:#3b82f6; cursor:pointer; font-size:16px; width: 24px; height: 24px; border: 1px solid rgba(59,130,246,0.3); border-radius: 50%; display:flex; justify-content:center; align-items:center;">↓</div>
+                                                    <div style="color:#ef4444; cursor:pointer; font-size:14px; width: 24px; height: 24px; border: 1px solid rgba(239,68,68,0.3); border-radius: 50%; display:flex; justify-content:center; align-items:center;">✕</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; align-items:flex-end; margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px; gap:10px;">
+                                <div style="display:flex; justify-content:space-between; width:300px; font-size:13px; color:#e2e8f0;">
+                                    <span style="font-weight:600;">Total de Impostos</span>
+                                    <span>0,00 €</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; width:300px; font-size:14px; color:#fff;">
+                                    <span style="font-weight:800;">Preço Venda ao Público (P.V.P.)</span>
+                                    <span style="font-weight:800;">0,00 €</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- TAB CONTENT: IMAGES -->
