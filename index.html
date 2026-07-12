@@ -74,7 +74,7 @@
         .airscreen-app .app-svg-wrapper { background: linear-gradient(135deg, rgba(45,212,191,0.2), rgba(56,189,248,0.1)); color: #2dd4bf; }
 
         .app-title { font-size: 16px; font-weight: 800; color: #f8fafc; letter-spacing: 1px; }
-        .app-subtitle { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: -10px;}
+        .app-subtitle { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;}
 
         /* GLOBAL APP HEADER */
         .global-app-header { display: none; width: 100%; max-width: 1200px; justify-content: flex-start; align-items: center; margin-bottom: 20px; animation: fadeInDown 0.4s ease;}
@@ -130,9 +130,9 @@
         .m-nav-item { position: relative; padding: 5px 0; font-size: 14px; font-weight: 600; color: #cbd5e1; cursor: pointer; transition: color 0.2s;}
         .m-nav-item:hover { color: #facc15; }
         
-        .m-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #1a1a1a; min-width: 200px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 100; text-align: left; overflow: hidden;}
+        .m-dropdown { display: none; position: absolute; top: 100%; left: 0; background: #1a1a1a; min-width: 200px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 100; text-align: left; overflow: hidden; /* Removed margin-top to prevent hover gap */ }
         .m-nav-item:hover .m-dropdown { display: block; }
-        .m-dropdown a { display: block; padding: 12px 16px; color: #e2e8f0; text-decoration: none; border-left: 2px solid transparent; transition: all 0.2s; font-size: 13px; font-weight: 500;}
+        .m-dropdown a { display: block; padding: 12px 16px; color: #e2e8f0; text-decoration: none; border-left: 2px solid transparent; transition: all 0.2s; font-size: 13px; font-weight: 500; cursor: pointer;}
         .m-dropdown a:hover { background: rgba(255,255,255,0.05); border-left: 2px solid #facc15; color: #fff;}
         .m-dropdown-title { color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 10px 16px 4px 16px; pointer-events: none; }
 
@@ -245,10 +245,10 @@
         .invoice-focus-mode #moloni-workspace { padding-top: 10px; }
 
         /* 3-DOT MENU IN TABLE */
-        .table-dropdown { position: relative; display: inline-block; cursor: pointer; margin-left: 8px; }
-        .table-dropdown-content { display: none; position: absolute; right: 0; top: 100%; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 100; text-align: left; min-width: 200px; overflow: hidden; margin-top: 5px; }
+        .table-dropdown { position: relative; display: inline-block; cursor: pointer; margin-left: 8px; padding-bottom: 10px; /* Added padding to bridge gap */ }
+        .table-dropdown-content { display: none; position: absolute; right: 0; top: 100%; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 100; text-align: left; min-width: 200px; overflow: hidden; /* Removed margin-top */ }
         .table-dropdown:hover .table-dropdown-content { display: block; }
-        .table-dropdown-content a { display: block; padding: 12px 16px; color: #e2e8f0; text-decoration: none; font-size: 13px; font-weight: 500; transition: 0.2s; border-left: 2px solid transparent;}
+        .table-dropdown-content a { display: block; padding: 12px 16px; color: #e2e8f0; text-decoration: none; font-size: 13px; font-weight: 500; transition: 0.2s; border-left: 2px solid transparent; cursor: pointer;}
         .table-dropdown-content a:hover { background: rgba(255,255,255,0.05); border-left: 2px solid #facc15; color:#fff;}
         .table-dropdown-content a.danger-action { color: #ef4444; border-top: 1px solid rgba(255,255,255,0.05); }
         .table-dropdown-content a.danger-action:hover { border-left-color: #ef4444; color: #f87171; }
@@ -975,6 +975,7 @@
         }
 
         function initPlaceholderGraph() {
+            if (dashChart) { dashChart.destroy(); }
             const ctx = document.getElementById('dashboardChart').getContext('2d');
             dashChart = new Chart(ctx, {
                 type: 'line',
@@ -1035,7 +1036,7 @@
 
         function loadMoloniView(viewName, isInternalCall = false) {
             // Determine required state
-            var isFocusMode = viewName.startsWith('Create ') || viewName === 'Expense' || viewName.includes('Report') || viewName.includes('VAT') || viewName === 'Invoice Recon' || viewName === 'Suppliers' || viewName === 'Clients';
+            var isFocusMode = viewName.startsWith('Create ') || viewName === 'Expense' || viewName.includes('Report') || viewName.includes('VAT') || viewName === 'Invoice Recon' || viewName === 'Suppliers' || viewName === 'Clients' || viewName.startsWith('Edit Category|') || viewName.startsWith('Admin Categories|');
             
             if (!isInternalCall) {
                 if (viewName === 'Dashboard') {
@@ -1587,9 +1588,9 @@
 
                         <div style="display:flex; justify-content:flex-end; gap: 10px; margin-bottom: 20px;">
                             <button class="f-btn-cancel" style="padding: 8px 20px; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">Filter</button>
-                            <div style="position:relative;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
+                            <div style="position:relative; padding-bottom: 5px;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
                                 <button class="btn-primary btn" style="width:auto; padding: 8px 20px; margin-bottom:0;">Export ▾</button>
-                                <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:120px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; margin-top:5px;">
+                                <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:120px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; /* Removed margin-top */">
                                     <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">Export CSV</a>
                                     <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">Export XLSX</a>
                                     <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer;">Export PDF</a>
@@ -1659,9 +1660,9 @@
 
                         <div style="display:flex; justify-content:flex-end; gap: 10px; margin-bottom: 20px;">
                             <button class="f-btn-cancel" style="padding: 8px 20px; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">Filter</button>
-                            <div style="position:relative;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
+                            <div style="position:relative; padding-bottom: 5px;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
                                 <button class="btn-primary btn" style="width:auto; padding: 8px 20px; margin-bottom:0;">Export ▾</button>
-                                <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:120px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; margin-top:5px;">
+                                <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:120px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; /* Removed margin-top */">
                                     <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">Export CSV</a>
                                     <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">Export XLSX</a>
                                     <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer;">Export PDF</a>
@@ -1743,6 +1744,413 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                `;
+            }
+            else if (viewName === 'Products') {
+                var categories = [
+                    {name: 'AV - Partners', count: ''},
+                    {name: 'Company Logistics', count: '7'},
+                    {name: 'Crewing', count: '2'},
+                    {name: 'Exhibition Stand build', count: '1'},
+                    {name: 'Graphic/Animation Design', count: '1'},
+                    {name: 'Invoicing', count: '2'},
+                    {name: 'Lighting', count: '4'},
+                    {name: 'Live AI Interpretation Service', count: '1'},
+                    {name: 'Print Services', count: '1'},
+                    {name: 'Service Pack', count: '9', special: true},
+                    {name: 'Setup', count: '1'},
+                    {name: 'Som', count: '11'},
+                    {name: 'Staging', count: '5'},
+                    {name: 'Video', count: '16'},
+                    {name: 'Video/Photography Production', count: '3'},
+                    {name: 'Virtual Platform', count: '1'},
+                    {name: 'Work team meals', count: '1'}
+                ];
+
+                var rowsHtml = categories.map(cat => `
+                    <tr>
+                        <td style="color:#f8fafc;">${cat.special ? '<span style="color:#22c55e; font-size:10px; margin-right:6px; text-shadow:0 0 5px rgba(34,197,94,0.5);">●</span>' : ''}${cat.name}</td>
+                        <td class="text-center"><a class="action-link" style="color:#facc15;" onclick="loadMoloniView('Edit Category|${cat.name}')">Edit</a></td>
+                        <td class="text-center"><a class="action-link" style="color:#facc15;" onclick="loadMoloniView('Admin Categories|${cat.name}')">Admin. Categories</a></td>
+                        <td class="text-center"><a class="action-link" style="color:#facc15;">Admin. Articles ${cat.count ? `<span style="background:rgba(250, 204, 21, 0.1); color:#facc15; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px; font-weight:800;">${cat.count}</span>` : ''}</a></td>
+                        <td class="text-center"><input type="checkbox" style="cursor:pointer; accent-color:#facc15;"></td>
+                    </tr>
+                `).join('');
+
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
+                            <div>
+                                <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">Article Categories</h2>
+                                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">In this section you can manage article categories.</p>
+                            </div>
+                            <button class="f-btn-cancel" onclick="loadMoloniView('Dashboard')" style="padding: 8px 20px;">← Back</button>
+                        </div>
+                        
+                        <div class="f-section" style="background: rgba(248, 250, 252, 0.02);">
+                            <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px;">
+                                <span style="color:#3b82f6; font-size: 14px;">Simple Search</span>
+                                <button class="f-btn-cancel" style="padding: 6px 12px; font-size: 11px;">Advanced Search</button>
+                            </div>
+                            <div style="display:flex; align-items:center; gap: 10px; font-size: 12px; color: #e2e8f0; flex-wrap:wrap;">
+                                <span style="font-weight:600;">Insert words to search</span>
+                                <div style="position:relative; flex:1; min-width:200px; max-width:300px;">
+                                    <input type="text" class="f-input" placeholder="Search" style="padding: 6px 30px 6px 12px;">
+                                    <span style="position:absolute; right:8px; top:8px; color:#22c55e; cursor:help; font-weight:800;" title="Help">?</span>
+                                </div>
+                                <select class="f-input" style="width:70px; padding: 6px;"><option>10</option><option selected>17</option><option>50</option></select>
+                                <button class="btn-yellow-outline" style="padding: 6px 15px; width:auto; margin:0;">Search</button>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; flex-wrap:wrap; gap:10px;">
+                            <span style="font-size:12px; color:#888;">Record(s) 1 to 17 of a total of 17 <span style="background:#3b82f6; color:#fff; padding:2px 8px; border-radius:4px; margin-left:5px; font-weight:800;">1</span></span>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <button class="btn-yellow-outline" style="padding: 6px 15px; width:auto; margin:0; border-color:rgba(255,255,255,0.2); color:#cbd5e1; background:transparent;">Orphan Articles <span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; margin-left:5px;">2</span></button>
+                                <div style="position:relative;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
+                                    <button class="btn-primary btn" style="width:auto; padding: 6px 15px; margin:0;">Add ▾</button>
+                                    <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:140px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; margin-top:5px;">
+                                        <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">New Category</a>
+                                        <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer;">New Article</a>
+                                    </div>
+                                </div>
+                                <span style="color:#ef4444; cursor:not-allowed; font-size:12px; margin-left:5px; padding:6px 10px;">Delete</span>
+                            </div>
+                        </div>
+
+                        <div class="moloni-table-container" style="padding-bottom: 50px;">
+                            <table class="moloni-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:40%;">Available Categories <span style="color:#888; font-size:10px;">▲</span></th>
+                                        <th class="text-center">Edit</th>
+                                        <th class="text-center">Admin. Categories</th>
+                                        <th class="text-center">Admin. Articles</th>
+                                        <th class="text-center">Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (viewName.startsWith('Edit Category|')) {
+                var categoryName = viewName.split('|')[1];
+                var now = new Date();
+                var formattedDate = now.getDate().toString().padStart(2, '0') + '-' + (now.getMonth() + 1).toString().padStart(2, '0') + '-' + now.getFullYear() + ' às ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                
+                // Switch back into Focus Mode styling
+                appView.classList.add('invoice-focus-mode');
+
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
+                        <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">Article Categories</h2>
+                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 25px;">In this section you can change the article category <strong>${categoryName}</strong>.</p>
+                        
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+                            <div style="display:flex; gap: 20px;">
+                                <div id="tab-general" class="edit-tab" style="padding-bottom: 10px; color:#facc15; font-weight:700; border-bottom: 2px solid #facc15; font-size: 14px; cursor:pointer; transition:0.2s;" onclick="switchEditTab('general')">General</div>
+                                <div id="tab-images" class="edit-tab" style="padding-bottom: 10px; color:#888; font-weight:600; font-size: 14px; cursor:pointer; transition:0.2s;" onclick="switchEditTab('images')" onmouseover="if(this.style.color!=='rgb(250, 204, 21)') this.style.color='#fff'" onmouseout="if(this.style.color!=='rgb(250, 204, 21)') this.style.color='#888'">Images</div>
+                            </div>
+                            <div style="display:flex; gap:10px; padding-bottom:10px;">
+                                <button class="f-btn-cancel" onclick="loadMoloniView('Products')">Cancelar</button>
+                                <button class="f-btn-save" onclick="simulateSave('Category updated successfully!', 'Products')">Guardar</button>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: GENERAL -->
+                        <div id="content-general" class="edit-content-pane" style="display:block;">
+                            <div style="background: rgba(255,255,255,0.03); padding: 10px 15px; border-radius: 4px; border-left: 3px solid rgba(255,255,255,0.2); font-size: 12px; color:#cbd5e1; margin-bottom: 25px;">
+                                <strong>NOTE:</strong> All fields marked with (<span style="color:#ef4444;">*</span>) are required
+                            </div>
+
+                            <h4 style="color:#e2e8f0; font-weight:400; font-size:18px; margin-top:0; margin-bottom: 20px;">General Information</h4>
+
+                            <div style="display:flex; flex-direction:column; gap: 15px; max-width: 600px;">
+                                
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:150px; text-align:right; font-size:13px; color:#e2e8f0;">Last update</div>
+                                    <div style="flex:1; font-size:13px; color:#94a3b8;">Ricardo Camacho | ${formattedDate}</div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:150px; text-align:right; font-size:13px; color:#e2e8f0;">Parent Category</div>
+                                    <div style="flex:1;">
+                                        <select class="f-input" style="width:100%;"><option>Choose an option</option></select>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:150px; text-align:right; font-size:13px; color:#e2e8f0;">Description</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:5px;">
+                                        <input type="text" class="f-input" value="${categoryName}" style="width:100%;">
+                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:flex-start; gap: 15px;">
+                                    <div style="width:150px; text-align:right; font-size:13px; color:#e2e8f0; padding-top:10px;">Summary</div>
+                                    <div style="flex:1;">
+                                        <textarea class="f-input" style="width:100%; height:80px; resize:vertical;"></textarea>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px; margin-top:10px;">
+                                    <div style="width:150px; text-align:right; font-size:13px; color:#e2e8f0;">Visible in POS</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                                        <input type="checkbox" style="cursor:pointer; accent-color:#facc15;"> <span style="font-size:13px; color:#94a3b8;">Yes</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:150px; text-align:right; font-size:13px; color:#e2e8f0;">Favorite in POS</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                                        <input type="checkbox" style="cursor:pointer; accent-color:#facc15;"> <span style="font-size:13px; color:#94a3b8;">Yes</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px; margin-top:10px;">
+                                    <div style="width:150px; text-align:right; font-size:13px; color:#e2e8f0; font-weight:700;">Admin. Articles</div>
+                                    <div style="flex:1; font-size:13px;">
+                                        <a class="action-link" style="color:#facc15;">Admin. Articles <span style="background:rgba(250, 204, 21, 0.2); color:#facc15; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px; font-weight:800;">2</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: IMAGES -->
+                        <div id="content-images" class="edit-content-pane" style="display:none; width: 100%;">
+                            <div style="margin-bottom: 30px;">
+                                <h4 style="color:#e2e8f0; font-weight:400; font-size:18px; margin-top:0; margin-bottom: 20px;">Imagens</h4>
+                                
+                                <div style="display:flex; align-items:center; gap: 15px; max-width: 600px;">
+                                    <div style="width:150px; text-align:right; font-size:13px; color:#e2e8f0; font-weight: 600;">Imagem</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:10px;">
+                                        <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; flex:1; display:flex; align-items:center; cursor: pointer; transition: all 0.3s ease;" onclick="document.getElementById('category-image-upload').click()" onmouseover="this.style.borderColor='rgba(250,204,21,0.5)'; this.style.background='rgba(250,204,21,0.05)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(0,0,0,0.2)';">
+                                            <input type="file" id="category-image-upload" style="display:none;" accept=".jpg,.gif,.png" onchange="document.getElementById('file-chosen-text').innerText = this.files.length ? this.files[0].name : 'No file chosen';">
+                                            <div style="background: transparent; color: #facc15; border: 1px solid rgba(250,204,21,0.3); padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 12px; transition: 0.3s ease;">Choose File</div>
+                                            <span id="file-chosen-text" style="color:#94a3b8; font-size:12px; font-family:'Nunito', sans-serif; font-weight:300;">No file chosen</span>
+                                        </div>
+                                        <span style="color:#888; font-size:11px; font-weight:300;">Ficheiros permitidos: jpg, gif, png</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="display:flex; justify-content:flex-end; gap:10px; padding-top:20px; margin-top:20px; border-top: 1px solid rgba(255,255,255,0.05);">
+                                <button class="f-btn-cancel" onclick="loadMoloniView('Products')">Cancel</button>
+                                <button class="f-btn-save" onclick="simulateSave('Category images updated!', 'Products')">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (viewName.startsWith('Admin Categories|')) {
+                var categoryName = viewName.split('|')[1];
+                
+                appView.classList.add('invoice-focus-mode');
+
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
+                            <div>
+                                <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">Article Categories</h2>
+                                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">In this section you can manage article categories within <strong>${categoryName}</strong></p>
+                            </div>
+                            <button class="f-btn-cancel" onclick="loadMoloniView('Products')" style="padding: 8px 20px;">← Back</button>
+                        </div>
+                        
+                        <div class="f-section" style="background: rgba(248, 250, 252, 0.02);">
+                            <div style="display:flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px;">
+                                <span style="color:#facc15; font-size: 14px; font-weight:600;">Simple Search</span>
+                                <button class="f-btn-cancel" style="padding: 6px 12px; font-size: 11px;">Advanced Search</button>
+                            </div>
+                            <div style="display:flex; align-items:center; gap: 10px; font-size: 12px; color: #e2e8f0; flex-wrap:wrap;">
+                                <span style="font-weight:600;">Insert words to search</span>
+                                <div style="position:relative; flex:1; min-width:200px; max-width:300px;">
+                                    <input type="text" class="f-input" placeholder="Search" style="padding: 6px 30px 6px 12px;">
+                                    <span style="position:absolute; right:8px; top:8px; color:#22c55e; cursor:help; font-weight:800;" title="Help">?</span>
+                                </div>
+                                <select class="f-input" style="width:70px; padding: 6px;"><option>10</option><option selected>17</option><option>50</option></select>
+                                <button class="btn-yellow-outline" style="padding: 6px 15px; width:auto; margin:0;">Search</button>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom: 40px; flex-wrap:wrap; gap:10px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <button class="btn-yellow-outline" style="padding: 6px 15px; width:auto; margin:0; border-color:rgba(255,255,255,0.2); color:#cbd5e1; background:transparent;">Orphan Articles <span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; margin-left:5px;">2</span></button>
+                                <div style="position:relative; padding-bottom: 5px;" onmouseenter="this.querySelector('div').style.display='block'" onmouseleave="this.querySelector('div').style.display='none'">
+                                    <button class="btn-primary btn" style="width:auto; padding: 6px 15px; margin:0;">Add ▾</button>
+                                    <div style="position:absolute; top:100%; right:0; background:#1a1a1a; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px 0; min-width:140px; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.8); display:none; text-align:left; /* Removed margin-top */">
+                                        <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">New Category</a>
+                                        <a style="display:block; padding:10px 15px; color:#e2e8f0; font-size:13px; cursor:pointer;" onclick="loadMoloniView('Create Article')">New Article</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; color: #888; padding: 40px 20px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+                            <span style="color:#e2e8f0; font-weight:700; font-size:14px;">Oh no... It looks like there are no categories here yet!</span>
+                            <span style="font-size:13px;">Since articles are organized by categories, let's create them now by choosing the 'Add Category' option :)</span>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (viewName === 'Create Article') {
+                appView.classList.add('invoice-focus-mode');
+
+                ws.innerHTML = `
+                    <div style="text-align:left; width:100%; padding: 20px; box-sizing: border-box;">
+                        <h2 style="color:#f8fafc; font-weight:600; margin-top:0; margin-bottom: 5px;">Articles</h2>
+                        <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 25px;">In this section you can insert a new article.</p>
+                        
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+                            <div style="display:flex; gap: 20px;">
+                                <div id="tab-art-general" class="edit-tab" style="padding-bottom: 10px; color:#facc15; font-weight:700; border-bottom: 2px solid #facc15; font-size: 14px; cursor:pointer; transition:0.2s;" onclick="switchEditTab('art-general')">General</div>
+                                <div id="tab-art-taxes" class="edit-tab" style="padding-bottom: 10px; color:#888; font-weight:600; font-size: 14px; cursor:pointer; transition:0.2s;" onclick="switchEditTab('art-taxes')" onmouseover="if(this.style.color!=='rgb(250, 204, 21)') this.style.color='#fff'" onmouseout="if(this.style.color!=='rgb(250, 204, 21)') this.style.color='#888'">Taxes</div>
+                                <div id="tab-art-images" class="edit-tab" style="padding-bottom: 10px; color:#888; font-weight:600; font-size: 14px; cursor:pointer; transition:0.2s;" onclick="switchEditTab('art-images')" onmouseover="if(this.style.color!=='rgb(250, 204, 21)') this.style.color='#fff'" onmouseout="if(this.style.color!=='rgb(250, 204, 21)') this.style.color='#888'">Images</div>
+                            </div>
+                            <div style="display:flex; gap:10px; padding-bottom:10px;">
+                                <button class="f-btn-cancel" onclick="loadMoloniView('Products')">Cancel</button>
+                                <button class="f-btn-save" onclick="simulateSave('Article created successfully!', 'Products')">Insert</button>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: GENERAL -->
+                        <div id="content-art-general" class="edit-content-pane" style="display:block;">
+                            <div style="background: rgba(255,255,255,0.03); padding: 10px 15px; border-radius: 4px; border-left: 3px solid rgba(255,255,255,0.2); font-size: 12px; color:#cbd5e1; margin-bottom: 25px;">
+                                <strong>NOTE:</strong> All fields marked with (<span style="color:#ef4444;">*</span>) are required
+                            </div>
+
+                            <h4 style="color:#e2e8f0; font-weight:400; font-size:18px; margin-top:0; margin-bottom: 20px;">General Information</h4>
+
+                            <div style="display:flex; flex-direction:column; gap: 15px; max-width: 700px;">
+                                
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; font-weight:600;">Visibility</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                                        <select class="f-input" style="width:100%;"><option selected>Active</option><option>Hidden</option></select>
+                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Category</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                                        <select class="f-input" style="width:100%;"><option>Choose an option</option></select>
+                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Type</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                                        <select class="f-input" style="width:100%;"><option>Choose an option</option><option>Product</option><option>Service</option></select>
+                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:flex-start; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; padding-top:10px;">Reference</div>
+                                    <div style="flex:1;">
+                                        <div style="color:#2dd4bf; font-size:11px; margin-bottom:4px;">Last Code: <i>PXM</i></div>
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <input type="text" class="f-input" value="PXN" style="width:100%;">
+                                            <span style="color:#ef4444; font-size:12px;">(*)</span>
+                                            <span style="width:16px; height:16px; background:#22c55e; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-size:10px; font-weight:800; cursor:help;">?</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">EAN (Barcode)</div>
+                                    <div style="flex:1;"><input type="text" class="f-input" style="width:100%;"></div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Designation</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                                        <input type="text" class="f-input" style="width:100%;">
+                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:flex-start; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; padding-top:10px;">Summary</div>
+                                    <div style="flex:1;"><textarea class="f-input" style="width:100%; height:80px; resize:vertical;"></textarea></div>
+                                </div>
+
+                                <div style="display:flex; align-items:flex-start; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; padding-top:10px;">Price</div>
+                                    <div style="flex:1;">
+                                        <div style="color:#888; font-size:11px; margin-bottom:4px;">Price without taxes & fees (<a href="#" style="color:#3b82f6; text-decoration:none;">Edit</a>)</div>
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <input type="text" class="f-input" value="0,00" style="width:120px; text-align:right;">
+                                            <button class="f-btn-cancel" style="background:rgba(255,255,255,0.05); padding:10px 15px;">Define Unit Price with VAT</button>
+                                            <span style="color:#ef4444; font-size:12px;">(*)</span>
+                                            <span style="width:16px; height:16px; background:#22c55e; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-size:10px; font-weight:800; cursor:help;">?</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Favorite in POS</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                                        <input type="checkbox" style="cursor:pointer; accent-color:#facc15;"> <span style="font-size:13px; color:#94a3b8;">Yes</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0;">Unit</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                                        <select class="f-input" style="width:100%;"><option>Choose an option</option><option>Un</option><option>Hour</option><option>Kg</option></select>
+                                        <span style="color:#ef4444; font-size:12px;">(*)</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap: 15px; margin-top:10px;">
+                                    <div style="width:160px; text-align:right; font-size:12px; color:#e2e8f0; line-height:1.2;">Export observations in article sheets</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                                        <input type="checkbox" style="cursor:pointer; accent-color:#facc15;"> <span style="font-size:13px; color:#94a3b8;">Yes. Add these observations in article sheets.</span>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; align-items:flex-start; gap: 15px;">
+                                    <div style="width:160px; text-align:right; font-size:13px; color:#e2e8f0; padding-top:10px;">Observations</div>
+                                    <div style="flex:1;"><textarea class="f-input" style="width:100%; height:80px; resize:vertical;"></textarea></div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: TAXES (Placeholder) -->
+                        <div id="content-art-taxes" class="edit-content-pane" style="display:none; width: 100%;">
+                            <h4 style="color:#e2e8f0; font-weight:400; font-size:18px; margin-top:0; margin-bottom: 20px;">Taxes Configuration</h4>
+                            <p style="color:#888; font-size:13px;">Advanced tax rules and exemptions will be mapped here.</p>
+                        </div>
+
+                        <!-- TAB CONTENT: IMAGES -->
+                        <div id="content-art-images" class="edit-content-pane" style="display:none; width: 100%;">
+                            <div style="margin-bottom: 30px;">
+                                <h4 style="color:#e2e8f0; font-weight:400; font-size:18px; margin-top:0; margin-bottom: 20px;">Images</h4>
+                                
+                                <div style="display:flex; align-items:center; gap: 15px; max-width: 600px;">
+                                    <div style="width:150px; text-align:right; font-size:13px; color:#e2e8f0; font-weight: 600;">Image</div>
+                                    <div style="flex:1; display:flex; align-items:center; gap:10px;">
+                                        <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; flex:1; display:flex; align-items:center; cursor: pointer; transition: all 0.3s ease;" onclick="document.getElementById('article-image-upload').click()" onmouseover="this.style.borderColor='rgba(250,204,21,0.5)'; this.style.background='rgba(250,204,21,0.05)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(0,0,0,0.2)';">
+                                            <input type="file" id="article-image-upload" style="display:none;" accept=".jpg,.gif,.png" onchange="document.getElementById('art-file-chosen-text').innerText = this.files.length ? this.files[0].name : 'No file chosen';">
+                                            <div style="background: transparent; color: #facc15; border: 1px solid rgba(250,204,21,0.3); padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 12px; transition: 0.3s ease;">Choose File</div>
+                                            <span id="art-file-chosen-text" style="color:#94a3b8; font-size:12px; font-family:'Nunito', sans-serif; font-weight:300;">No file chosen</span>
+                                        </div>
+                                        <span style="color:#888; font-size:11px; font-weight:300;">Allowed files: jpg, gif, png</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 `;
             }
@@ -2165,6 +2573,30 @@
             document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             document.getElementById(targetId).classList.add('active');
+        }
+
+        // Dedicated Tab Switcher for the Edit Category View
+        function switchEditTab(tabName) {
+            // Reset all tabs to inactive state
+            document.querySelectorAll('.edit-tab').forEach(t => {
+                t.style.color = '#888';
+                t.style.borderBottom = 'none';
+                t.style.fontWeight = '600';
+            });
+            // Hide all content panes
+            document.querySelectorAll('.edit-content-pane').forEach(c => c.style.display = 'none');
+            
+            // Activate selected tab (Using Yellow Theme)
+            var activeTab = document.getElementById('tab-' + tabName);
+            if(activeTab) {
+                activeTab.style.color = '#facc15';
+                activeTab.style.borderBottom = '2px solid #facc15';
+                activeTab.style.fontWeight = '700';
+            }
+            
+            // Show selected content
+            var activeContent = document.getElementById('content-' + tabName);
+            if(activeContent) activeContent.style.display = 'block';
         }
 
         // --- EXPENSE COMMAND CENTER LOGIC ---
