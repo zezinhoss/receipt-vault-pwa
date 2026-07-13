@@ -7,6 +7,9 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 🔌 LOAD SUPABASE FOR STORAGE & LEDGER INSERTS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -552,6 +555,11 @@
     </div>
 
     <script>
+        // 🔒 SUPABASE CONNECTION
+        const SUPABASE_URL = "https://neubhkdyxkidegndrpow.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldWJoa2R5eGtpZGVnbmRycG93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjU5NzYsImV4cCI6MjA5OTU0MTk3Nn0.9s645EtQQptWQOOa5SJcF-MtJW_37pvnDxq-PsheCOE";
+        let supabaseClient;
+        
         var dashChart;
         var moloniState = 0; // 0: Retracted, 1: Expanded (Dash/Lists), 2: Maximized (Forms/Reports)
         var expensePieChartInstance = null;
@@ -560,12 +568,138 @@
         var expenseVatMode = false;
         var isDigital = false;
         var isCash = false;
+        let heldFile = null; // Memory for the upload button
         
         // Auto-initialize the view on page load
         window.onload = function() {
+            // Initialize Supabase
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+
             initPlaceholderGraph();
             if(moloniState === 0) renderRetractedTicker();
+
+            // 📡 PWA SHARE TARGET LISTENER
+            // Asks the Service Worker if it caught a shared receipt
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ action: 'get-shared-file' });
+                
+                // Listen for the Service Worker's reply
+                navigator.serviceWorker.addEventListener('message', (event) => {
+                    if (event.data && event.data.action === 'deliver-shared-file' && event.data.file) {
+                        console.log("PWA Share Target File Caught!", event.data.file);
+                        
+                        // Fake a manual file upload using the caught file
+                        let dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(event.data.file);
+                        
+                        let fakeInput = { files: dataTransfer.files };
+                        handleFile(fakeInput); 
+                    }
+                });
+            }
         };
+
+        // 🖼️ HANDLE FILE PREVIEW
+        function handleFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            heldFile = file; // Store it for the upload button
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewImg = document.getElementById('preview');
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                
+                document.getElementById('status').innerHTML = `<span class="success-text">Document Captured: ${file.name}</span><br>Awaiting Vault Upload...`;
+                document.getElementById('uploadBtn').style.display = 'block';
+                document.getElementById('inputContainer').style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // ☁️ UPLOAD TO SUPABASE STORAGE & LEDGER
+        async function triggerUpload() {
+            if(!heldFile || !supabaseClient) {
+                alert("Database not connected or no file selected.");
+                return;
+            }
+            
+            var btn = document.getElementById('uploadBtn');
+            var statusEl = document.getElementById('status');
+            
+            btn.innerText = "Vaulting to Cloud...";
+            btn.style.pointerEvents = "none";
+            btn.style.opacity = "0.7";
+            
+            try {
+                // 1. Generate unique filename
+                const fileExt = heldFile.name.split('.').pop();
+                const fileName = `${Date.now()}_receipt.${fileExt}`;
+                
+                // 2. Upload to Storage
+                const { data: uploadData, error: uploadError } = await supabaseClient
+                    .storage
+                    .from('receipts_vault')
+                    .upload(`pending/${fileName}`, heldFile, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (uploadError) throw uploadError;
+
+                // 3. Get Public URL
+                const { data: publicUrlData } = supabaseClient
+                    .storage
+                    .from('receipts_vault')
+                    .getPublicUrl(`pending/${fileName}`);
+
+                // 4. Write to Expenses Ledger Table
+                const { error: dbError } = await supabaseClient
+                    .from('expenses')
+                    .insert([{
+                        fornecedor: 'Awaiting AI Extraction',
+                        filename_base: fileName,
+                        file_ext: `.${fileExt}`,
+                        storage_path: publicUrlData.publicUrl,
+                        status: 'Draft (Awaiting AI)',
+                        pay_method: isCash ? 'Cash' : (isDigital ? 'Digital' : 'Auto')
+                    }]);
+
+                if (dbError) throw dbError;
+
+                // Success!
+                statusEl.innerHTML = `<span class="success-text" style="font-weight:800;">✓ SECURELY VAULTED</span><br>File: ${fileName}<br><span style="color:#3b82f6; font-weight:700;">Logged to Ledger!</span>`;
+                btn.style.display = 'none';
+                document.getElementById('newBtn').style.display = 'block';
+                
+            } catch (err) {
+                console.error("Upload Error:", err);
+                statusEl.innerHTML = `<span class="error-text">Upload Failed: ${err.message}</span>`;
+                btn.style.display = 'none';
+                document.getElementById('retryBtn').style.display = 'block';
+                document.getElementById('retryBtn').style.pointerEvents = "auto";
+                document.getElementById('retryBtn').style.opacity = "1";
+                document.getElementById('retryBtn').innerText = "Try Again";
+            }
+        }
+
+        function resetForm() {
+            heldFile = null;
+            document.getElementById('preview').src = '';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('inputContainer').style.display = 'block';
+            document.getElementById('newBtn').style.display = 'none';
+            document.getElementById('retryBtn').style.display = 'none';
+            document.getElementById('uploadBtn').style.display = 'none';
+            document.getElementById('uploadBtn').innerText = "Upload to Vault";
+            document.getElementById('uploadBtn').style.pointerEvents = "auto";
+            document.getElementById('uploadBtn').style.opacity = "1";
+            document.getElementById('status').innerText = 'Awaiting Document...';
+        }
         
         const vatWarningPlugin = {
             id: 'vatWarningPlugin',
