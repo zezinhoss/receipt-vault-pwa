@@ -11,8 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- 🔌 LOAD SUPABASE OFFICIAL SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 🔌 LOAD SUPABASE OFFICIAL SDK (Updated CDN) -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -253,12 +253,27 @@
         // =========================================================================
         const SUPABASE_URL = "https://neubhkdyxkidegndrpow.supabase.co"; 
         
-        // ⚠️ SAFE KEY: This is your 'anon' public key. (Ends in ...PsheCOE)
-        // NEVER put the 'service_role' key here!
+        // ⚠️ SAFE KEY: This is your 'anon' public key.
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldWJoa2R5eGtpZGVnbmRycG93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjU5NzYsImV4cCI6MjA5OTU0MTk3Nn0.9s645EtQQptWQOOa5SJcF-MtJW_37pvnDxq-PsheCOE";
 
-        // Create the global database connection object
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase;
+
+        // Initialize Supabase ONLY after the window (and the CDN script) has fully loaded
+        window.onload = function() {
+            try {
+                if (window.supabase) {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    console.log("Supabase Client Initialized Successfully");
+                } else {
+                    console.error("Supabase library failed to load from CDN.");
+                }
+            } catch (err) {
+                console.error("Error initializing Supabase:", err);
+            }
+
+            // Focus the first box on load
+            if(pinInputs.length > 0) pinInputs[0].focus();
+        };
 
         var currentActiveApp = null;
         var currentPin = "";
@@ -279,11 +294,6 @@
 
         // --- PIN PAD LOGIC & API FETCH ---
         const pinInputs = document.querySelectorAll('.pin-input');
-        
-        // Focus the first box on load
-        window.onload = function() {
-            if(pinInputs.length > 0) pinInputs[0].focus();
-        };
 
         pinInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
