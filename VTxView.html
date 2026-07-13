@@ -5,158 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>WORKSTATION | PRODUCTION SUITE</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <!-- 🔌 LOAD SPREADSHEET PARSER -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <!-- 🔌 LOAD SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
+        /* FINTECH / TERMINAL THEME */
         :root { 
             --accent: #facc15; 
-            --accent-dim: rgba(250, 204, 21, 0.05); 
-            --bg-deep: #0a0a0a; 
-            --bg-panel: rgba(30, 30, 30, 0.5); 
-            --border-thin: rgba(255, 255, 255, 0.08);
-            --border-accent: rgba(250, 204, 21, 0.3); 
-            --text-primary: #F9F9FB;
-            --text-muted: #888888;
+            --accent-glow: rgba(250, 204, 21, 0.15);
+            --bg-deep: #050505; 
+            --bg-panel: #0a0a0a; 
+            --bg-surface: #111111;
+            --border-thin: rgba(255, 255, 255, 0.1);
+            --border-accent: rgba(250, 204, 21, 0.4); 
+            --text-primary: #e2e8f0;
+            --text-muted: #64748b;
             --alert-red: #ef4444;
-            --live-green: #22c55e;
-            --font-display: 'Nunito', sans-serif;
-            --font-body: 'Nunito', sans-serif;
+            --live-green: #10b981;
+            --override-blue: #0ea5e9;
+            --font-ui: 'Inter', sans-serif;
+            --font-data: 'JetBrains Mono', monospace;
         }
 
         body { 
-            font-family: var(--font-body); 
+            font-family: var(--font-ui); 
             background-color: var(--bg-deep); 
             color: var(--text-primary); 
             margin: 0; padding: 0; overflow-x: hidden;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 24px 24px; min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px; 
+            min-height: 100vh;
         }
 
         .bg-logo {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 60vw; max-width: 600px; opacity: 0.1; filter: grayscale(100%);
+            width: 40vw; max-width: 400px; opacity: 0.02; filter: grayscale(100%);
             pointer-events: none; z-index: -1;
         }
 
-        h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.05em; }
-        .text-micro { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+        h1, h2, h3, h4 { font-weight: 600; text-transform: uppercase; margin: 0; letter-spacing: 1px; color: #fff; }
+        .text-micro { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
         .text-accent { color: var(--accent); }
         .text-right { text-align: right; }
+        .data-font { font-family: var(--font-data); }
 
-        .glass-panel { 
-            background: var(--bg-panel); border: 1px solid var(--border-thin); 
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            padding: 24px; box-sizing: border-box; box-shadow: 0 10px 40px rgba(0,0,0,0.2); border-radius: 12px;
+        /* Crisp, sharp panels */
+        .fintech-panel { 
+            background: var(--bg-panel); 
+            border: 1px solid var(--border-thin); 
+            padding: 24px; box-sizing: border-box; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+            border-radius: 4px;
         }
 
-        .btn-outline { 
-            font-family: var(--font-display); background: transparent; color: var(--text-primary); 
-            border: 1px solid var(--border-thin); padding: 8px 16px; cursor: pointer; 
-            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; 
-            transition: 0.2s; border-radius: 6px;
+        /* Minimalist Buttons */
+        .btn-fintech { 
+            font-family: var(--font-ui); background: transparent; color: var(--text-primary); 
+            border: 1px solid var(--border-thin); padding: 6px 12px; cursor: pointer; 
+            font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; 
+            transition: all 0.2s ease; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
         }
-        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
-        .btn-outline.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+        .btn-fintech:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.3); color: #fff;}
+        .btn-fintech.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
         
-        .btn-action { 
-            font-family: var(--font-display); background: var(--accent-dim); color: var(--accent); 
-            border: 1px solid var(--border-accent); padding: 8px 16px; font-size: 11px;
-            font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em;
-            transition: all 0.2s ease; border-radius: 6px;
-        }
-        .btn-action:hover { background: var(--accent); color: #000; border-color: var(--accent); }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--alert-red); border-color: rgba(239, 68, 68, 0.3); }
-        .btn-danger:hover { background: var(--alert-red); color: #000; border-color: var(--alert-red); }
+        .btn-action { background: var(--accent-glow); color: var(--accent); border-color: var(--border-accent); }
+        .btn-action:hover { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow);}
+        
+        .btn-deploy { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-deploy.live { background: var(--alert-red); color: #fff; border-color: var(--alert-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        
+        .btn-override { color: var(--override-blue); border-color: rgba(14, 165, 233, 0.3); background: rgba(14, 165, 233, 0.05); }
+        .btn-override:hover { background: var(--override-blue); color: #000; border-color: var(--override-blue); box-shadow: 0 0 10px rgba(14, 165, 233, 0.3); }
 
+        .btn-icon { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 2px 6px; transition: 0.2s; border-radius: 3px; }
+        .btn-icon:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .btn-icon.text-red:hover { color: var(--alert-red); background: rgba(239, 68, 68, 0.1); }
+
+        /* Inputs */
         .as-input, .as-select { 
-            background: rgba(0,0,0,0.4); border: 1px solid var(--border-thin); color: var(--text-primary); 
-            padding: 10px 14px; font-family: var(--font-body); font-size: 13px; outline: none; width: 100%; 
-            box-sizing: border-box; transition: all 0.2s; border-radius: 6px;
+            background: var(--bg-surface); border: 1px solid var(--border-thin); color: #fff; 
+            padding: 8px 12px; font-family: var(--font-data); font-size: 12px; outline: none; width: 100%; 
+            box-sizing: border-box; transition: all 0.2s; border-radius: 3px;
         }
-        .as-input:focus, .as-select:focus { border-color: var(--border-accent); background: rgba(0,0,0,0.6);}
-        .as-select option { background: #1a1a1a; color: #fff; }
-        .custom-select {
-            appearance: none; -webkit-appearance: none; -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23facc15%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;
-        }
+        .as-input:focus, .as-select:focus { border-color: var(--border-accent); }
+        .as-select option { background: var(--bg-surface); color: #fff; }
 
+        /* Structural Layouts */
         #launcher-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100%; padding: 20px; box-sizing: border-box; animation: fadeIn 0.5s ease; }
         .launcher-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 800px; margin-top: 40px; }
-        .client-portal-box { grid-column: span 2; background: rgba(255,255,255,0.02); border: 1px dashed var(--border-thin); padding: 20px; text-align: center; transition: 0.3s; cursor: pointer; border-radius: 12px; }
-        .client-portal-box:hover { border-color: var(--border-accent); background: var(--accent-dim); }
-
-        .hub-anim { width: 300px; height: 150px; margin-bottom: 20px; }
-        .hub-core { fill: var(--bg-deep); stroke: var(--accent); stroke-width: 2; animation: pulseCore 2s infinite; }
-        .hub-line { stroke: var(--border-accent); stroke-width: 1.5; stroke-dasharray: 4; animation: flowData 20s linear infinite; }
-        .hub-screen { fill: transparent; stroke: var(--text-primary); stroke-width: 1.5; }
         
-        @keyframes pulseCore { 0% { filter: drop-shadow(0 0 2px var(--accent)); } 50% { filter: drop-shadow(0 0 15px var(--accent)); } 100% { filter: drop-shadow(0 0 2px var(--accent)); } }
-        @keyframes flowData { to { stroke-dashoffset: -1000; } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes scrollUpSVG { 0% { transform: translateY(0); } 100% { transform: translateY(-92px); } }
-        @keyframes scrollDownSVG { 0% { transform: translateY(-92px); } 100% { transform: translateY(0); } }
+        #dashboard-screen { display: none; flex-direction: column; gap: 20px; padding: 30px; max-width: 1600px; margin: 0 auto; animation: fadeIn 0.5s ease; }
+        .header-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border-thin); padding-bottom: 15px; }
+        .local-clock { font-family: var(--font-data); font-size: 20px; font-weight: 400; color: #fff; letter-spacing: 2px; }
         
-        .anim-up { animation: scrollUpSVG 10s linear infinite; }
-        .anim-down { animation: scrollDownSVG 12s linear infinite; }
-        .anim-up-fast { animation: scrollUpSVG 8s linear infinite; }
-
-        #dashboard-screen { display: none; flex-direction: column; gap: 24px; padding: 40px 20px; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.5s ease; }
-        .header-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border-thin); padding-bottom: 20px; }
-        .local-clock { font-family: var(--font-display); font-size: 24px; font-weight: 300; color: var(--text-primary); letter-spacing: 0.1em; }
-        .control-bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        /* Node Grid & Cards */
+        .node-grid { display: flex; flex-direction: column; gap: 16px; }
+        .node-card { border: 1px solid var(--border-thin); background: var(--bg-panel); display: flex; flex-direction: column; border-radius: 4px; transition: border-color 0.3s; }
+        .node-card:hover { border-color: rgba(255,255,255,0.2); }
         
-        .tab-btn { font-family: var(--font-display); padding: 8px 24px; background: transparent; border: 1px solid var(--border-thin); color: var(--text-muted); cursor: pointer; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s ease; border-radius: 6px; font-weight: 700; }
-        .tab-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--text-primary); }
-        .tab-btn.active { background: transparent; border-color: var(--border-thin); border-bottom-color: var(--accent); color: var(--text-primary); }
-
-        .node-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 20px; }
-        .node-card { border: 1px solid var(--border-accent); background: rgba(30, 30, 30, 0.4); display: flex; flex-direction: column; transition: box-shadow 0.3s ease; border-radius: 8px; }
-        .node-card:hover { box-shadow: 0 0 20px rgba(250, 204, 21, 0.05); }
-        .node-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border-thin); background: rgba(255,255,255,0.02); border-radius: 8px 8px 0 0; }
-        .node-body { transition: all 0.3s ease; overflow: hidden; }
-        .node-body.collapsed { display: none; }
-        .node-title-input { background: transparent; border: none; color: var(--text-primary); font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: 0.05em; outline: none; width: 140px; border-bottom: 1px solid transparent; transition: 0.2s; }
+        .node-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 16px; border-bottom: 1px solid var(--border-thin); 
+            background: var(--bg-surface); border-radius: 4px 4px 0 0; flex-wrap: wrap; gap: 10px;
+        }
+        .nh-section { display: flex; align-items: center; gap: 10px; }
+        
+        .node-title-input { 
+            background: transparent; border: none; color: var(--accent); font-family: var(--font-data); 
+            font-size: 14px; font-weight: 700; outline: none; width: 120px; 
+            border-bottom: 1px solid transparent; transition: 0.2s; padding: 2px 0;
+        }
         .node-title-input:focus { border-bottom-color: var(--accent); }
 
-        .data-table-wrap { max-height: 400px; overflow-y: auto; padding: 0; }
+        .node-body { transition: all 0.3s ease; overflow: hidden; }
+        .node-body.collapsed { display: none; }
+
+        /* Tables */
+        .data-table-wrap { max-height: 400px; overflow-y: auto; padding: 0; background: var(--bg-deep); }
         table { width: 100%; border-collapse: collapse; }
-        th { position: sticky; top: 0; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(5px); text-align: left; font-family: var(--font-display); font-size: 10px; color: var(--text-muted); padding: 12px 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border-thin); z-index: 10; }
-        td { padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        th { 
+            position: sticky; top: 0; background: #000; text-align: left; 
+            font-family: var(--font-ui); font-size: 10px; color: var(--text-muted); 
+            padding: 10px 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; 
+            border-bottom: 1px solid var(--border-thin); z-index: 10; 
+        }
+        td { padding: 6px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); }
 
-        .table-input { background: transparent; border: 1px solid var(--border-thin); color: var(--text-primary); padding: 8px 12px; font-family: var(--font-body); font-size: 12px; outline: none; width: 100%; box-sizing: border-box; transition: 0.2s; border-radius: 6px; }
-        .table-input:focus { border-color: var(--border-accent); }
-        .upload-btn { background: rgba(255,255,255,0.02); border: 1px dashed var(--border-thin); color: var(--text-muted); padding: 8px; width: 100%; cursor: pointer; font-size: 11px; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.05em; transition: 0.2s; border-radius: 6px; font-weight: 700; }
-        .upload-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text-primary); }
-        .upload-btn.ready { border-style: solid; border-color: var(--border-accent); color: var(--accent); background: var(--accent-dim); }
-        .row-del { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; transition: 0.2s; padding: 4px; }
-        .row-del:hover { color: var(--alert-red); }
-
-        .links-panel { border-top: 1px solid var(--border-thin); padding-top: 24px; margin-top: 12px;}
-        .links-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .links-grid { display: none; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
-        .links-grid.show { display: grid; }
-        .link-card { border: 1px solid var(--border-thin); padding: 16px; background: rgba(255,255,255,0.02); border-radius: 8px;}
-        .link-card .node-id { font-family: var(--font-display); font-size: 14px; color: var(--text-primary); margin-bottom: 8px; font-weight: 700;}
-        .link-url { font-size: 11px; color: var(--text-muted); cursor: pointer; transition: 0.2s; word-break: break-all;}
-        .link-url:hover { color: var(--accent); }
-
-        .hidden-cal { position: absolute; opacity: 0; pointer-events: none; width:0; height:0; }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; }
-        .modal-box { background: #1a1a1a; border: 1px solid var(--border-thin); width: 100%; max-width: 400px; padding: 32px; box-sizing: border-box; border-radius: 12px;}
-        .modal-title { font-family: var(--font-display); font-size: 16px; color: var(--text-primary); margin-bottom: 12px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 800;}
-        .modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
-        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
-        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--bg-deep); padding: 12px 24px; font-family: var(--font-display); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: none; z-index: 2000; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .table-input { 
+            background: transparent; border: 1px solid transparent; color: #fff; 
+            padding: 6px 8px; font-family: var(--font-data); font-size: 12px; outline: none; 
+            width: 100%; box-sizing: border-box; transition: 0.2s; border-radius: 3px;
+        }
+        .table-input:hover { border-color: rgba(255,255,255,0.1); }
+        .table-input:focus { border-color: var(--accent); background: var(--bg-surface); }
         
+        .upload-btn { 
+            background: transparent; border: 1px dashed rgba(255,255,255,0.2); color: var(--text-muted); 
+            padding: 6px; width: 100%; cursor: pointer; font-size: 10px; font-family: var(--font-data); 
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; border-radius: 3px; 
+        }
+        .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .upload-btn.ready { border-style: solid; border-color: rgba(255,255,255,0.1); color: #fff; background: var(--bg-surface); }
+
+        /* Override Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .modal-box { background: var(--bg-panel); border: 1px solid var(--border-thin); width: 100%; max-width: 500px; padding: 24px; box-sizing: border-box; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);}
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-thin); padding-bottom: 12px; margin-bottom: 16px; }
+        .modal-title { font-size: 14px; color: #fff; letter-spacing: 1px; margin:0; display:flex; align-items:center; gap:8px;}
+        .preview-box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid var(--border-thin); border-radius: 4px; display: flex; justify-content: center; align-items: center; margin-bottom: 16px; overflow: hidden; position: relative;}
+        .preview-box img, .preview-box video { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
+        .preview-placeholder { font-family: var(--font-data); font-size: 12px; color: var(--text-muted); }
+        
+        .custom-checkbox { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; color:#fff; user-select: none; font-family: var(--font-data);}
+        .custom-checkbox input { accent-color: var(--alert-red); width: 14px; height: 14px; margin:0;}
+
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 20px; font-family: var(--font-data); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: none; z-index: 2000; border-radius: 3px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px;}
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        ::-webkit-scrollbar-track { background: transparent; border-left: 1px solid var(--border-thin); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 0;}
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
     </style>
 </head>
 <body onload="initApp()">
@@ -165,71 +179,32 @@
     <div class="toast" id="sys-toast">ACTION COMPLETED</div>
     
     <input type="file" id="hidden-file-browser" style="display:none" onchange="handleFileSelect(this)">
-    <input type="date" id="master-calendar" class="hidden-cal" onchange="addMasterDate(this.value)">
-    <input type="date" id="copy-target-calendar" class="hidden-cal" onchange="executeCopyDay(this.value)">
+    <input type="date" id="master-calendar" style="position: absolute; opacity:0; pointer-events:none;" onchange="addMasterDate(this.value)">
+    <input type="date" id="copy-target-calendar" style="position: absolute; opacity:0; pointer-events:none;" onchange="executeCopyDay(this.value)">
 
+    <!-- LAUNCHER -->
     <div id="launcher-screen">
-        <svg class="hub-anim" viewBox="0 0 300 150">
-            <defs>
-                <clipPath id="screenClip1"><rect x="10" y="10" width="26" height="46" rx="2" /></clipPath>
-                <clipPath id="screenClip2"><rect x="10" y="94" width="26" height="46" rx="2" /></clipPath>
-                <clipPath id="screenClip3"><rect x="264" y="52" width="26" height="46" rx="2" /></clipPath>
-            </defs>
-            <path d="M150,75 L36,33" class="hub-line" />
-            <path d="M150,75 L36,117" class="hub-line" />
-            <path d="M150,75 L264,75" class="hub-line" />
-            <circle cx="150" cy="75" r="12" class="hub-core" />
-            <g clip-path="url(#screenClip1)">
-                <g class="anim-up">
-                    <image href="https://placehold.co/104x184/581c87/fff?text=DATA" x="10" y="10" width="26" height="46" />
-                    <image href="https://placehold.co/104x184/1d4ed8/fff?text=POLL" x="10" y="56" width="26" height="46" />
-                    <image href="https://placehold.co/104x184/581c87/fff?text=DATA" x="10" y="102" width="26" height="46" />
-                </g>
-            </g>
-            <rect x="10" y="10" width="26" height="46" rx="2" class="hub-screen" />
-            <g clip-path="url(#screenClip2)">
-                <g class="anim-down">
-                    <image href="https://placehold.co/104x184/0f172a/2dd4bf?text=MAP" x="10" y="94" width="26" height="46" />
-                    <image href="https://placehold.co/104x184/3b82f6/fff?text=TALK" x="10" y="140" width="26" height="46" />
-                    <image href="https://placehold.co/104x184/0f172a/2dd4bf?text=MAP" x="10" y="186" width="26" height="46" />
-                </g>
-            </g>
-            <rect x="10" y="94" width="26" height="46" rx="2" class="hub-screen" />
-            <g clip-path="url(#screenClip3)">
-                <g class="anim-up-fast">
-                    <image href="https://placehold.co/104x184/000/22c55e?text=LIVE" x="264" y="52" width="26" height="46" />
-                    <image href="https://placehold.co/104x184/581c87/facc15?text=QUIZ" x="264" y="98" width="26" height="46" />
-                    <image href="https://placehold.co/104x184/000/22c55e?text=LIVE" x="264" y="144" width="26" height="46" />
-                </g>
-            </g>
-            <rect x="264" y="52" width="26" height="46" rx="2" class="hub-screen" />
-        </svg>
-
-        <h1 style="font-size: 32px; letter-spacing: 0.2em; text-align: center;">WORKSTATION</h1>
-        <div class="text-micro" style="color:var(--accent); margin-top: 8px;">DIGITAL SIGNAGE FLEET CONTROL</div>
+        <h1 style="font-size: 32px; letter-spacing: 4px; text-align: center; color: #fff;">WORKSTATION</h1>
+        <div class="text-micro" style="margin-top: 8px; color: var(--accent);">FLEET SCHEDULER & CONTROL</div>
 
         <div class="launcher-grid">
-            <div class="glass-panel">
-                <h3 style="margin-bottom: 15px;">New Project</h3>
+            <div class="fintech-panel">
+                <h3 style="margin-bottom: 15px; font-size: 13px;">New Project</h3>
                 <input type="text" id="new-proj-name" class="as-input" placeholder="e.g. Summit 2026" style="margin-bottom: 15px;">
-                <button class="btn-action" style="width: 100%;" onclick="createNewProject()">Initialize Fleet</button>
+                <button class="btn-fintech btn-action" style="width: 100%; padding: 10px;" onclick="createNewProject()">Initialize Fleet</button>
             </div>
             
-            <div class="glass-panel">
-                <h3 style="margin-bottom: 15px;">Saved Projects</h3>
-                <select id="load-proj-select" class="as-select custom-select" style="margin-bottom: 15px;">
+            <div class="fintech-panel">
+                <h3 style="margin-bottom: 15px; font-size: 13px;">Saved Projects</h3>
+                <select id="load-proj-select" class="as-select" style="margin-bottom: 15px; padding-right:10px;">
                     <option value="">No saved projects...</option>
                 </select>
-                <button class="btn-outline" style="width: 100%;" onclick="loadSelectedProject()">Load Setup</button>
-            </div>
-
-            <div class="client-portal-box" onclick="showToast('CLIENT PORTAL LINK COPIED TO CLIPBOARD');">
-                <h4 style="color: var(--text-primary);">External Client Portal</h4>
-                <div class="text-micro" style="margin-top: 8px;">Generate secure drop-link for external populations</div>
+                <button class="btn-fintech" style="width: 100%; padding: 10px;" onclick="loadSelectedProject()">Load Setup</button>
             </div>
         </div>
     </div>
 
+    <!-- DASHBOARD -->
     <div id="dashboard-screen">
         <div class="header-bar">
             <div>
@@ -238,81 +213,67 @@
                     CLOUD SYNC ONLINE
                 </div>
                 <div style="display:flex; align-items:center; gap: 15px; flex-wrap: wrap;">
-                    <button class="btn-outline" style="padding: 4px 10px; font-size: 10px;" onclick="goToLauncher()">[ HOME ]</button>
-                    <h2>WORKSTATION</h2>
-                    <span style="color:#444; margin: 0 10px;">|</span>
-                    <button class="btn-outline" id="tab-assets" onclick="switchWorkspace('assets')">📁 ASSET HUB</button>
-                    <button class="btn-outline active" id="tab-fleet" onclick="switchWorkspace('fleet')">📅 XKEDULER</button>
+                    <button class="btn-fintech" onclick="goToLauncher()">[ HOME ]</button>
+                    <h2 style="font-size: 18px;">WORKSTATION</h2>
+                    <span style="color:#333; margin: 0 5px;">|</span>
+                    <button class="btn-fintech" id="tab-assets" onclick="switchWorkspace('assets')">ASSET HUB</button>
+                    <button class="btn-fintech active" id="tab-fleet" onclick="switchWorkspace('fleet')">TIMELINE</button>
                 </div>
-                <div class="text-micro" style="margin-top: 8px; color:var(--accent);" id="active-proj-title">PROJECT_NAME</div>
+                <div class="text-micro data-font" style="margin-top: 8px; color:var(--accent);" id="active-proj-title">PROJECT_NAME</div>
             </div>
             <div class="text-right">
-                <div class="text-micro text-accent" style="margin-bottom: 4px; animation: pulseCore 2s infinite;">LIVE SYNC...</div>
+                <div class="text-micro text-accent" style="margin-bottom: 4px;">LIVE SYNC...</div>
                 <div class="local-clock" id="master-clock">00:00:00</div>
             </div>
         </div>
 
-        <!-- WORKSPACE: ASSETS & IMPORT -->
+        <!-- WORKSPACE: ASSETS -->
         <div id="asset-workspace" style="display: none; animation: fadeIn 0.4s ease;">
-            <div class="node-grid" style="grid-template-columns: 1fr 1fr;">
-                <div class="glass-panel">
-                    <h3>Project Notepad & Links</h3>
-                    <p class="text-micro" style="margin-top: 8px; margin-bottom: 15px;">Paste Drive links, instructions, and master cues here.</p>
-                    <textarea class="as-input" id="project-notepad" style="height: 300px; resize: vertical;" oninput="saveNotepad()" placeholder="Start typing..."></textarea>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="fintech-panel">
+                    <h3 style="font-size:13px; margin-bottom: 15px;">Project Notepad</h3>
+                    <textarea class="as-input" id="project-notepad" style="height: 300px; resize: vertical;" oninput="saveNotepad()" placeholder="Paste Drive links, instructions, and master cues here..."></textarea>
                 </div>
                 
-                <div class="glass-panel">
-                    <h3 style="margin-bottom: 20px;">Asset Staging & Sync</h3>
+                <div class="fintech-panel">
+                    <h3 style="font-size:13px; margin-bottom: 20px;">Asset Staging & Sync</h3>
                     
-                    <div style="background: rgba(0,0,0,0.4); padding: 15px; border: 1px solid var(--border-thin); border-radius: 6px; margin-bottom: 20px;">
-                        <div class="text-micro" style="margin-bottom: 10px;">1. STAGE MEDIA FILES TO CLOUD (VIDEOS/IMAGES)</div>
+                    <div style="background: var(--bg-surface); padding: 15px; border: 1px solid var(--border-thin); border-radius: 4px; margin-bottom: 20px;">
+                        <div class="text-micro" style="margin-bottom: 10px;">1. STAGE MEDIA FILES (CLOUD UPLOAD)</div>
                         <div style="display: flex; gap: 10px;">
-                            <button class="upload-btn" onclick="document.getElementById('staging-media-upload').click()">BROWSE FILES</button>
-                            <button class="upload-btn" style="border-style: dashed;" onclick="document.getElementById('staging-folder-upload').click()">BROWSE FOLDER</button>
+                            <button class="btn-fintech" style="flex:1;" onclick="document.getElementById('staging-media-upload').click()">BROWSE FILES</button>
+                            <button class="btn-fintech" style="flex:1;" onclick="document.getElementById('staging-folder-upload').click()">BROWSE FOLDER</button>
                         </div>
                         <input type="file" id="staging-media-upload" multiple style="display:none" onchange="stageMediaFiles(this)">
                         <input type="file" id="staging-folder-upload" webkitdirectory directory multiple style="display:none" onchange="stageMediaFiles(this)">
                         
-                        <div id="staged-media-list" style="margin-top: 15px; max-height: 120px; overflow-y: auto; font-size: 11px; color: var(--text-primary); font-family: monospace;">
-                            <!-- File list injected here -->
-                        </div>
+                        <div id="staged-media-list" class="data-font" style="margin-top: 15px; max-height: 120px; overflow-y: auto; font-size: 11px; color: var(--text-primary);"></div>
                     </div>
 
-                    <div style="background: rgba(34, 197, 94, 0.05); padding: 15px; border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 6px;">
-                        <div class="text-micro" style="margin-bottom: 10px; color: var(--live-green);">2. SPREADSHEET CUE LIST IMPORT (CSV / XLSX)</div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">
-                            Format required: <strong>Node/Ecrã, Time/Hora, Type/Tipo, Value/Ficheiro</strong><br>
+                    <div style="background: rgba(16, 185, 129, 0.05); padding: 15px; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 4px;">
+                        <div class="text-micro" style="margin-bottom: 10px; color: var(--live-green);">2. SPREADSHEET CUE LIST IMPORT (CSV/XLSX)</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.5;">
+                            Format required: <strong>Node, Time, Type, File</strong><br>
                             Example: <em>1, 08:00:00, image, bg.jpg</em>
                         </div>
-                        <button class="btn-action" style="width: 100%; background: var(--live-green); color:#000; border-color: var(--live-green);" onclick="document.getElementById('spreadsheet-upload').click()">SYNC FROM SPREADSHEET</button>
+                        <button class="btn-fintech" style="width: 100%; background: var(--live-green); color:#000; border-color: var(--live-green);" onclick="document.getElementById('spreadsheet-upload').click()">SYNC FROM SPREADSHEET</button>
                         <input type="file" id="spreadsheet-upload" accept=".csv, .xlsx, .xls" style="display:none" onchange="processSpreadsheet(this)">
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- WORKSPACE: XKEDULER FLEET DASHBOARD -->
+        <!-- WORKSPACE: FLEET -->
         <div id="fleet-workspace" style="animation: fadeIn 0.4s ease;">
-            <div class="glass-panel" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                    <div class="control-bar">
-                        <span class="text-micro" style="margin-right: 8px;">ACTIVE SCHEDULE:</span>
-                        <div id="master-date-tabs" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-                    </div>
-                    <div class="control-bar">
-                        <button class="btn-outline" onclick="document.getElementById('master-calendar').showPicker()">+ Add Date</button>
-                        <button class="btn-outline" onclick="document.getElementById('copy-target-calendar').showPicker()">Duplicate</button>
-                        <button class="btn-outline" onclick="addNewNode()">+ Add Node</button>
-                        <button class="btn-outline btn-danger" onclick="openDeleteModal()">Purge Data</button>
-                    </div>
+            <div class="fintech-panel" style="padding: 16px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <span class="text-micro">SCHEDULE DATE:</span>
+                    <div id="master-date-tabs" style="display:flex; gap:8px;"></div>
                 </div>
-
-                <div class="links-panel">
-                    <div class="links-header" onclick="document.getElementById('link-grid-wrap').classList.toggle('show')">
-                        <span class="text-micro">Fleet Access Endpoints</span>
-                        <span class="text-micro" style="color:var(--accent);">Toggle Visibility</span>
-                    </div>
-                    <div class="links-grid" id="link-grid-wrap"></div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn-fintech" onclick="document.getElementById('master-calendar').showPicker()">+ Add Date</button>
+                    <button class="btn-fintech" onclick="document.getElementById('copy-target-calendar').showPicker()">Duplicate Day</button>
+                    <button class="btn-fintech" onclick="addNewNode()">+ Add Node</button>
                 </div>
             </div>
 
@@ -321,14 +282,53 @@
 
     </div>
 
-    <!-- Universal Custom Confirmation Modal -->
-    <div class="modal-overlay" id="confirm-modal">
+    <!-- OVERRIDE MODAL -->
+    <div class="modal-overlay" id="override-modal">
         <div class="modal-box">
-            <div class="modal-title" style="color: var(--alert-red);" id="confirm-title">Confirm Action</div>
-            <div class="modal-desc" id="confirm-desc">Are you sure you want to proceed?</div>
-            <div class="modal-actions">
-                <button class="btn-outline" onclick="document.getElementById('confirm-modal').style.display='none'">Abort</button>
-                <button class="btn-action btn-danger" id="confirm-btn">Execute</button>
+            <div class="modal-header">
+                <h3 class="modal-title"><span style="color:var(--override-blue);">●</span> LIVE OVERRIDE - <span id="override-node-label" class="data-font">NODE_XX</span></h3>
+                <button class="btn-icon" onclick="closeOverrideModal()">×</button>
+            </div>
+            
+            <div class="preview-box">
+                <span class="preview-placeholder" id="override-placeholder">Select Media to Preview</span>
+                <img id="override-img" src="" alt="Preview">
+                <video id="override-vid" src="" controls muted></video>
+                <iframe id="override-iframe" src="" style="width:100%; height:100%; border:none; display:none;"></iframe>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom: 16px;">
+                <select class="as-select" id="override-type" style="width: 100px;" onchange="toggleOverrideInput()">
+                    <option value="image">Image</option>
+                    <option value="video">Video</option>
+                    <option value="url">URL</option>
+                </select>
+                <div id="override-input-container" style="flex:1;">
+                    <button class="btn-fintech" style="width:100%; height:100%;" onclick="document.getElementById('override-file-browser').click()">BROWSE FILE</button>
+                </div>
+                <input type="file" id="override-file-browser" style="display:none;" accept="image/*,video/*,.pdf" onchange="handleOverrideFile(this)">
+            </div>
+            
+            <input type="hidden" id="override-target-id">
+            <input type="hidden" id="override-value">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-thin); padding-top: 16px;">
+                <label class="custom-checkbox">
+                    <input type="checkbox" id="override-mute" checked> Force Mute Output
+                </label>
+                <button class="btn-fintech btn-deploy live" style="padding: 8px 24px;" onclick="pushOverride()">PUSH LIVE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Universal Confirmation Modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-box" style="max-width: 400px; text-align:center;">
+            <h3 style="color: var(--alert-red); margin-bottom: 15px;" id="confirm-title">Confirm Action</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 25px;" id="confirm-desc">Are you sure?</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn-fintech" onclick="document.getElementById('confirm-modal').style.display='none'">CANCEL</button>
+                <button class="btn-fintech btn-deploy live" id="confirm-btn">EXECUTE</button>
             </div>
         </div>
     </div>
@@ -360,13 +360,13 @@
         }
 
         function loadDBFromStorage() {
-            const saved = localStorage.getItem('workstation_db_v8');
+            const saved = localStorage.getItem('vtx_db_v8');
             if (saved) { try { db = JSON.parse(saved); } catch(e) { db = { projects: {} }; } }
         }
 
         function saveDB() {
             if (activeProjId) saveCurrentUIToData();
-            localStorage.setItem('workstation_db_v8', JSON.stringify(db));
+            localStorage.setItem('vtx_db_v8', JSON.stringify(db));
         }
 
         function startClock() { 
@@ -397,7 +397,6 @@
         function switchWorkspace(mode) {
             document.getElementById('fleet-workspace').style.display = 'none';
             document.getElementById('asset-workspace').style.display = 'none';
-            
             document.getElementById('tab-fleet').classList.remove('active');
             document.getElementById('tab-assets').classList.remove('active');
             
@@ -443,13 +442,10 @@
             const today = new Date().toISOString().split('T')[0];
             
             db.projects[id] = {
-                name: name,
-                dates: [today],
-                nodes: [1], 
-                nodeNames: { "1": "NODE_01" },
+                name: name, dates: [today], nodes: [1], 
+                nodeNames: { "1": "NODE_01" }, nodeAspects: { "1": "16:9" }, nodeRes: { "1": "1920x1080" },
                 data: { "1": { [today]: JSON.parse(JSON.stringify(defaultSchedule)) } },
-                notepad: "",
-                stagedMedia: []
+                notepad: "", stagedMedia: []
             };
             
             saveDB(); openProject(id, true);
@@ -465,23 +461,20 @@
             activeProjId = id;
             const proj = db.projects[id];
             activeDate = proj.dates[0] || new Date().toISOString().split('T')[0];
+            if(!proj.nodeAspects) proj.nodeAspects = {};
+            if(!proj.nodeRes) proj.nodeRes = {};
             
             document.getElementById('active-proj-title').innerText = proj.name;
             document.getElementById('launcher-screen').style.display = 'none';
             document.getElementById('dashboard-screen').style.display = 'flex';
             
-            renderMasterTabs(); generateLinks(); generateNodes();
+            renderMasterTabs(); generateNodes();
             
-            if(isNew) {
-                switchWorkspace('assets');
-                showToast("PROJECT INITIALIZED. IMPORT ASSETS.");
-            } else {
-                switchWorkspace('fleet');
-                showToast("PROJECT LOADED");
-            }
+            if(isNew) { switchWorkspace('assets'); showToast("PROJECT INITIALIZED."); } 
+            else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
         }
 
-        /* --- STREAMING_CHUNK: Supabase Asset Upload & Spreadsheet Parsing --- */
+        /* --- STREAMING_CHUNK: Supabase Storage & Spreadsheet Parsing --- */
 
         async function stageMediaFiles(input) {
             const files = input.files;
@@ -493,28 +486,21 @@
             const list = document.getElementById('staged-media-list');
             list.innerHTML = `<span style="color:var(--accent);">Uploading to Supabase Bucket...</span>`;
             
-            if (!supabaseClient) {
-                showToast("SUPABASE NOT CONNECTED");
-                return;
-            }
+            if (!supabaseClient) { showToast("SUPABASE NOT CONNECTED"); return; }
 
             let uploads = 0;
             for(let i=0; i<files.length; i++) {
                 const file = files[i];
                 if(!proj.stagedMedia.includes(file.name)) {
                     try {
-                        const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-                        const { error } = await supabaseClient.storage.from('vtx_assets').upload(`media/${fileName}`, file);
-                        if (!error) {
-                            proj.stagedMedia.push(file.name);
-                            uploads++;
-                        }
-                    } catch (e) { console.error("Upload fail:", e); }
+                        const cleanName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                        const { error } = await supabaseClient.storage.from('vtx_assets').upload(`media/${cleanName}`, file);
+                        if (!error) { proj.stagedMedia.push(file.name); uploads++; }
+                    } catch (e) {}
                 }
             }
-            
             saveDB(); renderStagedMedia(); input.value = ""; 
-            showToast(`${uploads} MEDIA FILES STAGED TO CLOUD`);
+            showToast(`${uploads} MEDIA FILES STAGED`);
         }
         
         function renderStagedMedia() {
@@ -522,14 +508,13 @@
             const list = document.getElementById('staged-media-list');
             list.innerHTML = "";
             if(proj.stagedMedia && proj.stagedMedia.length > 0) {
-                proj.stagedMedia.forEach(m => { list.innerHTML += `<div style="padding: 4px 0; border-bottom: 1px dashed var(--border-thin);">☁️ ${m}</div>`; });
-            } else { list.innerHTML = "No media staged yet. Browse to attach files."; }
+                proj.stagedMedia.forEach(m => { list.innerHTML += `<div style="padding: 4px 0; border-bottom: 1px solid var(--border-thin);">FILE: ${m}</div>`; });
+            } else { list.innerHTML = "No media staged yet."; }
         }
 
         function processSpreadsheet(input) {
             const file = input.files[0];
             if(!file) return;
-            
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -554,9 +539,7 @@
                             let time = row[timeKey].toString();
                             if(typeof row[timeKey] === 'number') {
                                 let totalSeconds = Math.round(row[timeKey] * 86400);
-                                let hours = Math.floor(totalSeconds / 3600);
-                                let minutes = Math.floor((totalSeconds % 3600) / 60);
-                                time = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+                                time = `${Math.floor(totalSeconds / 3600).toString().padStart(2, '0')}:${Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')}:00`;
                             }
 
                             let type = row[typeKey] ? row[typeKey].toString().toLowerCase().trim() : 'image';
@@ -569,6 +552,8 @@
                             if(!proj.nodes.includes(nodeId)) {
                                 proj.nodes.push(nodeId);
                                 proj.nodeNames[nodeId] = `NODE_${nodeId.toString().padStart(2, '0')}`;
+                                proj.nodeAspects[nodeId] = "16:9";
+                                proj.nodeRes[nodeId] = "1920x1080";
                                 proj.data[nodeId] = {};
                                 proj.dates.forEach(d => proj.data[nodeId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
                                 nodesCreated++;
@@ -578,7 +563,6 @@
                                 proj.data[nodeId][activeDate] = [];
                                 proj.data[nodeId]._xlsImported = true; 
                             }
-
                             proj.data[nodeId][activeDate].push({ time: time, type: type, value: val });
                             rowsAdded++;
                         }
@@ -588,14 +572,11 @@
                         delete proj.data[n]._xlsImported;
                         if(proj.data[n][activeDate]) proj.data[n][activeDate].sort((a,b) => a.time.localeCompare(b.time));
                     });
-
-                    saveDB(); generateLinks(); generateNodes();
-                    showToast(`SYNC COMPLETE: ${rowsAdded} ROWS INJECTED, ${nodesCreated} NEW NODES`);
+                    saveDB(); generateNodes(); showToast(`SYNC COMPLETE: ${rowsAdded} ROWS`);
                     switchWorkspace('fleet'); 
-                } catch (error) { console.error(error); showToast("ERROR PARSING SPREADSHEET"); }
+                } catch (error) { showToast("ERROR PARSING SPREADSHEET"); }
             };
-            reader.readAsArrayBuffer(file);
-            input.value = "";
+            reader.readAsArrayBuffer(file); input.value = "";
         }
 
         /* --- STREAMING_CHUNK: Fleet Schedule Management --- */
@@ -606,70 +587,39 @@
             bar.innerHTML = "";
             proj.dates.sort().forEach(date => {
                 const btn = document.createElement('button');
-                btn.className = `tab-btn ${activeDate === date ? 'active' : ''}`;
+                btn.className = `btn-fintech ${activeDate === date ? 'active' : ''}`;
                 btn.innerText = date;
-                btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); showToast("DATE: " + date);};
+                btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); };
                 bar.appendChild(btn);
             });
         }
 
         function addMasterDate(date) {
-            if(!date) return;
-            const proj = db.projects[activeProjId];
+            if(!date) return; const proj = db.projects[activeProjId];
             if(proj.dates.includes(date)) return;
-            
             proj.dates.push(date);
             proj.nodes.forEach(nodeId => { proj.data[nodeId][date] = JSON.parse(JSON.stringify(defaultSchedule)); });
-            activeDate = date;
-            renderMasterTabs(); refreshAllNodes(); saveDB();
-            showToast("NEW ALLOCATION: " + date);
+            activeDate = date; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("NEW DATE ALLOCATED");
         }
 
         function executeCopyDay(targetDate) {
-            if(!targetDate) return;
-            const proj = db.projects[activeProjId];
+            if(!targetDate) return; const proj = db.projects[activeProjId];
             saveCurrentUIToData();
             if(!proj.dates.includes(targetDate)) proj.dates.push(targetDate);
             proj.nodes.forEach(nodeId => { proj.data[nodeId][targetDate] = JSON.parse(JSON.stringify(proj.data[nodeId][activeDate])); });
-            activeDate = targetDate;
-            renderMasterTabs(); refreshAllNodes(); saveDB();
-            showToast("DATA DUPLICATED TO: " + targetDate);
-        }
-
-        function openDeleteModal() {
-            const proj = db.projects[activeProjId];
-            if(proj.dates.length <= 1) { showToast("ERROR: MINIMUM 1 DATE REQUIRED"); return; }
-            showConfirm("Confirm Purge", `This action will permanently erase the schedule for <strong style="color:#fff;">${activeDate}</strong>. Proceed?`, () => {
-                proj.nodes.forEach(nodeId => delete proj.data[nodeId][activeDate]);
-                proj.dates = proj.dates.filter(d => d !== activeDate);
-                activeDate = proj.dates[0];
-                renderMasterTabs(); refreshAllNodes(); saveDB();
-                showToast("PURGE SUCCESSFUL");
-            });
+            activeDate = targetDate; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("DATA DUPLICATED");
         }
 
         function addNewNode() {
-            const proj = db.projects[activeProjId];
-            saveCurrentUIToData();
+            const proj = db.projects[activeProjId]; saveCurrentUIToData();
             const nextId = proj.nodes.length > 0 ? Math.max(...proj.nodes) + 1 : 1;
             proj.nodes.push(nextId);
             proj.nodeNames[nextId] = `NODE_${nextId.toString().padStart(2, '0')}`;
+            proj.nodeAspects[nextId] = "16:9";
+            proj.nodeRes[nextId] = "1920x1080";
             proj.data[nextId] = {};
             proj.dates.forEach(d => proj.data[nextId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
-            generateLinks(); generateNodes(); saveDB();
-            showToast(`NODE ${nextId} ADDED`);
-        }
-
-        function generateLinks() {
-            const proj = db.projects[activeProjId];
-            const wrap = document.getElementById('link-grid-wrap');
-            let html = '';
-            proj.nodes.forEach(id => {
-                const name = proj.nodeNames[id] || `NODE_${id}`;
-                // Cloud endpoint format for future Next.js app
-                html += `<div class="link-card"><div class="node-id" id="link-label-${id}">${name}</div><div class="link-url" onclick="navigator.clipboard.writeText('https://rcinput.com/node/${id}'); showToast('URL COPIED');">Web: https://rcinput.com/node/${id}</div></div>`;
-            });
-            wrap.innerHTML = html;
+            generateNodes(); saveDB(); showToast(`NODE ${nextId} ADDED`);
         }
 
         function generateNodes() {
@@ -679,18 +629,31 @@
             
             proj.nodes.forEach(id => {
                 const name = proj.nodeNames[id] || `NODE_${id}`;
+                const aspect = proj.nodeAspects[id] || "16:9";
+                const res = proj.nodeRes[id] || "1920x1080";
+                
                 let nodeHtml = `
                     <div class="node-card" id="container-${id}">
                         <div class="node-header">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <button class="btn-outline" style="padding:4px 8px; font-size:14px;" onclick="toggleNodeBody(${id})" id="toggle-btn-${id}">-</button>
-                                <input type="text" class="node-title-input" id="node-name-${id}" value="${name}" oninput="updateLinkLabel(${id})">
-                                <span class="text-micro" style="cursor:pointer; padding:4px;" onclick="resetNode(${id})" title="Reset">[RST]</span>
-                                <span class="text-micro" style="cursor:pointer; padding:4px; color:var(--alert-red);" onclick="requestDeleteNode(${id})" title="Delete">[DEL]</span>
+                            <div class="nh-section">
+                                <button class="btn-icon" onclick="toggleNodeBody(${id})" id="toggle-btn-${id}">▼</button>
+                                <input type="text" class="node-title-input" id="node-name-${id}" value="${name}" oninput="updateNodeMeta(${id})">
                             </div>
-                            <div style="display:flex; gap:8px;">
-                                <button type="button" class="btn-outline" onclick="showToast('PREVIEW SPAWNED')">VIEW</button>
-                                <button type="button" class="btn-action" onclick="goLive(${id})">DEPLOY</button>
+                            <div class="nh-section">
+                                <button class="btn-fintech" id="aspect-btn-${id}" onclick="toggleAspect(${id})" style="width:50px;">${aspect}</button>
+                                <select class="as-select" id="res-select-${id}" style="width:auto; padding:4px 8px; font-size:11px;" onchange="updateNodeMeta(${id})">
+                                    <option value="1920x1080" ${res==='1920x1080'?'selected':''}>1080p</option>
+                                    <option value="720x1080" ${res==='720x1080'?'selected':''}>720x1080</option>
+                                    <option value="1080x1920" ${res==='1080x1920'?'selected':''}>1080x1920</option>
+                                    <option value="3840x2160" ${res==='3840x2160'?'selected':''}>4K UHD</option>
+                                    <option value="Custom" ${res==='Custom'?'selected':''}>Custom...</option>
+                                </select>
+                            </div>
+                            <div class="nh-section">
+                                <button type="button" class="btn-fintech btn-override" onclick="openOverrideModal(${id})">OVERRIDE</button>
+                                <button type="button" class="btn-fintech" onclick="showToast('PREVIEW SPAWNED')">PREVIEW</button>
+                                <button type="button" class="btn-fintech btn-deploy" id="btn-deploy-${id}" onclick="goLive(${id})">DEPLOY</button>
+                                <button type="button" class="btn-icon text-red" style="margin-left:10px;" onclick="requestDeleteNode(${id})" title="Delete Node">×</button>
                             </div>
                         </div>
                         <div class="node-body" id="node-body-${id}">
@@ -698,7 +661,7 @@
                                 <form id="form-${id}">
                                     <input type="hidden" name="tv_id" value="${id}">
                                     <table>
-                                        <thead><tr><th style="width:90px;">Time</th><th style="width:70px;">Mode</th><th>Target File / URL</th><th style="width:30px;"></th></tr></thead>
+                                        <thead><tr><th style="width:90px;">Time</th><th style="width:70px;">Mode</th><th>Target Source (File/URL)</th><th style="width:30px;"></th></tr></thead>
                                         <tbody id="tbody-${id}"></tbody>
                                     </table>
                                 </form>
@@ -711,20 +674,36 @@
             });
         }
 
+        function updateNodeMeta(id) {
+            const proj = db.projects[activeProjId];
+            proj.nodeNames[id] = document.getElementById(`node-name-${id}`).value;
+            proj.nodeRes[id] = document.getElementById(`res-select-${id}`).value;
+            autoSave();
+        }
+
+        function toggleAspect(id) {
+            const proj = db.projects[activeProjId];
+            const btn = document.getElementById(`aspect-btn-${id}`);
+            const newAspect = btn.innerText === "16:9" ? "9:16" : "16:9";
+            btn.innerText = newAspect;
+            proj.nodeAspects[id] = newAspect;
+            autoSave();
+        }
+
         function requestDeleteNode(id) {
-            showConfirm('Delete Node', `Are you sure you want to completely erase NODE_${id}?`, () => {
+            showConfirm('Delete Node', `Are you sure you want to permanently erase NODE_${id}?`, () => {
                 const proj = db.projects[activeProjId];
                 proj.nodes = proj.nodes.filter(n => n !== id);
-                delete proj.nodeNames[id]; delete proj.data[id];
-                saveDB(); generateLinks(); generateNodes(); showToast(`NODE ${id} DELETED`);
+                delete proj.nodeNames[id]; delete proj.nodeAspects[id]; delete proj.nodeRes[id]; delete proj.data[id];
+                saveDB(); generateNodes(); showToast(`NODE DELETED`);
             });
         }
 
         function toggleNodeBody(id) {
             const body = document.getElementById(`node-body-${id}`);
             const btn = document.getElementById(`toggle-btn-${id}`);
-            if (body.classList.contains('collapsed')) { body.classList.remove('collapsed'); btn.innerText = "-"; } 
-            else { body.classList.add('collapsed'); btn.innerText = "+"; }
+            if (body.classList.contains('collapsed')) { body.classList.remove('collapsed'); btn.innerText = "▼"; } 
+            else { body.classList.add('collapsed'); btn.innerText = "▶"; }
         }
 
         function refreshAllNodes() { const proj = db.projects[activeProjId]; proj.nodes.forEach(id => renderTable(id)); }
@@ -732,35 +711,22 @@
         function renderTable(tvId) {
             const proj = db.projects[activeProjId];
             const tbody = document.getElementById('tbody-' + tvId);
-            if(!tbody) return;
-            tbody.innerHTML = "";
+            if(!tbody) return; tbody.innerHTML = "";
             const sched = (proj.data[tvId] && proj.data[tvId][activeDate]) ? proj.data[tvId][activeDate] : JSON.parse(JSON.stringify(defaultSchedule));
-            sched.sort((a,b) => a.time.localeCompare(b.time)).forEach((item, index) => {
-                appendRowHTML(tvId, index, item.time, item.type, item.value);
-            });
+            sched.sort((a,b) => a.time.localeCompare(b.time)).forEach((item, index) => { appendRowHTML(tvId, index, item.time, item.type, item.value); });
         }
 
         function appendRowHTML(tvId, index, time, type, val) {
-            const tbody = document.getElementById('tbody-' + tvId);
-            const row = tbody.insertRow();
-            
+            const tbody = document.getElementById('tbody-' + tvId); const row = tbody.insertRow();
             let sourceHtml = '';
-            if (type === 'url') {
-                sourceHtml = `<input type="text" class="table-input" name="value-${index}" value="${val}" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`;
-            } else {
-                let btnClass = val ? 'ready' : ''; let btnText = val || 'SELECT FILE';
-                sourceHtml = `<input type="hidden" name="value-${index}" value="${val}"><button type="button" class="upload-btn ${btnClass}" onclick="openBrowser(${tvId}, ${index})">${btnText}</button>`;
-            }
+            if (type === 'url') { sourceHtml = `<input type="text" class="table-input" name="value-${index}" value="${val}" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`; } 
+            else { let btnClass = val ? 'ready' : ''; let btnText = val || 'SELECT FILE'; sourceHtml = `<input type="hidden" name="value-${index}" value="${val}"><button type="button" class="upload-btn ${btnClass}" onclick="openBrowser(${tvId}, ${index})">${btnText}</button>`; }
 
             row.innerHTML = `
-                <td><input type="text" class="table-input" style="font-family:var(--font-display);" name="time-${index}" value="${time}" placeholder="HH:MM:SS" oninput="checkAutoAddRow(this, ${tvId}); autoSave()"></td>
-                <td>
-                    <select class="table-input custom-select" style="padding:8px;" name="type-${index}" onchange="changeType(${tvId}, ${index}, this.value, this); autoSave()">
-                        <option value="url" ${type==='url'?'selected':''}>URL</option><option value="image" ${type==='image'?'selected':''}>IMG</option><option value="video" ${type==='video'?'selected':''}>VID</option>
-                    </select>
-                </td>
+                <td><input type="text" class="table-input" name="time-${index}" value="${time}" placeholder="HH:MM:SS" oninput="checkAutoAddRow(this, ${tvId}); autoSave()"></td>
+                <td><select class="table-input custom-select" name="type-${index}" onchange="changeType(${tvId}, ${index}, this.value, this); autoSave()"><option value="url" ${type==='url'?'selected':''}>URL</option><option value="image" ${type==='image'?'selected':''}>IMG</option><option value="video" ${type==='video'?'selected':''}>VID</option></select></td>
                 <td id="source-td-${tvId}-${index}">${sourceHtml}</td>
-                <td style="text-align:center;"><button type="button" class="row-del" onclick="removeRow(this, ${tvId})">×</button></td>
+                <td style="text-align:center;"><button type="button" class="btn-icon" onclick="removeRow(this, ${tvId})">×</button></td>
             `;
         }
 
@@ -771,7 +737,7 @@
 
         function removeRow(btn, tvId) {
             const tbody = btn.closest('tbody');
-            if (tbody.rows.length <= 1) { showToast("RESTRICTION: CANNOT DELETE FINAL ROW"); return; }
+            if (tbody.rows.length <= 1) return showToast("CANNOT DELETE FINAL ROW");
             btn.closest('tr').remove(); saveCurrentUIToData(); renderTable(tvId); saveDB();
         }
 
@@ -782,24 +748,13 @@
             if(selectEl) checkAutoAddRow(selectEl, tvId);
         }
 
-        function updateLinkLabel(id) {
-            const val = document.getElementById(`node-name-${id}`).value;
-            const label = document.getElementById(`link-label-${id}`);
-            if(label) label.innerText = val || `NODE_${id}`;
-            db.projects[activeProjId].nodeNames[id] = val; autoSave();
-        }
-
-        function resetNode(id) { db.projects[activeProjId].data[id][activeDate] = JSON.parse(JSON.stringify(defaultSchedule)); renderTable(id); saveDB(); showToast(`NODE ${id} RESET`); }
-
         function openBrowser(tvId, index) { uploadTarget = { tvId, index }; document.getElementById('hidden-file-browser').click(); }
 
         /* --- STREAMING_CHUNK: Direct Supabase Cloud Storage Interaction --- */
         async function handleFileSelect(input) {
             if(!input.files[0]) return;
-            const file = input.files[0];
-            const filename = file.name;
+            const file = input.files[0]; const filename = file.name;
             const td = document.getElementById(`source-td-${uploadTarget.tvId}-${uploadTarget.index}`);
-            
             if(td) td.innerHTML = `<button type="button" class="upload-btn">UPLOADING...</button>`;
             
             if(supabaseClient) {
@@ -807,24 +762,17 @@
                     const cleanName = `${Date.now()}_${filename.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
                     const { error } = await supabaseClient.storage.from('vtx_assets').upload(`media/${cleanName}`, file);
                     if (error) throw error;
-                    
                     const { data } = supabaseClient.storage.from('vtx_assets').getPublicUrl(`media/${cleanName}`);
                     
                     if(td) {
-                        td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${data.publicUrl}">
-                                      <button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
+                        td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${data.publicUrl}"><button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
                         checkAutoAddRow(td.querySelector('button'), uploadTarget.tvId);
                     }
-                    showToast("FILE UPLOADED TO CLOUD");
-                } catch(e) {
-                    console.error("Upload Error:", e);
-                    if(td) td.innerHTML = `<button type="button" class="upload-btn" style="border-color:var(--alert-red); color:var(--alert-red);" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">UPLOAD FAILED</button>`;
-                }
+                    showToast("FILE CLOUD SYNCED");
+                } catch(e) { if(td) td.innerHTML = `<button type="button" class="upload-btn" style="border-color:var(--alert-red); color:var(--alert-red);" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">UPLOAD FAILED</button>`; }
             } else {
-                // Local Fallback if no DB
                 if(td) {
-                    td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${filename}">
-                                  <button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
+                    td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${filename}"><button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
                     checkAutoAddRow(td.querySelector('button'), uploadTarget.tvId);
                 }
             }
@@ -835,8 +783,7 @@
         function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDB(); }, 800); }
 
         function saveCurrentUIToData() {
-            if(!activeProjId) return;
-            const proj = db.projects[activeProjId];
+            if(!activeProjId) return; const proj = db.projects[activeProjId];
             document.querySelectorAll('form[id^="form-"]').forEach(f => {
                 const tvId = parseInt(f.elements['tv_id'].value);
                 const tb = document.getElementById('tbody-' + tvId);
@@ -848,8 +795,7 @@
                     const valEl = r.querySelector('[name^="value-"]');
                     slots.push({ time, type, value: valEl ? valEl.value : "" });
                 }
-                if(!proj.data[tvId]) proj.data[tvId] = {};
-                proj.data[tvId][activeDate] = slots;
+                if(!proj.data[tvId]) proj.data[tvId] = {}; proj.data[tvId][activeDate] = slots;
             });
         }
 
@@ -859,30 +805,33 @@
             const sched = db.projects[activeProjId].data[id][activeDate];
             if (!sched || sched.length === 0) return showToast("SCHEDULE EMPTY");
             
-            const btn = document.querySelector(`#container-${id} .btn-live`);
+            const btn = document.getElementById(`btn-deploy-${id}`);
+            
+            if(btn.classList.contains('live')) {
+                // Return to normal standby
+                btn.classList.remove('live');
+                btn.innerText = "DEPLOY";
+                showToast(`NODE ${id} RETURNED TO STANDBY`);
+                return;
+            }
+
             btn.innerText = "SYNCING...";
             
             if(!supabaseClient) {
-                // Local fallback simulation
-                setTimeout(() => { btn.innerText = "LIVE!"; btn.style.background = "#22c55e"; setTimeout(() => { btn.innerText = "DEPLOY"; btn.style.background = ""; }, 2000); showToast(`SIMULATED LOCAL DEPLOY`); }, 800);
+                setTimeout(() => { btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SIMULATED DEPLOY`); }, 500);
                 return;
             }
 
             try {
-                // Grab an active venue session ID to attach the schedule to
                 const { data: venue, error: vErr } = await supabaseClient.from('client_access').select('id').eq('is_active', true).limit(1).single();
                 if(vErr || !venue) throw new Error("No active venue gateway found");
                 
-                // Erase previous schedule for this specific node
                 await supabaseClient.from('vtx_schedules').delete().eq('client_id', venue.id).eq('node_id', id);
                 
-                // Push the fresh timeline
                 const payload = sched.filter(s => s.time && s.value).map(s => ({
-                    client_id: venue.id,
-                    node_id: parseInt(id),
+                    client_id: venue.id, node_id: parseInt(id),
                     time: s.time.length === 5 ? s.time + ':00' : s.time,
-                    type: s.type,
-                    value: s.value
+                    type: s.type, value: s.value
                 }));
                 
                 if(payload.length > 0) {
@@ -890,20 +839,93 @@
                     if(error) throw error;
                 }
                 
-                btn.innerText = "LIVE!";
-                btn.style.background = "#22c55e";
-                btn.style.color = "#000";
-                setTimeout(() => { btn.innerText = "DEPLOY"; btn.style.background = ""; btn.style.color = ""; }, 2000);
-                showToast(`SEQUENCE SYNCED TO CLOUD DB`);
-
+                btn.classList.add('live'); btn.innerText = "LIVE";
+                showToast(`SEQUENCE SYNCED TO CLOUD`);
             } catch(e) {
-                console.error("Deploy Error:", e);
                 btn.innerText = "ERROR";
-                btn.style.background = "var(--alert-red)";
-                setTimeout(() => { btn.innerText = "DEPLOY"; btn.style.background = ""; }, 2000);
-                showToast("CLOUD SYNC FAILED");
+                btn.style.borderColor = "var(--alert-red)"; btn.style.color = "var(--alert-red)";
+                setTimeout(() => { btn.innerText = "DEPLOY"; btn.style.borderColor = ""; btn.style.color = ""; }, 2000);
             }
         }
+
+        /* --- STREAMING_CHUNK: Live Override Modal Logic --- */
+        
+        function openOverrideModal(id) {
+            const proj = db.projects[activeProjId];
+            document.getElementById('override-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
+            document.getElementById('override-target-id').value = id;
+            document.getElementById('override-modal').style.display = 'flex';
+            resetOverrideModal();
+        }
+
+        function closeOverrideModal() { document.getElementById('override-modal').style.display = 'none'; }
+
+        function resetOverrideModal() {
+            document.getElementById('override-type').value = 'image';
+            document.getElementById('override-value').value = '';
+            document.getElementById('override-mute').checked = true;
+            document.getElementById('override-img').style.display = 'none';
+            document.getElementById('override-vid').style.display = 'none';
+            document.getElementById('override-iframe').style.display = 'none';
+            document.getElementById('override-placeholder').style.display = 'block';
+            toggleOverrideInput();
+        }
+
+        function toggleOverrideInput() {
+            const type = document.getElementById('override-type').value;
+            const container = document.getElementById('override-input-container');
+            if (type === 'url') {
+                container.innerHTML = `<input type="text" class="as-input" id="override-url-input" placeholder="https://..." oninput="handleOverrideURL(this.value)">`;
+            } else {
+                container.innerHTML = `<button class="btn-fintech" style="width:100%; height:100%;" onclick="document.getElementById('override-file-browser').click()">BROWSE FILE</button>`;
+            }
+        }
+
+        function handleOverrideURL(url) {
+            document.getElementById('override-value').value = url;
+            const iframe = document.getElementById('override-iframe');
+            document.getElementById('override-placeholder').style.display = 'none';
+            document.getElementById('override-img').style.display = 'none';
+            document.getElementById('override-vid').style.display = 'none';
+            iframe.src = url;
+            iframe.style.display = 'block';
+        }
+
+        function handleOverrideFile(input) {
+            if(!input.files[0]) return;
+            const file = input.files[0];
+            const type = document.getElementById('override-type').value;
+            const reader = new FileReader();
+            
+            document.getElementById('override-placeholder').style.display = 'none';
+            document.getElementById('override-iframe').style.display = 'none';
+            
+            reader.onload = function(e) {
+                document.getElementById('override-value').value = e.target.result; // Temporarily store local preview string
+                if (type === 'image') {
+                    const img = document.getElementById('override-img');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('override-vid').style.display = 'none';
+                } else if (type === 'video') {
+                    const vid = document.getElementById('override-vid');
+                    vid.src = e.target.result;
+                    vid.style.display = 'block';
+                    document.getElementById('override-img').style.display = 'none';
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function pushOverride() {
+            const targetId = document.getElementById('override-target-id').value;
+            const isMuted = document.getElementById('override-mute').checked;
+            // In a real environment, if this was a local file, it would upload to Supabase here first, or trigger a local WebSocket.
+            // For now, we simulate the push.
+            showToast(`OVERRIDE PUSHED TO NODE ${targetId} (MUTE: ${isMuted})`);
+            closeOverrideModal();
+        }
+
     </script>
 </body>
 </html>
