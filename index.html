@@ -87,22 +87,15 @@
         .splash-sub { font-size: 14px; color: #94a3b8; font-weight: 300; letter-spacing: 1px; }
 
         /* IFRAME APP CONTAINERS */
-        .app-iframe-container {
-            width: 100%;
-            height: 90vh;
-            border-radius: 12px;
-            overflow: hidden;
-            background: transparent;
-        }
-        .app-iframe-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: transparent;
-        }
+        .app-iframe-container { width: 100%; height: 90vh; border-radius: 12px; overflow: hidden; background: transparent; }
+        .app-iframe-container iframe { width: 100%; height: 100%; border: none; background: transparent; }
 
         @media (max-width: 768px) {
             body { align-items: flex-start; padding: 15px; }
+            .main-container { padding-left: 0; }
+            #os-splash { padding-left: 0; }
+            #os-sidebar { display: none !important; }
+            .splash-logo-bg { left: 50%; }
         }
     </style>
 </head>
@@ -112,14 +105,27 @@
     <div class='glass-panel' id='login-wrapper'>
         <div id='login-view'>
             <h3 style="justify-content: center;">SECURE VAULT</h3>
-            <p>Restricted Access</p>
+            <p id="login-subtitle">Restricted Venue Access</p>
+            
+            <!-- CLIENT PIN PAD -->
             <div class="pin-container" id="pin-container">
-                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="2">
-                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="0">
-                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="1">
-                <input type="password" class="pin-box" maxlength="1" inputmode="numeric" autocomplete="off" value="1">
+                <input type="password" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off">
+                <input type="password" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off">
+                <input type="password" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off">
+                <input type="password" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off">
             </div>
-            <div id='login-status' style='margin-top:15px;color:#ef4444;font-size:13px;'></div>
+
+            <!-- ADMIN EMAIL/PASS (Hidden by default) -->
+            <div id="admin-container" style="display:none; flex-direction:column; gap:10px; margin-bottom:15px; align-items:center;">
+                <input type="email" id="admin-email" placeholder="Staff Email" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; padding:12px; width:90%; box-sizing:border-box; font-family:'Nunito'; outline:none;">
+                <input type="password" id="admin-pass" placeholder="Password" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; padding:12px; width:90%; box-sizing:border-box; font-family:'Nunito'; outline:none;">
+                <button onclick="attemptAdminLogin()" style="background:var(--theme-primary); color:#000; font-weight:800; border:none; border-radius:8px; padding:12px 20px; cursor:pointer; width:90%; box-sizing:border-box; font-family:'Nunito'; margin-top:5px; transition: 0.2s;">AUTHORIZE</button>
+            </div>
+
+            <div id='login-status' style='margin-top:15px;color:#ef4444;font-size:13px;font-weight:bold;height:16px;'></div>
+
+            <!-- TOGGLE BUTTON -->
+            <button id="toggle-login-btn" onclick="toggleLoginMode()" style="background:transparent; border:none; color:#888; font-size:10px; text-transform:uppercase; letter-spacing:1px; cursor:pointer; margin-top:15px; transition: 0.2s;">Switch to Internal Staff Login</button>
         </div>
     </div>
     
@@ -200,12 +206,12 @@
 
         <!-- VTx APP VIEW -->
         <div id="vtx-core" class="app-iframe-container" style="display:none;">
-            <iframe src="VTx.html" title="VTx Scheduler"></iframe>
+            <iframe src="VTxView.html" title="VTx Scheduler"></iframe>
         </div>
 
         <!-- VTz APP VIEW -->
         <div id="vtz-core" class="app-iframe-container" style="display:none;">
-            <iframe src="VTz.html" title="VTz Switcher"></iframe>
+            <iframe src="VTzView.html" title="VTz Switcher"></iframe>
         </div>
 
         <!-- NOIZ APP VIEW -->
@@ -221,17 +227,151 @@
     </div>
 
     <script>
+        // =========================================================================
+        // ⚠️ CRITICAL: REPLACE THIS URL WITH YOUR GOOGLE APPS SCRIPT WEB APP URL!
+        // =========================================================================
+        const MASTER_API_URL = "https://script.google.com/macros/s/AKfycbw4EMcz8IS86YEt0nMTidp7cqjCFpXpI3wCPTBiMFYw-EQabPh5lJl2GxvVKKrC5hzQ/exec"; 
+
         var currentActiveApp = null;
+        var currentPin = "";
 
-        // Auto-login for Dev Sandbox
-        setTimeout(unlockApp, 100);
+        // --- PIN PAD LOGIC & API FETCH ---
+        const pinInputs = document.querySelectorAll('.pin-input');
+        
+        // Focus the first box on load
+        window.onload = function() {
+            if(pinInputs.length > 0) pinInputs[0].focus();
+        };
 
-        function unlockApp(){
+        pinInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                // Auto-advance to next box
+                if(e.target.value.length === 1 && index < pinInputs.length - 1) {
+                    pinInputs[index + 1].focus();
+                }
+                // If all 4 are filled, trigger login
+                if(Array.from(pinInputs).every(inp => inp.value.length === 1)) {
+                    attemptClientLogin();
+                }
+            });
+            // Handle backspace properly
+            input.addEventListener('keydown', (e) => {
+                if(e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                    pinInputs[index - 1].focus();
+                }
+            });
+        });
+
+        function getEnteredPin() {
+            return Array.from(pinInputs).map(inp => inp.value).join('');
+        }
+
+        function attemptClientLogin() {
+            const enteredPin = getEnteredPin();
+            const statusEl = document.getElementById('login-status');
+            
+            statusEl.innerText = "Decrypting connection...";
+            statusEl.style.color = "#facc15";
+
+            // Prevent typing while loading
+            pinInputs.forEach(inp => inp.classList.add('opacity-50', 'pointer-events-none'));
+
+            const payload = {
+                action: "auth",
+                type: "client", // We are hitting the Client_Access_Grid
+                pin: enteredPin
+            };
+
+            // Hit your Google Apps Script Backend!
+            fetch(MASTER_API_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                pinInputs.forEach(inp => inp.classList.remove('opacity-50', 'pointer-events-none'));
+                
+                if (data.status === "success") {
+                    currentPin = enteredPin;
+                    unlockApp(data.allowedApps); // Pass permissions to unlocker
+                } else {
+                    statusEl.innerText = data.error || "Access Denied. Invalid PIN.";
+                    statusEl.style.color = "#ef4444";
+                    pinInputs.forEach(inp => inp.value = ''); // clear boxes
+                    pinInputs[0].focus(); // reset focus
+                }
+            })
+            .catch(err => {
+                pinInputs.forEach(inp => inp.classList.remove('opacity-50', 'pointer-events-none'));
+                statusEl.innerText = "Network Error. Check connection.";
+                statusEl.style.color = "#ef4444";
+                console.error(err);
+            });
+        }
+
+        // --- ADMIN LOGIN LOGIC ---
+        let isAdminMode = false;
+        
+        function toggleLoginMode() {
+            isAdminMode = !isAdminMode;
+            document.getElementById('pin-container').style.display = isAdminMode ? 'none' : 'flex';
+            document.getElementById('admin-container').style.display = isAdminMode ? 'flex' : 'none';
+            document.getElementById('login-subtitle').innerText = isAdminMode ? "Internal Staff Portal" : "Restricted Venue Access";
+            document.getElementById('toggle-login-btn').innerText = isAdminMode ? "Switch to Venue PIN Access" : "Switch to Internal Staff Login";
+            document.getElementById('login-status').innerText = ""; // Clear errors
+        }
+
+        function attemptAdminLogin() {
+            const email = document.getElementById('admin-email').value;
+            const pass = document.getElementById('admin-pass').value;
+            const statusEl = document.getElementById('login-status');
+            
+            if(!email || !pass) {
+                statusEl.innerText = "Email and Password required.";
+                return;
+            }
+
+            statusEl.innerText = "Verifying credentials...";
+            statusEl.style.color = "#facc15";
+
+            const payload = {
+                action: "auth",
+                type: "admin", 
+                email: email,
+                password: pass
+            };
+
+            fetch(MASTER_API_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    unlockApp(data.allowedApps);
+                } else {
+                    statusEl.innerText = data.error || "Access Denied.";
+                    statusEl.style.color = "#ef4444";
+                }
+            })
+            .catch(err => {
+                statusEl.innerText = "Network Error. Check connection.";
+                statusEl.style.color = "#ef4444";
+                console.error(err);
+            });
+        }
+
+        // --- OS UNLOCK LOGIC ---
+        function unlockApp(allowedApps) {
             document.getElementById('login-wrapper').style.display = 'none';
             document.getElementById('os-sidebar').style.display = 'flex';
             document.getElementById('os-splash').style.display = 'flex';
             document.body.style.alignItems = 'center';
             document.body.style.justifyContent = 'center';
+
+            // Optional: You can use `allowedApps` array here to hide/show specific sidebar buttons!
+            // For example, if allowedApps doesn't include 'vault', you can hide the nav-vault button.
+            // (I have left them all visible by default for your testing)
         }
 
         // --- OS ROUTING LOGIC ---
@@ -273,7 +413,7 @@
             if (appId === 'ops') {
                 document.documentElement.style.setProperty('--theme-primary', '#10b981');
                 document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top center, #022c22 0%, #0a0a0a 60%)');
-                ops.style.display = 'flex';
+                ops.style.display = 'block';
             } else if (appId === 'vtx') {
                 document.documentElement.style.setProperty('--theme-primary', '#facc15');
                 document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
