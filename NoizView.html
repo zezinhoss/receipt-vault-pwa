@@ -15,28 +15,209 @@
             --theme-bg-gradient: radial-gradient(circle at top left, #1e1b4b 0%, #0a0a0a 60%);
         }
 
-        body { font-family:'Nunito', sans-serif; background:#0a0a0a; background-image: var(--theme-bg-gradient); color:#fff; padding:20px; display:flex; flex-direction: column; align-items:center; min-height:90vh; margin:0; overflow-x: hidden;}
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: #0a0a0a; 
+            background-image: var(--theme-bg-gradient); 
+            color: #fff; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 90vh; 
+            margin: 0; 
+            overflow-x: hidden;
+        }
         
-        .main-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; animation: fadeIn 0.4s ease;}
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .main-container { 
+            width: 100%; 
+            max-width: 1200px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            box-sizing: border-box; 
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
+        }
 
         /* ========================================== */
         /* MARKETING HUB SPECIFIC CSS                 */
         /* ========================================== */
-        #marketing-hub { width: 100%; display: flex; flex-direction: column; gap: 20px; }
-        .mkt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 10px; }
-        .mkt-node { background: rgba(20, 20, 30, 0.6); border: 1px solid rgba(192, 132, 252, 0.2); border-radius: 16px; padding: 25px; text-align: left; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);}
-        .mkt-node:hover { transform: translateY(-5px); border-color: #c084fc; box-shadow: 0 10px 30px rgba(192, 132, 252, 0.15); }
-        .mkt-node::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #c084fc, #2dd4bf); opacity: 0; transition: opacity 0.3s ease;}
-        .mkt-node:hover::before { opacity: 1; }
+        #marketing-hub { 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+        }
+
+        .mkt-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px; 
+            margin-top: 10px; 
+        }
+
+        .mkt-node { 
+            background: rgba(20, 20, 30, 0.4); 
+            border: 1px solid rgba(192, 132, 252, 0.2); 
+            border-radius: 16px; 
+            padding: 25px; 
+            text-align: left; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            position: relative; 
+            overflow: hidden; 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .mkt-node:hover { 
+            transform: translateY(-5px); 
+            border-color: #c084fc; 
+            box-shadow: 0 10px 30px rgba(192, 132, 252, 0.15); 
+        }
+
+        .mkt-node::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            height: 3px; 
+            background: linear-gradient(90deg, #c084fc, #2dd4bf); 
+            opacity: 0; 
+            transition: opacity 0.3s ease;
+        }
+
+        .mkt-node:hover::before { 
+            opacity: 1; 
+        }
         
-        .mkt-icon-wrap { width: 48px; height: 48px; background: rgba(192, 132, 252, 0.1); border-radius: 12px; display: flex; justify-content: center; align-items: center; color: #c084fc; margin-bottom: 15px; transition: transform 0.3s ease;}
-        .mkt-node:hover .mkt-icon-wrap { transform: scale(1.1); }
-        .mkt-title { color: #f8fafc; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-        .mkt-desc { color: #94a3b8; font-size: 13px; line-height: 1.5; margin-bottom: 20px; min-height: 40px;}
-        .mkt-launch { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; color: #2dd4bf; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
-        .mkt-launch span { display: flex; align-items: center; gap: 5px; transition: transform 0.2s;}
-        .mkt-node:hover .mkt-launch span { transform: translateX(5px); }
+        .mkt-icon-wrap { 
+            width: 48px; 
+            height: 48px; 
+            background: rgba(192, 132, 252, 0.1); 
+            border-radius: 12px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: #c084fc; 
+            margin-bottom: 15px; 
+            transition: transform 0.3s ease;
+        }
+
+        .mkt-node:hover .mkt-icon-wrap { 
+            transform: scale(1.1); 
+        }
+
+        .mkt-title { 
+            color: #f8fafc; 
+            font-size: 16px; 
+            font-weight: 700; 
+            margin-bottom: 8px; 
+        }
+
+        .mkt-desc { 
+            color: #94a3b8; 
+            font-size: 13px; 
+            line-height: 1.5; 
+            margin-bottom: 20px; 
+            min-height: 40px;
+        }
+
+        .mkt-status-badge { 
+            display: inline-block; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 10px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            margin-bottom: 12px; 
+        }
+
+        .badge-active { 
+            background: rgba(45, 212, 191, 0.2); 
+            color: #2dd4bf; 
+        }
+        
+        .badge-standby { 
+            background: rgba(192, 132, 252, 0.1); 
+            color: #c084fc; 
+        }
+
+        .mkt-launch { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            padding-top: 15px; 
+            color: #2dd4bf; 
+            font-size: 12px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+
+        .mkt-launch span { 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            transition: transform 0.2s;
+        }
+
+        .mkt-node:hover .mkt-launch span { 
+            transform: translateX(5px); 
+        }
+
+        /* Custom Modal for Node Launch */
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background: rgba(0,0,0,0.8); 
+            z-index: 1000; 
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
+            backdrop-filter: blur(5px); 
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content { 
+            background: #1e1b4b; /* Deep purple background */
+            border: 1px solid rgba(192, 132, 252, 0.3); 
+            border-radius: 12px; 
+            width: 90%; 
+            max-width: 400px; 
+            padding: 25px; 
+            text-align: center; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8); 
+            position: relative;
+        }
+
+        .btn-modal { 
+            background: #c084fc; 
+            color: #000; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            font-family: 'Nunito', sans-serif; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            margin-top: 20px;
+        }
+
+        .btn-modal:hover { 
+            box-shadow: 0 0 15px rgba(192, 132, 252, 0.5); 
+        }
 
         @media (max-width: 768px) {
             .mkt-grid { grid-template-columns: 1fr; }
@@ -57,8 +238,10 @@
             </div>
 
             <div class="mkt-grid">
+                
                 <!-- Node 1 -->
-                <div class="mkt-node" onclick="alert('Opening Auto-Blog & SEO Generator...')">
+                <div class="mkt-node" onclick="showMktModal('Auto-Blog & SEO', 'Initializing web article generator from stack details...')">
+                    <span class="mkt-status-badge badge-active">Live</span>
                     <div class="mkt-icon-wrap">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                     </div>
@@ -68,7 +251,8 @@
                 </div>
 
                 <!-- Node 2 -->
-                <div class="mkt-node" onclick="alert('Opening Multi-Platform Social Stack...')">
+                <div class="mkt-node" onclick="showMktModal('Social Stack', 'Converting briefs into multi-platform campaigns...')">
+                    <span class="mkt-status-badge badge-active">Live</span>
                     <div class="mkt-icon-wrap">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                     </div>
@@ -78,7 +262,8 @@
                 </div>
 
                 <!-- Node 3 -->
-                <div class="mkt-node" onclick="alert('Opening B2B Targeted Campaigns...')">
+                <div class="mkt-node" onclick="showMktModal('B2B Campaigns', 'Accessing target company scraping engine...')">
+                    <span class="mkt-status-badge badge-standby">Standby</span>
                     <div class="mkt-icon-wrap">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
                     </div>
@@ -88,7 +273,8 @@
                 </div>
 
                 <!-- Node 4 -->
-                <div class="mkt-node" onclick="alert('Opening Lead Nurture Engine...')">
+                <div class="mkt-node" onclick="showMktModal('Lead Nurture', 'Loading inquiry response templates...')">
+                    <span class="mkt-status-badge badge-standby">Standby</span>
                     <div class="mkt-icon-wrap">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                     </div>
@@ -98,7 +284,8 @@
                 </div>
 
                 <!-- Node 5 -->
-                <div class="mkt-node" onclick="alert('Opening Branding & Design Curation...')">
+                <div class="mkt-node" onclick="showMktModal('Brand & Gallery', 'Initializing creative direction algorithms...')">
+                    <span class="mkt-status-badge badge-standby">Standby</span>
                     <div class="mkt-icon-wrap">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                     </div>
@@ -111,5 +298,26 @@
 
     </div>
 
+    <!-- Custom Modal to replace alerts -->
+    <div class="modal-overlay" id="mkt-modal">
+        <div class="modal-content">
+            <h3 style="color:#c084fc; margin-top:0; font-size:20px; text-transform:uppercase; letter-spacing:1px;" id="mkt-modal-title">Node Title</h3>
+            <p style="color:#cbd5e1; font-size:14px; margin-bottom:20px;" id="mkt-modal-desc">Node description.</p>
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px dashed rgba(192,132,252,0.3); color:#888; font-size:12px;">
+                <span style="font-size:20px; display:block; margin-bottom:10px;">🚧</span>
+                Interface connected. Awaiting backend data binding.
+            </div>
+            <button class="btn-modal" onclick="document.getElementById('mkt-modal').style.display='none'">Acknowledge</button>
+        </div>
+    </div>
+
+    <script>
+        // Custom function to handle node clicks securely without native browser alerts
+        function showMktModal(title, desc) {
+            document.getElementById('mkt-modal-title').innerText = title;
+            document.getElementById('mkt-modal-desc').innerText = desc;
+            document.getElementById('mkt-modal').style.display = 'flex';
+        }
+    </script>
 </body>
 </html>
