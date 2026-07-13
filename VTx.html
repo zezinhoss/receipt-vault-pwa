@@ -8,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
+    <!-- 🔌 LOAD SUPABASE FOR REAL-TIME CLOUD SCHEDULING -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         :root { 
             --accent: #facc15; 
@@ -87,6 +90,11 @@
 
         .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--bg-deep); padding: 12px 24px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: none; z-index: 2000; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
+        .btn-live { background: rgba(34, 197, 94, 0.1); color: var(--live-green); border: 1px solid rgba(34, 197, 94, 0.3); padding: 10px 20px; font-size: 12px; cursor: pointer; font-weight: 900; text-transform: uppercase; border-radius: 4px; transition: 0.2s;}
+        .btn-live:hover { background: var(--live-green); color: #000; }
+        .btn-sub { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 10px 15px; font-size: 12px; cursor: pointer; border-radius: 4px; text-transform: uppercase; transition: 0.2s; }
+        .btn-sub:hover { background: rgba(250, 204, 21, 0.1); }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -125,7 +133,8 @@
         <div class="header-bar">
             <div>
                 <div class="text-micro" style="margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
-                    <span style="width:6px; height:6px; background:var(--live-green); border-radius:50%; display:inline-block;"></span> VTx ONLINE
+                    <span style="width:6px; height:6px; background:var(--live-green); border-radius:50%; display:inline-block; box-shadow: 0 0 8px var(--live-green);"></span> 
+                    SUPABASE CLOUD SYNC ACTIVE
                 </div>
                 <div style="display:flex; align-items:center; gap: 15px;">
                     <button class="btn-outline" style="padding: 4px 10px; font-size: 10px;" onclick="goToLauncher()">[ HOME ]</button>
@@ -172,7 +181,6 @@
                 </div>
                 <div style="display: flex; gap: 16px;">
                     <button class="btn-outline" onclick="document.getElementById('master-calendar').showPicker()">+ Add Date</button>
-                    <button class="btn-outline" onclick="addNewNode()">+ Add Node</button>
                 </div>
             </div>
             <div class="node-grid" id="node-grid-container"></div>
@@ -180,28 +188,30 @@
     </div>
 
     <script>
-        let db = { projects: {} };
-        let activeProjId = null;
-        let activeDate = null;
+        // 🔒 SUPABASE CONNECTION
+        const SUPABASE_URL = "https://neubhkdyxkidegndrpow.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldWJoa2R5eGtpZGVnbmRycG93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjU5NzYsImV4cCI6MjA5OTU0MTk3Nn0.9s645EtQQptWQOOa5SJcF-MtJW_37pvnDxq-PsheCOE";
+        let supabaseClient;
+        
+        let fullData = { dates: [] }; 
+        let activeDate = "";
         let uploadTarget = { tvId: null, index: null };
-        const defaultSchedule = [{"time": "08:00:00", "type": "image", "value": ""}, {"time": "", "type": "url", "value": ""}];
 
         function initApp() {
-            setInterval(() => { document.getElementById('master-clock').innerText = new Date().toTimeString().split(' ')[0]; }, 1000); 
-            const saved = localStorage.getItem('vtx_db_v1');
-            if (saved) { try { db = JSON.parse(saved); } catch(e) {} }
-            refreshLauncherDropdown();
-        }
+            // Init Supabase
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
 
-        function saveDB() {
-            if (activeProjId) saveCurrentUIToData();
-            localStorage.setItem('vtx_db_v1', JSON.stringify(db));
+            setInterval(() => { document.getElementById('master-clock').innerText = new Date().toTimeString().split(' ')[0]; }, 1000); 
+            restoreState();
+            refreshLauncherDropdown();
         }
 
         function showToast(msg) {
             const t = document.getElementById('sys-toast');
             t.innerText = msg; t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 2000);
+            setTimeout(() => t.style.display = 'none', 3000);
         }
 
         function switchWorkspace(mode) {
@@ -216,18 +226,15 @@
             } else if(mode === 'assets') {
                 document.getElementById('asset-workspace').style.display = 'block';
                 document.getElementById('tab-assets').classList.add('active');
-                if(activeProjId) document.getElementById('project-notepad').value = db.projects[activeProjId].notepad || "";
+                document.getElementById('project-notepad').value = localStorage.getItem('rc_notepad_v200') || "";
             }
         }
 
         function saveNotepad() {
-            if(!activeProjId) return;
-            db.projects[activeProjId].notepad = document.getElementById('project-notepad').value;
-            autoSave();
+            localStorage.setItem('rc_notepad_v200', document.getElementById('project-notepad').value);
         }
 
         function goToLauncher() {
-            saveDB(); activeProjId = null;
             document.getElementById('dashboard-screen').style.display = 'none';
             document.getElementById('launcher-screen').style.display = 'flex';
             refreshLauncherDropdown();
@@ -235,33 +242,38 @@
 
         function refreshLauncherDropdown() {
             const sel = document.getElementById('load-proj-select');
-            sel.innerHTML = '<option value="">Select a project...</option>';
-            for (const [id, proj] of Object.entries(db.projects)) { sel.innerHTML += `<option value="${id}">${proj.name}</option>`; }
+            sel.innerHTML = '<option value="">Select a project...</option><option value="current">Current Working State</option>';
         }
 
         function createNewProject() {
             const name = document.getElementById('new-proj-name').value.trim();
             if (!name) return showToast("PLEASE ENTER A PROJECT NAME");
-            const id = 'proj_' + Date.now();
-            const today = new Date().toISOString().split('T')[0];
-            db.projects[id] = { name: name, dates: [today], nodes: [1], nodeNames: { "1": "NODE_01" }, data: { "1": { [today]: JSON.parse(JSON.stringify(defaultSchedule)) } }, notepad: "" };
-            saveDB(); openProject(id, true);
+            
+            fullData = { dates: [new Date().toISOString().split('T')[0]] };
+            for(let i=1; i<=10; i++) {
+                fullData[i] = {};
+                fullData[i][fullData.dates[0]] = [{"time": "08:00:00", "type": "url", "value": ""}];
+            }
+            
+            document.getElementById('active-proj-title').innerText = name;
+            localStorage.setItem('rc_project_name_v200', name);
+            setGlobalDate(fullData.dates[0]);
+            
+            document.getElementById('launcher-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').style.display = 'flex';
+            switchWorkspace('assets'); 
+            showToast("PROJECT INITIALIZED.");
         }
 
         function loadSelectedProject() {
             const id = document.getElementById('load-proj-select').value;
-            if (!id) return; openProject(id, false);
-        }
-
-        function openProject(id, isNew) {
-            activeProjId = id; const proj = db.projects[id];
-            activeDate = proj.dates[0] || new Date().toISOString().split('T')[0];
-            document.getElementById('active-proj-title').innerText = proj.name;
+            if (!id) return; 
+            document.getElementById('active-proj-title').innerText = localStorage.getItem('rc_project_name_v200') || "LOADED PROJECT";
             document.getElementById('launcher-screen').style.display = 'none';
             document.getElementById('dashboard-screen').style.display = 'flex';
-            renderMasterTabs(); generateNodes();
-            if(isNew) { switchWorkspace('assets'); showToast("PROJECT INITIALIZED."); } 
-            else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
+            restoreState();
+            switchWorkspace('fleet'); 
+            showToast("PROJECT LOADED");
         }
 
         function processSpreadsheet(input) {
@@ -274,7 +286,6 @@
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     const json = XLSX.utils.sheet_to_json(worksheet);
                     
-                    const proj = db.projects[activeProjId];
                     let rowsAdded = 0;
 
                     json.forEach(row => {
@@ -291,17 +302,25 @@
                                 time = `${Math.floor(totalSeconds / 3600).toString().padStart(2, '0')}:${Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')}:00`;
                             }
                             let type = row[typeKey] ? row[typeKey].toString().toLowerCase().trim() : 'image';
-                            if(!proj.nodes.includes(nodeId)) {
-                                proj.nodes.push(nodeId); proj.nodeNames[nodeId] = `NODE_${nodeId.toString().padStart(2, '0')}`;
-                                proj.data[nodeId] = {}; proj.dates.forEach(d => proj.data[nodeId][d] = []);
-                            }
-                            if(!proj.data[nodeId]._xlsImported) { proj.data[nodeId][activeDate] = []; proj.data[nodeId]._xlsImported = true; }
-                            proj.data[nodeId][activeDate].push({ time: time, type: type, value: row[valKey].toString().trim() });
+                            
+                            if(!fullData[nodeId]) fullData[nodeId] = {};
+                            if(!fullData[nodeId]._xlsImported) { fullData[nodeId][activeDate] = []; fullData[nodeId]._xlsImported = true; }
+                            
+                            fullData[nodeId][activeDate].push({ time: time, type: type, value: row[valKey].toString().trim() });
                             rowsAdded++;
                         }
                     });
-                    proj.nodes.forEach(n => { delete proj.data[n]._xlsImported; if(proj.data[n][activeDate]) proj.data[n][activeDate].sort((a,b) => a.time.localeCompare(b.time)); });
-                    saveDB(); generateNodes(); showToast(`SYNC COMPLETE: ${rowsAdded} ROWS INJECTED`);
+                    
+                    for(let i=1; i<=10; i++) { 
+                        if(fullData[i]) {
+                            delete fullData[i]._xlsImported; 
+                            if(fullData[i][activeDate]) fullData[i][activeDate].sort((a,b) => a.time.localeCompare(b.time));
+                        }
+                    }
+                    
+                    saveCurrentUIToFullData(); 
+                    for(let i=1; i<=10; i++) renderTable(i);
+                    showToast(`SYNC COMPLETE: ${rowsAdded} ROWS INJECTED`);
                     switchWorkspace('fleet'); 
                 } catch (error) { showToast("ERROR PARSING SPREADSHEET"); }
             };
@@ -309,44 +328,45 @@
         }
 
         function renderMasterTabs() {
-            const proj = db.projects[activeProjId];
-            const bar = document.getElementById('master-date-tabs'); bar.innerHTML = "";
-            proj.dates.sort().forEach(date => {
+            const bar = document.getElementById('master-date-tabs');
+            bar.innerHTML = "";
+            fullData.dates.sort().forEach(date => {
                 const btn = document.createElement('button');
                 btn.className = `tab-btn ${activeDate === date ? 'active' : ''}`;
                 btn.innerText = date;
-                btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); };
+                btn.onclick = () => setGlobalDate(date);
                 bar.appendChild(btn);
             });
         }
 
-        function addMasterDate(date) {
-            if(!date) return;
-            const proj = db.projects[activeProjId];
-            if(proj.dates.includes(date)) return;
-            proj.dates.push(date);
-            proj.nodes.forEach(nodeId => { proj.data[nodeId][date] = JSON.parse(JSON.stringify(defaultSchedule)); });
-            activeDate = date; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("NEW ALLOCATION: " + date);
+        function setGlobalDate(date) {
+            saveCurrentUIToFullData();
+            activeDate = date;
+            renderMasterTabs();
+            for(let i=1; i<=10; i++) renderTable(i);
+            localStorage.setItem('rc_last_date_v200', activeDate);
         }
 
-        function addNewNode() {
-            const proj = db.projects[activeProjId]; saveCurrentUIToData();
-            const nextId = proj.nodes.length > 0 ? Math.max(...proj.nodes) + 1 : 1;
-            proj.nodes.push(nextId); proj.nodeNames[nextId] = `NODE_${nextId.toString().padStart(2, '0')}`;
-            proj.data[nextId] = {}; proj.dates.forEach(d => proj.data[nextId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
-            generateNodes(); saveDB(); showToast(`NODE ${nextId} ADDED`);
+        function addMasterDate(date) {
+            if(!date) return;
+            if(!fullData.dates.includes(date)) {
+                fullData.dates.push(date);
+                for(let i=1; i<=10; i++) { if(!fullData[i]) fullData[i] = {}; fullData[i][date] = [{"time": "08:00:00", "type": "url", "value": ""}]; }
+            }
+            setGlobalDate(date);
+            showToast("NEW ALLOCATION: " + date);
         }
 
         function generateNodes() {
-            const proj = db.projects[activeProjId];
             const container = document.getElementById('node-grid-container'); container.innerHTML = "";
-            proj.nodes.forEach(id => {
-                const name = proj.nodeNames[id] || `NODE_${id}`;
+            for(let id=1; id<=10; id++) {
                 container.insertAdjacentHTML('beforeend', `
                     <div class="node-card" id="container-${id}">
                         <div class="node-header">
-                            <input type="text" class="node-title-input" id="node-name-${id}" value="${name}" oninput="updateLinkLabel(${id})">
-                            <button type="button" class="btn-action" onclick="showToast('SCHEDULE SAVED')">SAVE</button>
+                            <input type="text" class="node-title-input" id="node-name-${id}" value="NODE_0${id}" oninput="saveNodeNames()">
+                            <div style="display:flex; gap:10px;">
+                                <button type="button" class="btn-live" onclick="goLive(${id})">GO LIVE</button>
+                            </div>
                         </div>
                         <div class="node-body">
                             <div class="data-table-wrap">
@@ -356,78 +376,216 @@
                                         <thead><tr><th style="width:90px;">Time</th><th style="width:70px;">Mode</th><th>Target File / URL</th><th style="width:30px;"></th></tr></thead>
                                         <tbody id="tbody-${id}"></tbody>
                                     </table>
+                                    <button type="button" style="background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); color:#888; width:100%; padding:10px; margin-top:10px; cursor:pointer; font-size:11px; font-family:'Nunito'; font-weight:700; text-transform:uppercase;" onclick="addRow(${id})">+ ADD SLOT</button>
                                 </form>
                             </div>
                         </div>
                     </div>
                 `);
-                renderTable(id);
-            });
+            }
         }
-
-        function refreshAllNodes() { db.projects[activeProjId].nodes.forEach(id => renderTable(id)); }
 
         function renderTable(tvId) {
-            const proj = db.projects[activeProjId];
             const tbody = document.getElementById('tbody-' + tvId); if(!tbody) return;
             tbody.innerHTML = "";
-            const sched = (proj.data[tvId] && proj.data[tvId][activeDate]) ? proj.data[tvId][activeDate] : JSON.parse(JSON.stringify(defaultSchedule));
-            sched.sort((a,b) => a.time.localeCompare(b.time)).forEach((item, index) => { appendRowHTML(tvId, index, item.time, item.type, item.value); });
+            const sched = (fullData[tvId] && fullData[tvId][activeDate]) ? fullData[tvId][activeDate] : [{"time": "08:00:00", "type": "url", "value": ""}];
+            sched.sort((a,b) => a.time.localeCompare(b.time)).forEach((item, index) => { addRow(tvId, item, false, index); });
         }
 
-        function appendRowHTML(tvId, index, time, type, val) {
-            const tbody = document.getElementById('tbody-' + tvId); const row = tbody.insertRow();
-            let sourceHtml = type === 'url' 
-                ? `<input type="text" class="table-input" name="value-${index}" value="${val}" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`
-                : `<input type="hidden" name="value-${index}" value="${val}"><button type="button" class="upload-btn ${val?'ready':''}" onclick="openBrowser(${tvId}, ${index})">${val||'SELECT FILE'}</button>`;
+        function addRow(tvId, data = {time: '', type: 'url', value: ''}, shouldSave = true, forcedIndex = null) {
+            const tbody = document.getElementById('tbody-' + tvId);
+            const i = forcedIndex !== null ? forcedIndex : tbody.rows.length;
+            const row = tbody.insertRow();
+            
+            let displayVal = data.value;
+            if(displayVal && displayVal.length > 30) displayVal = "..." + displayVal.slice(-25);
+
+            let sourceHtml = data.type === 'url' 
+                ? `<input type="text" class="table-input" name="value-${i}" value="${data.value}" placeholder="https://..." oninput="saveCurrentUIToFullData()">`
+                : `<input type="hidden" name="value-${i}" value="${data.value}"><button type="button" class="upload-btn ${data.value?'ready':''}" onclick="openBrowser(${tvId}, ${i})">${displayVal||'UPLOAD'}</button>`;
+            
             row.innerHTML = `
-                <td><input type="text" class="table-input" name="time-${index}" value="${time}" placeholder="HH:MM:SS" oninput="checkAutoAddRow(this, ${tvId}); autoSave()"></td>
-                <td><select class="table-input custom-select" name="type-${index}" onchange="changeType(${tvId}, ${index}, this.value, this); autoSave()"><option value="url" ${type==='url'?'selected':''}>URL</option><option value="image" ${type==='image'?'selected':''}>IMG</option><option value="video" ${type==='video'?'selected':''}>VID</option></select></td>
-                <td id="source-td-${tvId}-${index}">${sourceHtml}</td>
-                <td style="text-align:center;"><button type="button" class="row-del" onclick="removeRow(this, ${tvId})">×</button></td>`;
-        }
-
-        function checkAutoAddRow(el, tvId) {
-            const tr = el.closest('tr'); const tbody = tr.parentNode;
-            if (tr === tbody.lastElementChild) appendRowHTML(tvId, tbody.rows.length, "", "url", "");
+                <td><input type="text" class="table-input" name="time-${i}" value="${data.time}" oninput="formatTime(this)" onblur="reOrderAndSave('${tvId}')" placeholder="00:00:00"></td>
+                <td><select class="table-input custom-select" name="type-${i}" onchange="changeType(${tvId}, ${i}, this.value); saveCurrentUIToFullData()"><option value="url" ${data.type==='url'?'selected':''}>URL</option><option value="image" ${data.type==='image'?'selected':''}>IMG</option><option value="video" ${data.type==='video'?'selected':''}>VID</option></select></td>
+                <td id="source-td-${tvId}-${i}">${sourceHtml}</td>
+                <td style="text-align:center;"><button type="button" class="row-del" onclick="removeRow(this, '${tvId}')">×</button></td>`;
+                
+            if(shouldSave) saveCurrentUIToFullData();
         }
 
         function removeRow(btn, tvId) {
-            const tbody = btn.closest('tbody'); if (tbody.rows.length <= 1) return;
-            btn.closest('tr').remove(); saveCurrentUIToData(); renderTable(tvId); saveDB();
+            btn.closest('tr').remove();
+            saveCurrentUIToFullData();
+            renderTable(tvId);
         }
 
-        function changeType(tvId, index, newType, selectEl) {
+        function reOrderAndSave(tvId) { saveCurrentUIToFullData(); renderTable(tvId); }
+
+        function changeType(tvId, index, newType) {
             const td = document.getElementById(`source-td-${tvId}-${index}`);
-            td.innerHTML = newType === 'url' ? `<input type="text" class="table-input" name="value-${index}" value="" oninput="checkAutoAddRow(this, ${tvId}); autoSave()">` : `<input type="hidden" name="value-${index}" value=""><button type="button" class="upload-btn" onclick="openBrowser(${tvId}, ${index})">SELECT FILE</button>`;
-            if(selectEl) checkAutoAddRow(selectEl, tvId);
+            td.innerHTML = newType === 'url' ? `<input type="text" class="table-input" name="value-${index}" value="" oninput="saveCurrentUIToFullData()">` : `<input type="hidden" name="value-${index}" value=""><button type="button" class="upload-btn" onclick="openBrowser(${tvId}, ${index})">UPLOAD</button>`;
         }
 
-        function updateLinkLabel(id) { db.projects[activeProjId].nodeNames[id] = document.getElementById(`node-name-${id}`).value; autoSave(); }
+        function saveNodeNames() {
+            const names = {};
+            for(let i=1; i<=10; i++) { 
+                const val = document.getElementById(`node-name-${i}`).value;
+                names[i] = val;
+            }
+            localStorage.setItem('rc_node_names_v200', JSON.stringify(names));
+        }
+
+        function restoreNodeNames() {
+            const saved = JSON.parse(localStorage.getItem('rc_node_names_v200'));
+            if(saved) { for(let i=1; i<=10; i++) { if(saved[i] && document.getElementById(`node-name-${i}`)) { document.getElementById(`node-name-${i}`).value = saved[i]; } } }
+        }
+
+        function formatTime(input) {
+            let v = input.value.replace(/\D/g, ''); let f = "";
+            if (v.length > 0) f += v.substr(0, 2); if (v.length > 2) f += ":" + v.substr(2, 2); if (v.length > 4) f += ":" + v.substr(4, 2);
+            input.value = f;
+        }
+
         function openBrowser(tvId, index) { uploadTarget = { tvId, index }; document.getElementById('hidden-file-browser').click(); }
         
-        function handleFileSelect(input) {
-            if(!input.files[0]) return; const filename = input.files[0].name; const td = document.getElementById(`source-td-${uploadTarget.tvId}-${uploadTarget.index}`);
+        async function handleFileSelect(input) {
+            if(!input.files[0]) return;
+            const file = input.files[0];
+            const td = document.getElementById(`source-td-${uploadTarget.tvId}-${uploadTarget.index}`);
+            
             if(td) {
-                td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${filename}"><button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
-                const tr = td.closest('tr'); const tbody = tr.parentNode;
-                if (tr === tbody.lastElementChild) appendRowHTML(uploadTarget.tvId, tbody.rows.length, "", "url", "");
+                const btn = td.querySelector('.upload-btn');
+                if(btn) { btn.innerText = "UPLOADING..."; btn.classList.remove('ready'); }
             }
-            autoSave(); input.value = ""; showToast("FILE ATTACHED");
+
+            try {
+                if (supabaseClient) {
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `vtx_${Date.now()}.${fileExt}`;
+                    
+                    const { error } = await supabaseClient.storage.from('vtx_assets').upload(`media/${fileName}`, file);
+                    if (error) throw error;
+                    
+                    const { data: publicUrlData } = supabaseClient.storage.from('vtx_assets').getPublicUrl(`media/${fileName}`);
+                    const publicUrl = publicUrlData.publicUrl;
+
+                    if (td) {
+                        let displayVal = "..." + publicUrl.slice(-25);
+                        td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${publicUrl}"><button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${displayVal}</button>`;
+                    }
+                    showToast("ASSET CLOUD STAGED");
+                } else {
+                    // Fallback to local name if no DB
+                    const filename = file.name;
+                    if(td) {
+                        td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${filename}"><button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
+                    }
+                    showToast("LOCAL FILE ATTACHED");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("UPLOAD FAILED");
+            }
+            saveCurrentUIToFullData(); input.value = "";
         }
 
-        let saveTimeout; function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDB(); }, 800); }
-
-        function saveCurrentUIToData() {
-            if(!activeProjId) return; const proj = db.projects[activeProjId];
+        function saveCurrentUIToFullData() {
             document.querySelectorAll('form[id^="form-"]').forEach(f => {
-                const tvId = parseInt(f.elements['tv_id'].value); const tb = document.getElementById('tbody-' + tvId); const slots = [];
+                const tvId = f.elements['tv_id'].value;
+                const tb = document.getElementById('tbody-' + tvId);
+                const slots = [];
                 for (let i = 0; i < tb.rows.length; i++) {
-                    const r = tb.rows[i]; const time = r.querySelector('input[name^="time-"]').value; const type = r.querySelector('select[name^="type-"]').value; const valEl = r.querySelector('[name^="value-"]');
+                    const r = tb.rows[i];
+                    const time = r.querySelector('input[name^="time-"]').value;
+                    const type = r.querySelector('select[name^="type-"]').value;
+                    const valEl = r.querySelector('[name^="value-"]');
                     slots.push({ time, type, value: valEl ? valEl.value : "" });
                 }
-                if(!proj.data[tvId]) proj.data[tvId] = {}; proj.data[tvId][activeDate] = slots;
+                if(!fullData[tvId]) fullData[tvId] = {};
+                fullData[tvId][activeDate] = slots;
             });
+            localStorage.setItem('rc_kinetic_state_v200', JSON.stringify(fullData));
+        }
+
+        async function goLive(tvId) {
+            saveCurrentUIToFullData();
+            const sched = fullData[tvId][activeDate];
+            if (!sched) return;
+            
+            // 1. Fetch Session Client ID (from OS gatekeeper)
+            let clientId = localStorage.getItem('active_client_id');
+            
+            // Failsafe: If loaded directly without login, grab the first active venue to bind the schedule to
+            if (!clientId && supabaseClient) {
+                const { data } = await supabaseClient.from('client_access').select('id').eq('is_active', true).limit(1).single();
+                if (data) {
+                    clientId = data.id;
+                    localStorage.setItem('active_client_id', clientId);
+                } else {
+                    showToast("ERROR: NO ACTIVE VENUE FOUND IN DATABASE");
+                    return;
+                }
+            }
+
+            try {
+                if(clientId && supabaseClient) {
+                    // 2. Clear out any previous schedule for this specific node & venue
+                    await supabaseClient.from('vtx_schedules').delete().eq('client_id', clientId).eq('node_id', tvId);
+
+                    // 3. Prepare the new SQL rows
+                    const payload = [];
+                    sched.forEach(s => {
+                        if(!s.time || !s.value) return; // Skip empty rows
+                        let formattedTime = s.time;
+                        if (formattedTime.length === 5) formattedTime += ":00"; // Force HH:MM:SS
+                        
+                        payload.push({
+                            client_id: clientId,
+                            node_id: parseInt(tvId),
+                            time: formattedTime,
+                            type: s.type,
+                            value: s.value
+                        });
+                    });
+
+                    // 4. Inject instantly over WebSockets
+                    if (payload.length > 0) {
+                        const { error } = await supabaseClient.from('vtx_schedules').insert(payload);
+                        if (error) throw error;
+                    }
+                }
+
+                // Visual confirmation
+                const btn = document.querySelector(`#container-${tvId} .btn-live`); 
+                btn.innerText = "LIVE!"; 
+                btn.style.background = "#22c55e";
+                btn.style.color = "#000";
+                
+                setTimeout(() => {
+                    btn.innerText = "GO LIVE";
+                    btn.style.background = "rgba(34, 197, 94, 0.1)";
+                    btn.style.color = "var(--live-green)";
+                }, 2000);
+                
+                showToast("NODE " + tvId + " SYNCED TO CLOUD INSTANTLY");
+
+            } catch(err) {
+                console.error("Database Sync Error:", err);
+                showToast("DATABASE SYNC FAILED");
+            }
+        }
+
+        function restoreState() {
+            const saved = JSON.parse(localStorage.getItem('rc_kinetic_state_v200'));
+            fullData = saved || { dates: [new Date().toISOString().split('T')[0]] };
+            if(!fullData.dates || fullData.dates.length === 0) fullData.dates = [new Date().toISOString().split('T')[0]];
+            const lastActive = localStorage.getItem('rc_last_date_v200');
+            activeDate = (lastActive && fullData.dates.includes(lastActive)) ? lastActive : fullData.dates[0];
+            
+            generateNodes();
+            restoreNodeNames();
+            renderMasterTabs();
+            for(let i=1; i<=10; i++) renderTable(i);
         }
     </script>
 </body>
