@@ -9,10 +9,22 @@
     <meta name="theme-color" content="#facc15">
     
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- 🔌 LOAD LIBRARIES (Using ultra-reliable jsdelivr) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- 🔌 LOAD SUPABASE OFFICIAL SDK (Updated CDN) -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- 🚨 GLOBAL CRASH DETECTOR -->
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            var statusEl = document.getElementById('login-status');
+            if(statusEl) {
+                statusEl.innerText = "SYSTEM CRASH: " + message + " (Line " + lineno + ")";
+                statusEl.style.color = "#ef4444";
+            }
+            return true;
+        };
+    </script>
 
     <style>
         :root {
@@ -22,48 +34,35 @@
         }
 
         .marketing-theme {
-            --theme-primary: #c084fc; /* Purple */
-            --theme-secondary: #2dd4bf; /* Cyan/Teal */
+            --theme-primary: #c084fc;
+            --theme-secondary: #2dd4bf;
             --theme-bg-gradient: radial-gradient(circle at top left, #1e1b4b 0%, #0a0a0a 60%);
         }
 
         body { font-family:'Nunito', sans-serif; background:#0a0a0a; background-image: var(--theme-bg-gradient); color:#fff; padding:20px; display:flex; flex-direction: column; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; overflow-x: hidden;}
         
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-        /* Remove arrows from number inputs */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-
-        /* Force dark mode on native browser dropdowns and calendars */
-        input[type="date"], select { color-scheme: dark; }
-        ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; opacity: 0.7; transition: 0.2s; }
-        ::-webkit-calendar-picker-indicator:hover { opacity: 1; }
-        option { background: #1e1e1e; color: #fff; }
-
-        .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; transition: all 0.4s ease; }
+        .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; transition: all 0.4s ease; z-index: 10;}
         
         #login-wrapper { width:100%; max-width:360px; }
         
-        h3 { color: var(--theme-primary); font-size:16px; font-weight:700; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; align-items:center; gap:8px; transition: color 0.4s;}
+        h3 { color: var(--theme-primary); font-size:16px; font-weight:700; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; align-items:center; gap:8px; transition: color 0.4s; justify-content: center;}
         p { color:#888; font-size:13px; font-weight:300; margin-bottom:25px; }
         
+        /* 🛡️ PIN PAD FIX: Uses text type but visually hides characters to stop password managers */
         .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
         .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color: var(--theme-primary); font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; font-family:'Nunito', sans-serif; -webkit-text-security: disc; }
         .pin-box:focus { border-color: var(--theme-primary); box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
-        .marketing-theme .pin-box:focus { box-shadow:0 0 15px rgba(192, 132, 252, 0.2); }
 
         .main-container { width: 100%; max-width: 1400px; display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; padding-left: 80px; box-sizing: border-box; transition: padding-left 0.3s ease;}
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* OS SIDEBAR (NEW DOCK) */
+        /* OS SIDEBAR */
         #os-sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 80px; background: rgba(10, 10, 10, 0.8); border-right: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: none; flex-direction: column; align-items: center; padding: 20px 0; z-index: 9000; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; white-space: nowrap; box-shadow: 10px 0 30px rgba(0,0,0,0.5);}
         #os-sidebar:hover { width: 240px; align-items: flex-start; }
         
@@ -75,14 +74,13 @@
         .sidebar-item { display: flex; align-items: center; width: 100%; padding: 15px 20px; color: #94a3b8; cursor: pointer; transition: all 0.2s; box-sizing: border-box; position: relative; border-left: 3px solid transparent;}
         .sidebar-item:hover { color: #f8fafc; background: rgba(255,255,255,0.03); }
         .sidebar-item.active { border-left-color: var(--theme-primary); color: var(--theme-primary); background: linear-gradient(90deg, rgba(250, 204, 21, 0.1) 0%, transparent 100%); }
-        .marketing-theme .sidebar-item.active { border-left-color: #c084fc; color: #c084fc; background: linear-gradient(90deg, rgba(192, 132, 252, 0.1) 0%, transparent 100%);}
         
         .sidebar-icon { width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; min-width: 40px; border-radius: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;}
         .sidebar-item:hover .sidebar-icon { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
         .sidebar-label { margin-left: 15px; font-weight: 600; font-size: 13px; opacity: 0; transition: opacity 0.2s; letter-spacing: 0.5px;}
         #os-sidebar:hover .sidebar-label { opacity: 1; transition-delay: 0.1s;}
 
-        /* SPLASH SCREEN (NEW HOME) */
+        /* SPLASH SCREEN */
         #os-splash { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100vh; position: relative; padding-left: 80px; box-sizing: border-box; animation: fadeIn 0.8s ease;}
         .splash-logo-bg { position: absolute; width: 60vw; max-width: 800px; opacity: 0.05; pointer-events: none; top: 50%; left: calc(50% + 40px); transform: translate(-50%, -50%); filter: grayscale(100%) contrast(1000%);}
         .splash-content { position: relative; z-index: 10; text-align: center; }
@@ -125,10 +123,10 @@
     <!-- LOGIN SCREEN -->
     <div class='glass-panel' id='login-wrapper'>
         <div id='login-view'>
-            <h3 style="justify-content: center;">SECURE VAULT</h3>
+            <h3>SECURE VAULT</h3>
             <p id="login-subtitle">Restricted Venue Access</p>
             
-            <!-- CLIENT PIN PAD -->
+            <!-- CLIENT PIN PAD (Using 'text' to defeat autofill, and 'data-lpignore' for LastPass) -->
             <div class="pin-container" id="pin-container">
                 <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
                 <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
@@ -136,7 +134,7 @@
                 <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
             </div>
 
-            <!-- ADMIN EMAIL/PASS (Hidden by default) -->
+            <!-- ADMIN EMAIL/PASS -->
             <div id="admin-container" style="display:none; flex-direction:column; gap:10px; margin-bottom:15px; align-items:center;">
                 <input type="email" id="admin-email" placeholder="Staff Email" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; padding:12px; width:90%; box-sizing:border-box; font-family:'Nunito'; outline:none;">
                 <input type="password" id="admin-pass" placeholder="Password" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; padding:12px; width:90%; box-sizing:border-box; font-family:'Nunito'; outline:none;">
@@ -146,7 +144,7 @@
             <div id='login-status' style='margin-top:15px;color:#ef4444;font-size:13px;font-weight:bold;height:16px;'></div>
 
             <!-- TOGGLE BUTTON -->
-            <button id="toggle-login-btn" onclick="toggleLoginMode()" style="background:transparent; border:none; color:#888; font-size:10px; text-transform:uppercase; letter-spacing:1px; cursor:pointer; margin-top:15px; transition: 0.2s;">Switch to Internal Staff Login</button>
+            <button id="toggle-login-btn" onclick="toggleLoginMode()" style="background:transparent; border:none; color:#888; font-size:10px; text-transform:uppercase; letter-spacing:1px; cursor:pointer; margin-top:15px; transition: 0.2s; position: relative; z-index: 50;">Switch to Internal Staff Login</button>
         </div>
     </div>
     
@@ -156,52 +154,31 @@
             <img src="icon.png" alt="RC Logo" style="filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));" onerror="this.style.display='none'">
             <span>COMMAND CENTER</span>
         </div>
-
         <div class="sidebar-category"><span>Production</span></div>
-
         <div class="sidebar-item" id="nav-ops" onclick="launchApp('ops')">
-            <div class="sidebar-icon" style="color: #10b981;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-            </div>
+            <div class="sidebar-icon" style="color: #10b981;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></div>
             <span class="sidebar-label">OPS CORE</span>
         </div>
-
         <div class="sidebar-item" onclick="showToast('Kinetic Studio OS is currently offline or deploying.')">
-            <div class="sidebar-icon" style="color: #f87171;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            </div>
+            <div class="sidebar-icon" style="color: #f87171;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
             <span class="sidebar-label">KINETIC</span>
         </div>
-
         <div class="sidebar-item" id="nav-vtx" onclick="launchApp('vtx')">
-            <div class="sidebar-icon" style="color: #facc15;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-            </div>
+            <div class="sidebar-icon" style="color: #facc15;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></div>
             <span class="sidebar-label">VTx</span>
         </div>
-
         <div class="sidebar-item" id="nav-vtz" onclick="launchApp('vtz')">
-            <div class="sidebar-icon" style="color: #3b82f6;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            </div>
+            <div class="sidebar-icon" style="color: #3b82f6;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
             <span class="sidebar-label">VTz</span>
         </div>
-
         <div class="sidebar-category"><span>Marketing</span></div>
-
         <div class="sidebar-item" id="nav-noiz" onclick="launchApp('noiz')">
-            <div class="sidebar-icon" style="color: #c084fc;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-            </div>
+            <div class="sidebar-icon" style="color: #c084fc;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
             <span class="sidebar-label">NOIZ</span>
         </div>
-
         <div class="sidebar-category"><span>Finance</span></div>
-
         <div class="sidebar-item" id="nav-vault" onclick="launchApp('vault')">
-            <div class="sidebar-icon" style="color: #facc15;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-            </div>
+            <div class="sidebar-icon" style="color: #facc15;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
             <span class="sidebar-label">VAULT</span>
         </div>
     </nav>
@@ -215,151 +192,134 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- APP VIEW CONTAINER (Holds all active apps) -->
-    <!-- ========================================== -->
+    <!-- APP VIEW CONTAINER -->
     <div id='app-view' class="main-container">
-        
-        <!-- OPS CORE APP VIEW -->
-        <div id="ops-core" class="app-iframe-container" style="display:none;">
-            <iframe src="OpsView.html" title="Ops Core"></iframe>
-        </div>
-
-        <!-- VTx APP VIEW -->
-        <div id="vtx-core" class="app-iframe-container" style="display:none;">
-            <iframe src="VTxView.html" title="VTx Scheduler"></iframe>
-        </div>
-
-        <!-- VTz APP VIEW -->
-        <div id="vtz-core" class="app-iframe-container" style="display:none;">
-            <iframe src="VTzView.html" title="VTz Switcher"></iframe>
-        </div>
-
-        <!-- NOIZ APP VIEW -->
-        <div id="noiz-core" class="app-iframe-container" style="display:none;">
-            <iframe src="NoizView.html" title="Noiz Core"></iframe>
-        </div>
-
-        <!-- VAULT APP VIEW -->
-        <div id="vault-core" class="app-iframe-container" style="display:none;">
-            <iframe src="VaultView.html" title="Financial Vault"></iframe>
-        </div>
-
+        <div id="ops-core" class="app-iframe-container" style="display:none;"><iframe src="OpsView.html"></iframe></div>
+        <div id="vtx-core" class="app-iframe-container" style="display:none;"><iframe src="VTxView.html"></iframe></div>
+        <div id="vtz-core" class="app-iframe-container" style="display:none;"><iframe src="VTzView.html"></iframe></div>
+        <div id="noiz-core" class="app-iframe-container" style="display:none;"><iframe src="NoizView.html"></iframe></div>
+        <div id="vault-core" class="app-iframe-container" style="display:none;"><iframe src="VaultView.html"></iframe></div>
     </div>
 
     <script>
         // =========================================================================
-        // 🔒 SUPABASE ENTERPRISE DATABASE INITIALIZATION
+        // 🔒 SUPABASE CONNECTION (REPLACING GOOGLE APPS SCRIPT)
         // =========================================================================
         const SUPABASE_URL = "https://neubhkdyxkidegndrpow.supabase.co"; 
-        
-        // ⚠️ SAFE KEY: This is your 'anon' public key.
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldWJoa2R5eGtpZGVnbmRycG93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjU5NzYsImV4cCI6MjA5OTU0MTk3Nn0.9s645EtQQptWQOOa5SJcF-MtJW_37pvnDxq-PsheCOE";
 
-        let supabase;
-
-        // Initialize Supabase ONLY after the window (and the CDN script) has fully loaded
-        window.onload = function() {
-            try {
-                if (window.supabase) {
-                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                    console.log("Supabase Client Initialized Successfully");
-                } else {
-                    console.error("Supabase library failed to load from CDN.");
-                }
-            } catch (err) {
-                console.error("Error initializing Supabase:", err);
-            }
-
-            // Force clear any browser autofill garbage and focus first box
-            pinInputs.forEach(inp => inp.value = '');
-            if(pinInputs.length > 0) pinInputs[0].focus();
-        };
-
+        let supabaseClient; // Renamed to avoid collision with CDN object
         var currentActiveApp = null;
         var currentPin = "";
+        let isAdminMode = false;
 
-        // --- ENTERPRISE TOAST ALERTS (Replacing default browser alerts) ---
+        // Ensure DOM is fully loaded before attaching events
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Initialize Supabase
+            try {
+                if (window.supabase) {
+                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    console.log("Supabase Client Initialized Successfully");
+                } else {
+                    document.getElementById('login-status').innerText = "Database connection offline (CDN blocked).";
+                }
+            } catch (err) {
+                console.error(err);
+            }
+
+            // 2. Setup PIN Pad Listeners
+            const pinInputs = document.querySelectorAll('.pin-input');
+            
+            // Force clear fields on load (defeats password managers)
+            pinInputs.forEach(inp => inp.value = '');
+            if(pinInputs.length > 0) pinInputs[0].focus();
+
+            pinInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    // Auto-advance
+                    if(e.target.value.length === 1 && index < pinInputs.length - 1) {
+                        pinInputs[index + 1].focus();
+                    }
+                    // Trigger login check if full
+                    if(Array.from(pinInputs).every(inp => inp.value.length === 1)) {
+                        attemptClientLogin();
+                    }
+                });
+                
+                input.addEventListener('keydown', (e) => {
+                    if(e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                        pinInputs[index - 1].focus();
+                    }
+                });
+            });
+        });
+
+        // --- ENTERPRISE TOAST NOTIFICATION (Replaces native alert) ---
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast-notification';
             toast.innerText = message;
             document.body.appendChild(toast);
+            
+            // Remove after 3 seconds
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateY(100px)';
-                toast.style.transition = 'all 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
-        // --- PIN PAD LOGIC & API FETCH ---
-        const pinInputs = document.querySelectorAll('.pin-input');
-
-        pinInputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-                // Auto-advance to next box
-                if(e.target.value.length === 1 && index < pinInputs.length - 1) {
-                    pinInputs[index + 1].focus();
-                }
-                // If all 4 are filled, trigger login
-                if(Array.from(pinInputs).every(inp => inp.value.length === 1)) {
-                    attemptClientLogin();
-                }
-            });
-            // Handle backspace properly
-            input.addEventListener('keydown', (e) => {
-                if(e.key === 'Backspace' && e.target.value === '' && index > 0) {
-                    pinInputs[index - 1].focus();
-                }
-            });
-        });
-
+        // --- LOGIN & AUTHENTICATION LOGIC ---
         function getEnteredPin() {
+            const pinInputs = document.querySelectorAll('.pin-input');
             return Array.from(pinInputs).map(inp => inp.value).join('');
         }
 
-        /**
-         * Verifies a 4-digit venue PIN against active client access in Supabase
-         */
+        function toggleLoginMode() {
+            isAdminMode = !isAdminMode;
+            document.getElementById('pin-container').style.display = isAdminMode ? 'none' : 'flex';
+            document.getElementById('admin-container').style.display = isAdminMode ? 'flex' : 'none';
+            document.getElementById('login-subtitle').innerText = isAdminMode ? "Internal Staff Portal" : "Restricted Venue Access";
+            document.getElementById('toggle-login-btn').innerText = isAdminMode ? "Switch to Venue PIN Access" : "Switch to Internal Staff Login";
+            document.getElementById('login-status').innerText = ""; 
+        }
+
         async function attemptClientLogin() {
             const enteredPin = getEnteredPin();
             const statusEl = document.getElementById('login-status');
+            const pinInputs = document.querySelectorAll('.pin-input');
             
             statusEl.innerText = "Querying Live Database...";
             statusEl.style.color = "#facc15";
-
-            // Prevent typing while loading
             pinInputs.forEach(inp => inp.classList.add('opacity-50', 'pointer-events-none'));
 
-            try {
-                const currentTime = new Date().toISOString();
+            if(!supabaseClient) {
+                statusEl.innerText = "Database not connected.";
+                return;
+            }
 
-                // 📡 SUPABASE QUERY: Select an active event matching this PIN
-                const { data: venue, error } = await supabase
+            try {
+                // Perform Supabase Query on the client_access table
+                const currentTime = new Date().toISOString();
+                
+                const { data: venue, error } = await supabaseClient
                     .from('client_access')
                     .select('id, venue_name, expires_at')
                     .eq('pin', enteredPin)
                     .eq('is_active', true)
-                    .gt('expires_at', currentTime)
-                    .maybeSingle();
+                    .maybeSingle(); // Returns 1 row if matched, or null
 
                 pinInputs.forEach(inp => inp.classList.remove('opacity-50', 'pointer-events-none'));
 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
 
                 if (venue) {
-                    // Success! Save session info.
+                    // Success! Store PIN in memory and unlock limited apps
                     currentPin = enteredPin;
-                    localStorage.setItem("active_client_id", venue.id);
-                    localStorage.setItem("active_venue_name", venue.venue_name);
-                    
-                    // Clients only get access to specific production modules
-                    unlockApp(['vtx', 'vtz', 'vault']); 
+                    unlockApp(['vtx', 'vtz', 'vault']); // Clients get limited access
                 } else {
-                    // Fail State
+                    // Fail! No active PIN matched
                     statusEl.innerText = "Access Denied. Invalid or Expired PIN.";
                     statusEl.style.color = "#ef4444";
                     pinInputs.forEach(inp => inp.value = ''); 
@@ -368,27 +328,11 @@
 
             } catch (err) {
                 pinInputs.forEach(inp => inp.classList.remove('opacity-50', 'pointer-events-none'));
-                statusEl.innerText = "Database Connection Error.";
+                statusEl.innerText = "Database Error: " + err.message;
                 statusEl.style.color = "#ef4444";
-                console.error("Supabase Error:", err.message);
             }
         }
 
-        // --- ADMIN LOGIN LOGIC ---
-        let isAdminMode = false;
-        
-        function toggleLoginMode() {
-            isAdminMode = !isAdminMode;
-            document.getElementById('pin-container').style.display = isAdminMode ? 'none' : 'flex';
-            document.getElementById('admin-container').style.display = isAdminMode ? 'flex' : 'none';
-            document.getElementById('login-subtitle').innerText = isAdminMode ? "Internal Staff Portal" : "Restricted Venue Access";
-            document.getElementById('toggle-login-btn').innerText = isAdminMode ? "Switch to Venue PIN Access" : "Switch to Internal Staff Login";
-            document.getElementById('login-status').innerText = ""; // Clear errors
-        }
-
-        /**
-         * Verifies Staff credentials against Supabase Auth Engine
-         */
         async function attemptAdminLogin() {
             const email = document.getElementById('admin-email').value;
             const pass = document.getElementById('admin-pass').value;
@@ -403,29 +347,26 @@
             statusEl.style.color = "#facc15";
 
             try {
-                // 📡 SUPABASE AUTH: Validate User Credentials
-                const { data, error } = await supabase.auth.signInWithPassword({
+                // Talk to Supabase Native Auth instead of Google Sheets
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: pass
                 });
 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
 
                 if (data.session) {
-                    // Staff get access to the entire OS
+                    // Admin gets all apps
                     unlockApp(['ops', 'vtx', 'vtz', 'noiz', 'vault']);
                 }
 
             } catch (err) {
                 statusEl.innerText = err.message || "Access Denied.";
                 statusEl.style.color = "#ef4444";
-                console.error("Auth Error:", err);
             }
         }
 
-        // --- OS UNLOCK LOGIC ---
+        // --- OS ROUTING & NAVIGATION ---
         function unlockApp(allowedApps) {
             document.getElementById('login-wrapper').style.display = 'none';
             document.getElementById('os-sidebar').style.display = 'flex';
@@ -433,20 +374,15 @@
             document.body.style.alignItems = 'center';
             document.body.style.justifyContent = 'center';
 
-            // Hide nav items that the user doesn't have permission for
+            // Filter sidebar based on permissions array
             if (allowedApps) {
                 document.querySelectorAll('.sidebar-item').forEach(item => {
                     const appId = item.id.replace('nav-', '');
-                    if (allowedApps.includes(appId)) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
+                    item.style.display = allowedApps.includes(appId) ? 'flex' : 'none';
                 });
             }
         }
 
-        // --- OS ROUTING LOGIC ---
         function launchApp(appId) {
             if(currentActiveApp === appId) return;
             currentActiveApp = appId;
@@ -460,7 +396,6 @@
             var vault = document.getElementById('vault-core');
             var body = document.body;
 
-            // Manage Nav Active States
             document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
             if(document.getElementById('nav-' + appId)) {
                 document.getElementById('nav-' + appId).classList.add('active');
@@ -468,12 +403,9 @@
 
             splash.style.display = 'none';
             appView.style.display = 'flex';
-            
-            // Keep horizontally centered, but start from the top vertically
             body.style.alignItems = 'center';
             body.style.justifyContent = 'flex-start';
 
-            // Hide all apps first
             ops.style.display = 'none';
             vtx.style.display = 'none';
             vtz.style.display = 'none';
@@ -481,7 +413,6 @@
             vault.style.display = 'none';
             body.classList.remove('marketing-theme');
             
-            // Set dynamic theme colors based on app
             if (appId === 'ops') {
                 document.documentElement.style.setProperty('--theme-primary', '#10b981');
                 document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top center, #022c22 0%, #0a0a0a 60%)');
@@ -501,9 +432,6 @@
                 document.documentElement.style.setProperty('--theme-primary', '#facc15');
                 document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
                 vault.style.display = 'block';
-                if(typeof initPlaceholderGraph === 'function') {
-                    initPlaceholderGraph();
-                }
             }
         }
 
@@ -520,12 +448,10 @@
             document.documentElement.style.setProperty('--theme-primary', '#facc15');
             document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
             
-            // Return to dead center for the OS Launcher
             body.style.alignItems = 'center';
             body.style.justifyContent = 'center';
             currentActiveApp = null;
         }
-
     </script>
 </body>
 </html>
