@@ -252,7 +252,10 @@
         // 🔒 SUPABASE ENTERPRISE DATABASE INITIALIZATION
         // =========================================================================
         const SUPABASE_URL = "https://neubhkdyxkidegndrpow.supabase.co"; 
-        const SUPABASE_ANON_KEY = "sb_publishable_twN5jze3Q3GogLjmWxVGGg_xSqOvKpT";
+        
+        // ⚠️ SAFE KEY: This is your 'anon' public key. (Ends in ...PsheCOE)
+        // NEVER put the 'service_role' key here!
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldWJoa2R5eGtpZGVnbmRycG93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjU5NzYsImV4cCI6MjA5OTU0MTk3Nn0.9s645EtQQptWQOOa5SJcF-MtJW_37pvnDxq-PsheCOE";
 
         // Create the global database connection object
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
