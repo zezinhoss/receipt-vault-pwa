@@ -54,7 +54,7 @@
         p { color:#888; font-size:13px; font-weight:300; margin-bottom:25px; }
         
         .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
-        .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color: var(--theme-primary); font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; font-family:'Nunito', sans-serif; }
+        .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color: var(--theme-primary); font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; font-family:'Nunito', sans-serif; -webkit-text-security: disc; }
         .pin-box:focus { border-color: var(--theme-primary); box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
         .marketing-theme .pin-box:focus { box-shadow:0 0 15px rgba(192, 132, 252, 0.2); }
 
@@ -130,10 +130,10 @@
             
             <!-- CLIENT PIN PAD -->
             <div class="pin-container" id="pin-container">
-                <input type="password" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off">
-                <input type="password" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off">
-                <input type="password" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off">
-                <input type="password" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off">
+                <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
+                <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
+                <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
+                <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
             </div>
 
             <!-- ADMIN EMAIL/PASS (Hidden by default) -->
@@ -271,7 +271,8 @@
                 console.error("Error initializing Supabase:", err);
             }
 
-            // Focus the first box on load
+            // Force clear any browser autofill garbage and focus first box
+            pinInputs.forEach(inp => inp.value = '');
             if(pinInputs.length > 0) pinInputs[0].focus();
         };
 
