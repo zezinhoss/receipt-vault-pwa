@@ -19,6 +19,7 @@
     
     <style>
         :root {
+            color-scheme: dark;
             --bg-base: #030303;
             --bg-gradient: radial-gradient(circle at top center, #111827 0%, #030303 100%);
             --panel-bg: rgba(15, 15, 20, 0.6);
@@ -36,6 +37,16 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
         .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Hide number input arrows */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
 
         .glass-panel { background: var(--panel-bg); border: 1px solid var(--border-color); backdrop-filter: blur(24px); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         
@@ -163,7 +174,7 @@
         <div id="asset-workspace" class="hidden grid-cols-1 md:grid-cols-2 gap-8 animate-[fadeIn_0.4s_ease]">
             <div class="glass-panel p-6">
                 <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wide">Project Notepad</h3>
-                <textarea class="hq-input h-[300px] resize-y" id="project-notepad" oninput="saveNotepad()" placeholder="Paste Drive links, instructions, and master cues here..."></textarea>
+                <textarea class="hq-input h-[120px] resize-y" id="project-notepad" oninput="saveNotepad()" placeholder="Paste Drive links, instructions, and master cues here..."></textarea>
             </div>
             
             <div class="glass-panel p-6">
@@ -619,18 +630,33 @@
                             </div>
                             
                             <div class="flex items-center gap-2">
-                                <button class="hq-btn-outline text-[10px] px-2 py-1 h-8" id="aspect-btn-${id}" onclick="toggleAspect(${id})">${aspect}</button>
+                                <button class="hq-btn-outline text-[10px] px-3 py-1.5" id="aspect-btn-${id}" onclick="toggleAspect(${id})">${aspect}</button>
                                 
                                 <div class="relative group">
-                                    <select class="hq-input w-32 h-8 text-[10px] cursor-pointer" id="res-select-${id}" onchange="handleResChange(this, ${id})">
+                                    <select class="hq-input w-32 py-1.5 px-3 text-[10px] cursor-pointer" id="res-select-${id}" onchange="handleResChange(this, ${id})">
                                         <option value="1920x1080" ${res==='1920x1080'?'selected':''}>1080p</option>
-                                        <option value="720x1080" ${res==='720x1080'?'selected':''}>720x1080</option>
-                                        <option value="1080x1920" ${res==='1080x1920'?'selected':''}>1080x1920</option>
-                                        <option value="3840x2160" ${res==='3840x2160'?'selected':''}>4K UHD</option>
-                                        <option value="${res}" class="custom-val-opt" style="display:${!['1920x1080','720x1080','1080x1920','3840x2160'].includes(res) ? 'block' : 'none'};" ${!['1920x1080','720x1080','1080x1920','3840x2160'].includes(res) ? 'selected' : ''}>${res}</option>
-                                        <option value="Custom">Custom...</option>
-                                    </select>
-                                </div>
+    <!-- CUSTOM RESOLUTION MODAL -->
+    <div class="modal-overlay" id="custom-res-modal">
+        <div class="modal-box max-w-sm text-center">
+            <h3 class="text-sm font-bold text-yellow-400 mb-2 uppercase tracking-wide">Custom Resolution</h3>
+            <p class="text-xs text-slate-400 mb-5">Enter LED processor canvas dimensions</p>
+            <div class="flex items-center justify-center gap-2 mb-6">
+                <div class="relative">
+                    <input type="number" id="res-w" class="hq-input w-24 text-center pr-6 text-sm" placeholder="1920">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold">px</span>
+                </div>
+                <span class="text-slate-500 font-bold mx-2">×</span>
+                <div class="relative">
+                    <input type="number" id="res-h" class="hq-input w-24 text-center pr-6 text-sm" placeholder="1080">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold">px</span>
+                </div>
+            </div>
+            <div class="flex gap-3 justify-center">
+                <button class="hq-btn-outline" onclick="cancelCustomRes()">Cancel</button>
+                <button class="hq-btn" onclick="saveCustomRes()">Set Canvas</button>
+            </div>
+        </div>
+    </div>
                             </div>
 
                             <div class="flex items-center gap-2">
