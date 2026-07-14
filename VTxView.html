@@ -42,7 +42,15 @@
         .hq-input { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); color: #f8fafc; padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; width: 100%; border-radius: 6px; transition: all 0.3s ease; }
         .hq-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.8); }
 
-        select.hq-input { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23facc15' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; padding-right: 32px; }
+        /* OS HQ Dropdown Styling */
+        select.hq-input, select.table-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23facc15' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
 
         .hq-btn { background: var(--accent); color: #000; border: 1px solid transparent; padding: 8px 16px; font-weight: 800; cursor: pointer; border-radius: 6px; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
         .hq-btn:hover { background: var(--accent-hover); box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4); }
@@ -84,7 +92,7 @@
 
     <div class="toast" id="sys-toast">ACTION COMPLETED</div>
     
-    <input type="file" id="hidden-file-browser" style="display:none" onchange="handleFileSelect(this)">
+    <input type="file" id="hidden-file-browser" class="hidden" onchange="handleFileSelect(this)">
 
     <!-- LAUNCHER SCREEN -->
     <div id="launcher-screen" class="flex flex-col items-center justify-center min-h-[80vh] w-full px-5">
@@ -105,7 +113,8 @@
             <rect x="264" y="52" width="26" height="46" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
         </svg>
 
-        <h1 class="text-4xl font-extrabold tracking-[0.2em] text-white uppercase text-center">VTx</h1>
+        <!-- No uppercase override on VTx -->
+        <h1 class="text-4xl font-extrabold tracking-[0.2em] text-white text-center">VTx</h1>
         <div class="text-[10px] font-bold text-yellow-400 tracking-widest uppercase mt-2 text-center">Fleet Scheduler & Control</div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mt-12">
@@ -130,7 +139,8 @@
         <!-- Header -->
         <div class="flex justify-between items-end border-b border-white/10 pb-5">
             <div>
-                <h1 class="text-3xl font-extrabold text-white tracking-wide uppercase">VTx</h1>
+                <!-- No uppercase override on VTx -->
+                <h1 class="text-3xl font-extrabold text-white tracking-wide">VTx</h1>
                 <div class="flex gap-4 mt-4">
                     <button class="hq-btn-outline" onclick="goToLauncher()">HOME</button>
                     <span class="text-white/20">|</span>
@@ -140,10 +150,12 @@
                 <div class="text-[10px] font-bold mono mt-3 text-yellow-400 uppercase tracking-widest" id="active-proj-title">PROJECT_NAME</div>
             </div>
             <div class="text-right pb-2">
-                <div class="flex items-center justify-end gap-2 text-[10px] font-bold text-emerald-500 uppercase mb-2 tracking-widest">
+                <!-- Live Sync Red Text & Green Dot -->
+                <div class="flex items-center justify-end gap-2 text-[10px] font-bold text-red-500 uppercase mb-2 tracking-widest">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span> Live Sync...
                 </div>
-                <div class="mono text-2xl font-bold text-white tracking-widest" id="master-clock">00:00:00</div>
+                <!-- Tight tracking on clock -->
+                <div class="mono text-2xl font-bold text-white tracking-normal" id="master-clock">00:00:00</div>
             </div>
         </div>
 
@@ -317,7 +329,7 @@
             loadDBFromStorage();
             refreshLauncherDropdown();
 
-            // Initialize Premium Flatpickr[cite: 5]
+            // Initialize Premium Flatpickr
             flatpickr("#flatpickr-add", {
                 onChange: function(selectedDates, dateStr) { addMasterDate(dateStr); }
             });
@@ -441,7 +453,7 @@
             else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
         }
 
-        /* --- Supabase Storage & Spreadsheet Parsing[cite: 5] --- */
+        /* --- Supabase Storage & Spreadsheet Parsing --- */
         async function stageMediaFiles(input) {
             const files = input.files;
             if(files.length === 0) return;
@@ -745,7 +757,7 @@
 
             row.innerHTML = `
                 <td class="px-2 py-1 border-b border-white/5"><input type="text" class="table-input" name="time-${index}" value="${time}" placeholder="HH:MM:SS" oninput="checkAutoAddRow(this, ${tvId}); autoSave()"></td>
-                <td class="px-2 py-1 border-b border-white/5"><select class="table-input custom-select" name="type-${index}" onchange="changeType(${tvId}, ${index}, this.value, this); autoSave()"><option value="url" ${type==='url'?'selected':''}>URL</option><option value="image" ${type==='image'?'selected':''}>IMG</option><option value="video" ${type==='video'?'selected':''}>VID</option></select></td>
+                <td class="px-2 py-1 border-b border-white/5"><select class="table-input hq-input bg-transparent border-transparent hover:border-white/10 focus:bg-black/50 py-1 px-2 text-xs" name="type-${index}" onchange="changeType(${tvId}, ${index}, this.value, this); autoSave()"><option value="url" ${type==='url'?'selected':''}>URL</option><option value="image" ${type==='image'?'selected':''}>IMG</option><option value="video" ${type==='video'?'selected':''}>VID</option></select></td>
                 <td class="px-2 py-1 border-b border-white/5" id="source-td-${tvId}-${index}">${sourceHtml}</td>
                 <td class="px-2 py-1 border-b border-white/5 text-center"><button type="button" class="text-slate-500 hover:text-red-500 text-lg transition" onclick="removeRow(this, ${tvId})">×</button></td>
             `;
@@ -771,7 +783,7 @@
 
         function openBrowser(tvId, index) { uploadTarget = { tvId, index }; document.getElementById('hidden-file-browser').click(); }
 
-        /* --- Direct Supabase Cloud Storage Interaction[cite: 5] --- */
+        /* --- Direct Supabase Cloud Storage Interaction --- */
         async function handleFileSelect(input) {
             if(!input.files[0]) return;
             const file = input.files[0]; const filename = file.name;
