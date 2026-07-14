@@ -7,14 +7,15 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- 🔌 LOAD SPREADSHEET PARSER & SUPABASE -->
+    <!-- 🔌 LOAD LIBRARIES -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- 🔌 LOAD FLATPICKR (Dark Theme) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <!-- Flatpickr (Premium Calendar) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    
+
     <style>
         /* FINTECH / TERMINAL THEME */
         :root { 
@@ -32,7 +33,6 @@
             --override-blue: #0ea5e9;
             --font-ui: 'Inter', sans-serif;
             --font-data: 'JetBrains Mono', monospace;
-            color-scheme: dark; /* Forces Windows to use dark context menus */
         }
 
         body { 
@@ -59,9 +59,35 @@
         .text-right { text-align: right; }
         .data-font { font-family: var(--font-data); }
 
-        .fintech-panel { background: var(--bg-panel); border: 1px solid var(--border-thin); padding: 24px; box-sizing: border-box; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border-radius: 4px; }
+        /* SVG ANIMATIONS */
+        .hub-anim { width: 300px; height: 150px; margin-bottom: 20px; }
+        .hub-core { fill: var(--bg-deep); stroke: var(--accent); stroke-width: 2; animation: pulseCore 2s infinite; }
+        .hub-line { stroke: var(--border-accent); stroke-width: 1.5; stroke-dasharray: 4; animation: flowData 20s linear infinite; }
+        .hub-screen { fill: transparent; stroke: var(--text-primary); stroke-width: 1.5; }
+        @keyframes pulseCore { 0% { filter: drop-shadow(0 0 2px var(--accent)); } 50% { filter: drop-shadow(0 0 15px var(--accent)); } 100% { filter: drop-shadow(0 0 2px var(--accent)); } }
+        @keyframes flowData { to { stroke-dashoffset: -1000; } }
+        @keyframes scrollUpSVG { 0% { transform: translateY(0); } 100% { transform: translateY(-92px); } }
+        @keyframes scrollDownSVG { 0% { transform: translateY(-92px); } 100% { transform: translateY(0); } }
+        .anim-up { animation: scrollUpSVG 10s linear infinite; }
+        .anim-down { animation: scrollDownSVG 12s linear infinite; }
+        .anim-up-fast { animation: scrollUpSVG 8s linear infinite; }
 
-        .btn-fintech { font-family: var(--font-ui); background: transparent; color: var(--text-primary); border: 1px solid var(--border-thin); padding: 6px 12px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        /* Crisp, sharp panels */
+        .fintech-panel { 
+            background: var(--bg-panel); 
+            border: 1px solid var(--border-thin); 
+            padding: 24px; box-sizing: border-box; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+            border-radius: 4px;
+        }
+
+        /* Minimalist Buttons */
+        .btn-fintech { 
+            font-family: var(--font-ui); background: transparent; color: var(--text-primary); 
+            border: 1px solid var(--border-thin); padding: 6px 12px; cursor: pointer; 
+            font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; 
+            transition: all 0.2s ease; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;
+        }
         .btn-fintech:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.3); color: #fff;}
         .btn-fintech.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
         
@@ -74,11 +100,19 @@
         .btn-override { color: var(--override-blue); border-color: rgba(14, 165, 233, 0.3); background: rgba(14, 165, 233, 0.05); }
         .btn-override:hover { background: var(--override-blue); color: #000; border-color: var(--override-blue); box-shadow: 0 0 10px rgba(14, 165, 233, 0.3); }
 
-        .btn-icon { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 2px 6px; transition: 0.2s; border-radius: 3px; }
+        .btn-icon { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 2px 6px; transition: 0.2s; border-radius: 3px; display:flex; align-items:center; justify-content:center; }
         .btn-icon:hover { color: #fff; background: rgba(255,255,255,0.05); }
         .btn-icon.text-red:hover { color: var(--alert-red); background: rgba(239, 68, 68, 0.1); }
 
-        /* Inputs & Native Dark Mode */
+        /* Custom Dropdown for Canvas Resolution */
+        .custom-dd { position: relative; display: inline-block; }
+        .custom-dd-content { display: none; position: absolute; background: var(--bg-panel); border: 1px solid var(--border-thin); min-width: 120px; box-shadow: 0px 8px 16px rgba(0,0,0,0.8); z-index: 100; border-radius: 3px; top: 100%; left: 0; margin-top: 4px; overflow: hidden; }
+        .custom-dd-content a { color: var(--text-primary); padding: 8px 12px; text-decoration: none; display: block; font-family: var(--font-data); font-size: 11px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.02);}
+        .custom-dd-content a:last-child { border-bottom: none; }
+        .custom-dd-content a:hover { background: rgba(255,255,255,0.05); color: #fff; border-left: 2px solid var(--accent); padding-left: 10px;}
+        .show-dd { display: block; }
+
+        /* Inputs */
         .as-input, .as-select { 
             background: var(--bg-surface); border: 1px solid var(--border-thin); color: #fff; 
             padding: 8px 12px; font-family: var(--font-data); font-size: 12px; outline: none; width: 100%; 
@@ -86,19 +120,6 @@
         }
         .as-input:focus, .as-select:focus { border-color: var(--border-accent); }
         .as-select option { background: var(--bg-surface); color: #fff; }
-
-        /* OS HQ SVG Dropdown Chevron */
-        select.as-select {
-            appearance: none; -webkit-appearance: none; -moz-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23facc15' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat; background-position: right 8px center; background-size: 14px;
-            padding-right: 30px;
-        }
-
-        /* Remove arrows from number inputs */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
 
         /* Structural Layouts */
         #launcher-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100%; padding: 20px; box-sizing: border-box; animation: fadeIn 0.5s ease; }
@@ -108,52 +129,71 @@
         .header-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border-thin); padding-bottom: 15px; }
         .local-clock { font-family: var(--font-data); font-size: 20px; font-weight: 400; color: #fff; letter-spacing: 2px; }
         
+        /* Node Grid & Cards */
         .node-grid { display: flex; flex-direction: column; gap: 16px; }
         .node-card { border: 1px solid var(--border-thin); background: var(--bg-panel); display: flex; flex-direction: column; border-radius: 4px; transition: border-color 0.3s; }
         .node-card:hover { border-color: rgba(255,255,255,0.2); }
         
-        .node-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-thin); background: var(--bg-surface); border-radius: 4px 4px 0 0; flex-wrap: wrap; gap: 10px; }
+        .node-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 16px; border-bottom: 1px solid var(--border-thin); 
+            background: var(--bg-surface); border-radius: 4px 4px 0 0; flex-wrap: wrap; gap: 10px;
+        }
         .nh-section { display: flex; align-items: center; gap: 10px; }
         
-        .node-title-input { background: transparent; border: none; color: var(--accent); font-family: var(--font-data); font-size: 14px; font-weight: 700; outline: none; width: 120px; border-bottom: 1px solid transparent; transition: 0.2s; padding: 2px 0; }
+        .node-title-input { 
+            background: transparent; border: none; color: var(--accent); font-family: var(--font-data); 
+            font-size: 14px; font-weight: 700; outline: none; width: 120px; 
+            border-bottom: 1px solid transparent; transition: 0.2s; padding: 2px 0;
+        }
         .node-title-input:focus { border-bottom-color: var(--accent); }
 
         .node-body { transition: all 0.3s ease; overflow: hidden; }
         .node-body.collapsed { display: none; }
 
+        /* Tables */
         .data-table-wrap { max-height: 400px; overflow-y: auto; padding: 0; background: var(--bg-deep); }
         table { width: 100%; border-collapse: collapse; }
-        th { position: sticky; top: 0; background: #000; text-align: left; font-family: var(--font-ui); font-size: 10px; color: var(--text-muted); padding: 10px 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-thin); z-index: 10; }
+        th { 
+            position: sticky; top: 0; background: #000; text-align: left; 
+            font-family: var(--font-ui); font-size: 10px; color: var(--text-muted); 
+            padding: 10px 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; 
+            border-bottom: 1px solid var(--border-thin); z-index: 10; 
+        }
         td { padding: 6px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); }
 
-        .table-input { background: transparent; border: 1px solid transparent; color: #fff; padding: 6px 8px; font-family: var(--font-data); font-size: 12px; outline: none; width: 100%; box-sizing: border-box; transition: 0.2s; border-radius: 3px; }
+        .table-input { 
+            background: transparent; border: 1px solid transparent; color: #fff; 
+            padding: 6px 8px; font-family: var(--font-data); font-size: 12px; outline: none; 
+            width: 100%; box-sizing: border-box; transition: 0.2s; border-radius: 3px;
+        }
         .table-input:hover { border-color: rgba(255,255,255,0.1); }
         .table-input:focus { border-color: var(--accent); background: var(--bg-surface); }
         
-        .upload-btn { background: transparent; border: 1px dashed rgba(255,255,255,0.2); color: var(--text-muted); padding: 6px; width: 100%; cursor: pointer; font-size: 10px; font-family: var(--font-data); text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; border-radius: 3px; }
+        .upload-btn { 
+            background: transparent; border: 1px dashed rgba(255,255,255,0.2); color: var(--text-muted); 
+            padding: 6px; width: 100%; cursor: pointer; font-size: 10px; font-family: var(--font-data); 
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; border-radius: 3px; 
+        }
         .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
         .upload-btn.ready { border-style: solid; border-color: rgba(255,255,255,0.1); color: #fff; background: var(--bg-surface); }
 
+        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-box { background: var(--bg-panel); border: 1px solid var(--border-thin); width: 100%; max-width: 500px; padding: 24px; box-sizing: border-box; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);}
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-thin); padding-bottom: 12px; margin-bottom: 16px; }
         .modal-title { font-size: 14px; color: #fff; letter-spacing: 1px; margin:0; display:flex; align-items:center; gap:8px;}
+        
         .preview-box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid var(--border-thin); border-radius: 4px; display: flex; justify-content: center; align-items: center; margin-bottom: 16px; overflow: hidden; position: relative;}
         .preview-box img, .preview-box video { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
-        .preview-placeholder { font-family: var(--font-data); font-size: 12px; color: var(--text-muted); }
+        .preview-placeholder { font-family: var(--font-data); font-size: 12px; color: var(--text-muted); text-align: center; padding: 20px;}
         
         .custom-checkbox { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; color:#fff; user-select: none; font-family: var(--font-data);}
         .custom-checkbox input { accent-color: var(--alert-red); width: 14px; height: 14px; margin:0;}
 
         .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 20px; font-family: var(--font-data); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: none; z-index: 2000; border-radius: 3px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         
-        @keyframes pulseDot { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
-        @keyframes flowData { to { stroke-dashoffset: -1000; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; border-left: 1px solid var(--border-thin); }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 0;}
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
     </style>
 </head>
 <body onload="initApp()">
@@ -162,25 +202,41 @@
     <div class="toast" id="sys-toast">ACTION COMPLETED</div>
     
     <input type="file" id="hidden-file-browser" style="display:none" onchange="handleFileSelect(this)">
+    
+    <!-- Flatpickr inputs (Hidden, triggered by buttons) -->
     <input type="text" id="master-calendar" style="display:none;">
     <input type="text" id="copy-target-calendar" style="display:none;">
 
     <!-- LAUNCHER -->
     <div id="launcher-screen">
-        <!-- Animated Flow Map -->
-        <svg style="width: 250px; height: 120px; margin-bottom: 20px;" viewBox="0 0 300 150">
+        <svg class="hub-anim" viewBox="0 0 300 150">
             <defs>
                 <clipPath id="screenClip1"><rect x="10" y="10" width="26" height="46" rx="2" /></clipPath>
                 <clipPath id="screenClip2"><rect x="10" y="94" width="26" height="46" rx="2" /></clipPath>
                 <clipPath id="screenClip3"><rect x="264" y="52" width="26" height="46" rx="2" /></clipPath>
             </defs>
-            <path d="M150,75 L36,33" stroke="rgba(250,204,21,0.5)" stroke-width="2" style="stroke-dasharray: 6; animation: flowData 15s linear infinite;" fill="none" />
-            <path d="M150,75 L36,117" stroke="rgba(250,204,21,0.5)" stroke-width="2" style="stroke-dasharray: 6; animation: flowData 15s linear infinite;" fill="none" />
-            <path d="M150,75 L264,75" stroke="rgba(250,204,21,0.5)" stroke-width="2" style="stroke-dasharray: 6; animation: flowData 15s linear infinite;" fill="none" />
-            <circle cx="150" cy="75" r="10" fill="#050505" stroke="#facc15" stroke-width="2" style="filter: drop-shadow(0 0 8px rgba(250,204,21,0.8));" />
-            <rect x="10" y="10" width="26" height="46" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
-            <rect x="10" y="94" width="26" height="46" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
-            <rect x="264" y="52" width="26" height="46" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
+            <path d="M150,75 L36,33" class="hub-line" />
+            <path d="M150,75 L36,117" class="hub-line" />
+            <path d="M150,75 L264,75" class="hub-line" />
+            <circle cx="150" cy="75" r="12" class="hub-core" />
+            <g clip-path="url(#screenClip1)"><g class="anim-up">
+                <image href="https://placehold.co/104x184/581c87/fff?text=DATA" x="10" y="10" width="26" height="46" />
+                <image href="https://placehold.co/104x184/1d4ed8/fff?text=POLL" x="10" y="56" width="26" height="46" />
+                <image href="https://placehold.co/104x184/581c87/fff?text=DATA" x="10" y="102" width="26" height="46" />
+            </g></g>
+            <rect x="10" y="10" width="26" height="46" rx="2" class="hub-screen" />
+            <g clip-path="url(#screenClip2)"><g class="anim-down">
+                <image href="https://placehold.co/104x184/0f172a/2dd4bf?text=MAP" x="10" y="94" width="26" height="46" />
+                <image href="https://placehold.co/104x184/3b82f6/fff?text=TALK" x="10" y="140" width="26" height="46" />
+                <image href="https://placehold.co/104x184/0f172a/2dd4bf?text=MAP" x="10" y="186" width="26" height="46" />
+            </g></g>
+            <rect x="10" y="94" width="26" height="46" rx="2" class="hub-screen" />
+            <g clip-path="url(#screenClip3)"><g class="anim-up-fast">
+                <image href="https://placehold.co/104x184/000/22c55e?text=LIVE" x="264" y="52" width="26" height="46" />
+                <image href="https://placehold.co/104x184/581c87/facc15?text=QUIZ" x="264" y="98" width="26" height="46" />
+                <image href="https://placehold.co/104x184/000/22c55e?text=LIVE" x="264" y="144" width="26" height="46" />
+            </g></g>
+            <rect x="264" y="52" width="26" height="46" rx="2" class="hub-screen" />
         </svg>
 
         <h1 style="font-size: 32px; letter-spacing: 4px; text-align: center; color: #fff;">VTx</h1>
@@ -195,7 +251,7 @@
             
             <div class="fintech-panel">
                 <h3 style="margin-bottom: 15px; font-size: 13px;">Saved Projects</h3>
-                <select id="load-proj-select" class="as-select" style="margin-bottom: 15px; padding-right:10px;">
+                <select id="load-proj-select" class="as-select" style="margin-bottom: 15px;">
                     <option value="">No saved projects...</option>
                 </select>
                 <button class="btn-fintech" style="width: 100%; padding: 10px;" onclick="loadSelectedProject()">Load Setup</button>
@@ -207,9 +263,9 @@
     <div id="dashboard-screen">
         <div class="header-bar">
             <div>
-                <div class="text-micro" style="margin-bottom: 12px; display:flex; align-items:center; gap:6px; color: var(--alert-red);">
-                    <span style="width:6px; height:6px; background:var(--live-green); border-radius:50%; display:inline-block; animation: pulseDot 2s infinite;"></span> 
-                    LIVE SYNC...
+                <div class="text-micro" style="margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
+                    <span style="width:6px; height:6px; background:var(--live-green); border-radius:50%; display:inline-block; box-shadow: 0 0 8px var(--live-green);"></span> 
+                    CLOUD SYNC ONLINE
                 </div>
                 <div style="display:flex; align-items:center; gap: 15px; flex-wrap: wrap;">
                     <button class="btn-fintech" onclick="goToLauncher()">[ HOME ]</button>
@@ -221,6 +277,10 @@
                 <div class="text-micro data-font" style="margin-top: 8px; color:var(--accent);" id="active-proj-title">PROJECT_NAME</div>
             </div>
             <div class="text-right">
+                <div class="text-micro text-accent" style="margin-bottom: 4px; display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                    <span style="width:6px; height:6px; background:var(--live-green); border-radius:50%; display:inline-block; box-shadow: 0 0 8px var(--live-green); animation: pulseCore 2s infinite;"></span>
+                    LIVE SYNC...
+                </div>
                 <div class="local-clock" id="master-clock">00:00:00</div>
             </div>
         </div>
@@ -230,7 +290,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="fintech-panel">
                     <h3 style="font-size:13px; margin-bottom: 15px;">Project Notepad</h3>
-                    <textarea class="as-input" id="project-notepad" style="height: 120px; resize: vertical;" oninput="saveNotepad()" placeholder="Paste Drive links, instructions, and master cues here..."></textarea>
+                    <textarea class="as-input" id="project-notepad" style="height: 300px; resize: vertical;" oninput="saveNotepad()" placeholder="Paste Drive links, instructions, and master cues here..."></textarea>
                 </div>
                 
                 <div class="fintech-panel">
@@ -269,8 +329,9 @@
                     <div id="master-date-tabs" style="display:flex; gap:8px;"></div>
                 </div>
                 <div style="display: flex; gap: 12px;">
+                    <!-- Flatpickr Buttons -->
                     <button class="btn-fintech" id="btn-add-date">+ Add Date</button>
-                    <button class="btn-fintech" id="btn-dup-date">Duplicate Day</button>
+                    <button class="btn-fintech" id="btn-copy-date">Duplicate Day</button>
                     <button class="btn-fintech" onclick="addNewNode()">+ Add Node</button>
                 </div>
             </div>
@@ -284,7 +345,7 @@
     <div class="modal-overlay" id="override-modal">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 class="modal-title"><span style="color:var(--override-blue);">●</span> LIVE OVERRIDE - <span id="override-node-label" class="data-font text-accent">NODE_XX</span></h3>
+                <h3 class="modal-title"><span style="color:var(--override-blue);">●</span> LIVE OVERRIDE - <span id="override-node-label" class="data-font">NODE_XX</span></h3>
                 <button class="btn-icon" onclick="closeOverrideModal()">×</button>
             </div>
             
@@ -319,39 +380,34 @@
         </div>
     </div>
 
-    <!-- CUSTOM RESOLUTION MODAL -->
-    <div class="modal-overlay" id="custom-res-modal">
-        <div class="modal-box" style="max-width: 320px; text-align: center;">
-            <h3 style="font-size: 14px; color: var(--accent); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase;">Custom Resolution</h3>
-            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 20px;">Enter canvas dimensions</p>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px;">
-                <input type="number" id="res-w" class="as-input" style="width: 70px; text-align: center;" placeholder="1920">
-                <span style="color: var(--text-muted); font-weight: 700; font-size: 12px;">px</span>
-                <span style="color: var(--text-muted); font-weight: 700; margin: 0 4px;">×</span>
-                <input type="number" id="res-h" class="as-input" style="width: 70px; text-align: center;" placeholder="1080">
-                <span style="color: var(--text-muted); font-weight: 700; font-size: 12px;">px</span>
+    <!-- NODE PREVIEW MODAL -->
+    <div class="modal-overlay" id="node-preview-modal">
+        <div class="modal-box" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><span style="color:var(--accent);">●</span> ACTIVE TIMELINE - <span id="np-node-label" class="data-font">NODE_XX</span></h3>
+                <button class="btn-icon" onclick="document.getElementById('node-preview-modal').style.display='none'">×</button>
             </div>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="btn-fintech" onclick="cancelCustomRes()">Cancel</button>
-                <button class="btn-fintech btn-action" onclick="saveCustomRes()">Set Canvas</button>
+            <div class="text-micro" style="margin-bottom: 10px; text-align: left;" id="np-time-label">Current Cue: 08:00:00</div>
+            <div class="preview-box" style="aspect-ratio: 16/9;" id="np-preview-container">
+                <span class="preview-placeholder" id="np-placeholder">Calculating Timeline Status...</span>
             </div>
         </div>
     </div>
 
-    <!-- PREVIEW MODAL -->
-    <div class="modal-overlay" id="preview-modal">
-        <div class="modal-box">
+    <!-- CUSTOM RESOLUTION MODAL -->
+    <div class="modal-overlay" id="custom-res-modal">
+        <div class="modal-box" style="max-width: 300px;">
             <div class="modal-header">
-                <h3 class="modal-title"><span style="color:var(--live-green);">●</span> ACTIVE PREVIEW - <span id="preview-node-label" class="data-font text-accent">NODE_XX</span></h3>
-                <button class="btn-icon" onclick="closePreviewModal()">×</button>
+                <h3 class="modal-title">Custom Canvas Size</h3>
+                <button class="btn-icon" onclick="document.getElementById('custom-res-modal').style.display='none'">×</button>
             </div>
-            <div class="preview-box" style="margin-bottom: 12px;">
-                <span id="preview-content-placeholder" class="preview-placeholder data-font text-accent">Calculating schedule...</span>
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <input type="number" id="res-width" class="as-input" placeholder="Width (px)" value="3328">
+                <span style="display:flex; align-items:center; color:var(--text-muted);">×</span>
+                <input type="number" id="res-height" class="as-input" placeholder="Height (px)" value="1024">
             </div>
-            <div style="text-align: center;">
-                <span class="text-micro">Current Cue: </span>
-                <span id="preview-time-label" class="data-font text-accent" style="font-size: 12px;">--:--:--</span>
-            </div>
+            <input type="hidden" id="res-target-node">
+            <button class="btn-fintech btn-action" style="width: 100%; padding: 10px;" onclick="applyCustomResolution()">Apply Configuration</button>
         </div>
     </div>
 
@@ -378,7 +434,8 @@
         let activeDate = null;
         let uploadTarget = { tvId: null, index: null };
         let confirmAction = null;
-        let customResTargetNode = null;
+        
+        let addDateFp, copyDateFp; // Flatpickr instances
 
         const defaultSchedule = [
             {"time": "08:00:00", "type": "image", "value": ""},
@@ -386,21 +443,57 @@
         ];
 
         function initApp() {
-            if (window.supabase) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            startClock(); loadDBFromStorage(); refreshLauncherDropdown();
-            
-            // Initialize Flatpickr
-            flatpickr("#master-calendar", { onChange: function(s, dateStr) { addMasterDate(dateStr); } });
-            flatpickr("#copy-target-calendar", { onChange: function(s, dateStr) { executeCopyDay(dateStr); } });
-            
-            document.getElementById('btn-add-date').onclick = () => document.getElementById('master-calendar')._flatpickr.open();
-            document.getElementById('btn-dup-date').onclick = () => document.getElementById('copy-target-calendar')._flatpickr.open();
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+            startClock();
+            loadDBFromStorage();
+            refreshLauncherDropdown();
+            initFlatpickr();
         }
 
-        function loadDBFromStorage() { const saved = localStorage.getItem('vtx_db_v10'); if (saved) { try { db = JSON.parse(saved); } catch(e) { db = { projects: {} }; } } }
-        function saveDB() { if (activeProjId) saveCurrentUIToData(); localStorage.setItem('vtx_db_v10', JSON.stringify(db)); }
-        function startClock() { setInterval(() => { let d = new Date(); document.getElementById('master-clock').innerText = d.toTimeString().split(' ')[0]; }, 1000); }
-        function showToast(msg) { const t = document.getElementById('sys-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
+        function initFlatpickr() {
+            addDateFp = flatpickr("#master-calendar", {
+                theme: "dark",
+                onChange: function(selectedDates, dateStr, instance) {
+                    addMasterDate(dateStr);
+                }
+            });
+            
+            copyDateFp = flatpickr("#copy-target-calendar", {
+                theme: "dark",
+                onChange: function(selectedDates, dateStr, instance) {
+                    executeCopyDay(dateStr);
+                }
+            });
+
+            document.getElementById('btn-add-date').onclick = () => addDateFp.open();
+            document.getElementById('btn-copy-date').onclick = () => copyDateFp.open();
+        }
+
+        function loadDBFromStorage() {
+            const saved = localStorage.getItem('vtx_db_v9');
+            if (saved) { try { db = JSON.parse(saved); } catch(e) { db = { projects: {} }; } }
+        }
+
+        function saveDB() {
+            if (activeProjId) saveCurrentUIToData();
+            localStorage.setItem('vtx_db_v9', JSON.stringify(db));
+        }
+
+        function startClock() { 
+            setInterval(() => { 
+                let d = new Date();
+                document.getElementById('master-clock').innerText = d.toTimeString().split(' ')[0];
+            }, 1000); 
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('sys-toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        }
 
         function showConfirm(title, desc, action) {
             document.getElementById('confirm-title').innerText = title;
@@ -408,8 +501,26 @@
             confirmAction = action;
             document.getElementById('confirm-modal').style.display = 'flex';
         }
-        document.getElementById('confirm-btn').onclick = () => { if(confirmAction) confirmAction(); document.getElementById('confirm-modal').style.display = 'none'; };
+        document.getElementById('confirm-btn').onclick = () => {
+            if(confirmAction) confirmAction();
+            document.getElementById('confirm-modal').style.display = 'none';
+        };
 
+        // UI Toggles
+        document.addEventListener('click', function(e) {
+            if (!e.target.matches('.drop-btn')) {
+                const dropdowns = document.getElementsByClassName("custom-dd-content");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].classList.remove('show-dd');
+                }
+            }
+        });
+
+        function toggleCustomDropdown(id) {
+            document.getElementById(`dd-content-${id}`).classList.toggle("show-dd");
+        }
+
+        /* --- STREAMING_CHUNK: Workspace Routing & Project Management --- */
         function switchWorkspace(mode) {
             document.getElementById('fleet-workspace').style.display = 'none';
             document.getElementById('asset-workspace').style.display = 'none';
@@ -422,52 +533,82 @@
             } else if(mode === 'assets') {
                 document.getElementById('asset-workspace').style.display = 'block';
                 document.getElementById('tab-assets').classList.add('active');
-                if(activeProjId) { document.getElementById('project-notepad').value = db.projects[activeProjId].notepad || ""; renderStagedMedia(); }
+                if(activeProjId) {
+                    document.getElementById('project-notepad').value = db.projects[activeProjId].notepad || "";
+                    renderStagedMedia();
+                }
             }
         }
 
-        function saveNotepad() { if(!activeProjId) return; db.projects[activeProjId].notepad = document.getElementById('project-notepad').value; autoSave(); }
-        function goToLauncher() { saveDB(); activeProjId = null; document.getElementById('dashboard-screen').style.display = 'none'; document.getElementById('launcher-screen').style.display = 'flex'; refreshLauncherDropdown(); }
+        function saveNotepad() {
+            if(!activeProjId) return;
+            db.projects[activeProjId].notepad = document.getElementById('project-notepad').value;
+            autoSave();
+        }
+
+        function goToLauncher() {
+            saveDB(); activeProjId = null;
+            document.getElementById('dashboard-screen').style.display = 'none';
+            document.getElementById('launcher-screen').style.display = 'flex';
+            refreshLauncherDropdown();
+        }
 
         function refreshLauncherDropdown() {
             const sel = document.getElementById('load-proj-select');
             sel.innerHTML = '<option value="">Select a project...</option>';
-            for (const [id, proj] of Object.entries(db.projects)) sel.innerHTML += `<option value="${id}">${proj.name}</option>`;
+            for (const [id, proj] of Object.entries(db.projects)) {
+                sel.innerHTML += `<option value="${id}">${proj.name}</option>`;
+            }
         }
 
         function createNewProject() {
             const name = document.getElementById('new-proj-name').value.trim();
             if (!name) return showToast("PLEASE ENTER A PROJECT NAME");
-            const id = 'proj_' + Date.now(); const today = new Date().toISOString().split('T')[0];
+            
+            const id = 'proj_' + Date.now();
+            const today = new Date().toISOString().split('T')[0];
+            
             db.projects[id] = {
                 name: name, dates: [today], nodes: [1], 
-                nodeNames: { "1": "NODE_01" }, nodeAspects: { "1": "16:9" }, nodeRes: { "1": "1920x1080" },
+                nodeNames: { "1": "NODE_01" }, nodeAspects: { "1": "16:9" }, nodeRes: { "1": "1080p" },
                 data: { "1": { [today]: JSON.parse(JSON.stringify(defaultSchedule)) } },
                 notepad: "", stagedMedia: []
             };
+            
             saveDB(); openProject(id, true);
         }
 
-        function loadSelectedProject() { const id = document.getElementById('load-proj-select').value; if (!id) return; openProject(id, false); }
+        function loadSelectedProject() {
+            const id = document.getElementById('load-proj-select').value;
+            if (!id) return;
+            openProject(id, false);
+        }
 
         function openProject(id, isNew) {
-            activeProjId = id; const proj = db.projects[id];
+            activeProjId = id;
+            const proj = db.projects[id];
             activeDate = proj.dates[0] || new Date().toISOString().split('T')[0];
-            if(!proj.nodeAspects) proj.nodeAspects = {}; if(!proj.nodeRes) proj.nodeRes = {};
+            if(!proj.nodeAspects) proj.nodeAspects = {};
+            if(!proj.nodeRes) proj.nodeRes = {};
             
             document.getElementById('active-proj-title').innerText = proj.name;
             document.getElementById('launcher-screen').style.display = 'none';
             document.getElementById('dashboard-screen').style.display = 'flex';
             
             renderMasterTabs(); generateNodes();
-            if(isNew) { switchWorkspace('assets'); showToast("PROJECT INITIALIZED."); } else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
+            
+            if(isNew) { switchWorkspace('assets'); showToast("PROJECT INITIALIZED."); } 
+            else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
         }
 
-        /* --- Supabase Storage & Spreadsheet Parsing --- */
+        /* --- STREAMING_CHUNK: Fleet Schedule Management & UI --- */
         async function stageMediaFiles(input) {
-            const files = input.files; if(files.length === 0) return;
-            const proj = db.projects[activeProjId]; if(!proj.stagedMedia) proj.stagedMedia = [];
-            const list = document.getElementById('staged-media-list'); list.innerHTML = `<span style="color:var(--accent);">Uploading to Cloud Bucket...</span>`;
+            const files = input.files;
+            if(files.length === 0) return;
+            const proj = db.projects[activeProjId];
+            if(!proj.stagedMedia) proj.stagedMedia = [];
+            const list = document.getElementById('staged-media-list');
+            list.innerHTML = `<span style="color:var(--accent);">Uploading to Supabase Bucket...</span>`;
             if (!supabaseClient) { showToast("SUPABASE NOT CONNECTED"); return; }
             let uploads = 0;
             for(let i=0; i<files.length; i++) {
@@ -484,17 +625,27 @@
         }
         
         function renderStagedMedia() {
-            const proj = db.projects[activeProjId]; const list = document.getElementById('staged-media-list'); list.innerHTML = "";
-            if(proj.stagedMedia && proj.stagedMedia.length > 0) { proj.stagedMedia.forEach(m => { list.innerHTML += `<div style="padding: 4px 0; border-bottom: 1px solid var(--border-thin);">FILE: ${m}</div>`; }); } else { list.innerHTML = "No media staged yet."; }
+            const proj = db.projects[activeProjId];
+            const list = document.getElementById('staged-media-list');
+            list.innerHTML = "";
+            if(proj.stagedMedia && proj.stagedMedia.length > 0) {
+                proj.stagedMedia.forEach(m => { list.innerHTML += `<div style="padding: 4px 0; border-bottom: 1px solid var(--border-thin);">FILE: ${m}</div>`; });
+            } else { list.innerHTML = "No media staged yet."; }
         }
 
         function processSpreadsheet(input) {
-            const file = input.files[0]; if(!file) return; const reader = new FileReader();
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array'});
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]]; const json = XLSX.utils.sheet_to_json(worksheet);
-                    const proj = db.projects[activeProjId]; let nodesCreated = 0; let rowsAdded = 0;
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+                    const proj = db.projects[activeProjId];
+                    let nodesCreated = 0; let rowsAdded = 0;
+
                     json.forEach(row => {
                         let nodeKey = Object.keys(row).find(k => k.toLowerCase().match(/(node|tv|ecr|ecra|tela)/));
                         let timeKey = Object.keys(row).find(k => k.toLowerCase().match(/(time|hora|inicio|start)/));
@@ -502,7 +653,8 @@
                         let valKey = Object.keys(row).find(k => k.toLowerCase().match(/(val|file|fich|url|source|media)/));
 
                         if(nodeKey && timeKey && valKey) {
-                            let nodeId = parseInt(row[nodeKey]); if(isNaN(nodeId)) return; 
+                            let nodeId = parseInt(row[nodeKey]);
+                            if(isNaN(nodeId)) return; 
                             let time = row[timeKey].toString();
                             if(typeof row[timeKey] === 'number') {
                                 let totalSeconds = Math.round(row[timeKey] * 86400);
@@ -513,57 +665,76 @@
                             let val = row[valKey].toString().trim();
 
                             if(!proj.nodes.includes(nodeId)) {
-                                proj.nodes.push(nodeId); proj.nodeNames[nodeId] = `NODE_${nodeId.toString().padStart(2, '0')}`;
-                                proj.nodeAspects[nodeId] = "16:9"; proj.nodeRes[nodeId] = "1920x1080";
-                                proj.data[nodeId] = {}; proj.dates.forEach(d => proj.data[nodeId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
+                                proj.nodes.push(nodeId);
+                                proj.nodeNames[nodeId] = `NODE_${nodeId.toString().padStart(2, '0')}`;
+                                proj.nodeAspects[nodeId] = "16:9"; proj.nodeRes[nodeId] = "1080p";
+                                proj.data[nodeId] = {};
+                                proj.dates.forEach(d => proj.data[nodeId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
                                 nodesCreated++;
                             }
                             if(!proj.data[nodeId]._xlsImported) { proj.data[nodeId][activeDate] = []; proj.data[nodeId]._xlsImported = true; }
-                            proj.data[nodeId][activeDate].push({ time: time, type: type, value: val }); rowsAdded++;
+                            proj.data[nodeId][activeDate].push({ time: time, type: type, value: val });
+                            rowsAdded++;
                         }
                     });
+
                     proj.nodes.forEach(n => { delete proj.data[n]._xlsImported; if(proj.data[n][activeDate]) proj.data[n][activeDate].sort((a,b) => a.time.localeCompare(b.time)); });
-                    saveDB(); generateNodes(); showToast(`SYNC COMPLETE: ${rowsAdded} ROWS`); switchWorkspace('fleet'); 
+                    saveDB(); generateNodes(); showToast(`SYNC COMPLETE: ${rowsAdded} ROWS`);
+                    switchWorkspace('fleet'); 
                 } catch (error) { showToast("ERROR PARSING SPREADSHEET"); }
             };
             reader.readAsArrayBuffer(file); input.value = "";
         }
 
-        /* --- Fleet Schedule Management --- */
         function renderMasterTabs() {
-            const proj = db.projects[activeProjId]; const bar = document.getElementById('master-date-tabs'); bar.innerHTML = "";
+            const proj = db.projects[activeProjId];
+            const bar = document.getElementById('master-date-tabs');
+            bar.innerHTML = "";
             proj.dates.sort().forEach(date => {
-                const btn = document.createElement('button'); btn.className = `btn-fintech ${activeDate === date ? 'active' : ''}`; btn.innerText = date;
-                btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); }; bar.appendChild(btn);
+                const btn = document.createElement('button');
+                btn.className = `btn-fintech ${activeDate === date ? 'active' : ''}`;
+                btn.innerText = date;
+                btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); };
+                bar.appendChild(btn);
             });
         }
 
         function addMasterDate(date) {
-            if(!date) return; const proj = db.projects[activeProjId]; if(proj.dates.includes(date)) return;
-            proj.dates.push(date); proj.nodes.forEach(nodeId => { proj.data[nodeId][date] = JSON.parse(JSON.stringify(defaultSchedule)); });
+            if(!date) return; const proj = db.projects[activeProjId];
+            if(proj.dates.includes(date)) return;
+            proj.dates.push(date);
+            proj.nodes.forEach(nodeId => { proj.data[nodeId][date] = JSON.parse(JSON.stringify(defaultSchedule)); });
             activeDate = date; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("NEW DATE ALLOCATED");
         }
 
         function executeCopyDay(targetDate) {
-            if(!targetDate) return; const proj = db.projects[activeProjId]; saveCurrentUIToData();
+            if(!targetDate) return; const proj = db.projects[activeProjId];
+            saveCurrentUIToData();
             if(!proj.dates.includes(targetDate)) proj.dates.push(targetDate);
             proj.nodes.forEach(nodeId => { proj.data[nodeId][targetDate] = JSON.parse(JSON.stringify(proj.data[nodeId][activeDate])); });
             activeDate = targetDate; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("DATA DUPLICATED");
         }
 
         function addNewNode() {
-            const proj = db.projects[activeProjId]; saveCurrentUIToData(); const nextId = proj.nodes.length > 0 ? Math.max(...proj.nodes) + 1 : 1;
-            proj.nodes.push(nextId); proj.nodeNames[nextId] = `NODE_${nextId.toString().padStart(2, '0')}`;
-            proj.nodeAspects[nextId] = "16:9"; proj.nodeRes[nextId] = "1920x1080";
+            const proj = db.projects[activeProjId]; saveCurrentUIToData();
+            const nextId = proj.nodes.length > 0 ? Math.max(...proj.nodes) + 1 : 1;
+            proj.nodes.push(nextId);
+            proj.nodeNames[nextId] = `NODE_${nextId.toString().padStart(2, '0')}`;
+            proj.nodeAspects[nextId] = "16:9"; proj.nodeRes[nextId] = "1080p";
             proj.data[nextId] = {}; proj.dates.forEach(d => proj.data[nextId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
             generateNodes(); saveDB(); showToast(`NODE ${nextId} ADDED`);
         }
 
+        /* --- STREAMING_CHUNK: Dynamic Node Grid Rendering --- */
         function generateNodes() {
-            const proj = db.projects[activeProjId]; const container = document.getElementById('node-grid-container'); container.innerHTML = "";
+            const proj = db.projects[activeProjId];
+            const container = document.getElementById('node-grid-container');
+            container.innerHTML = "";
             
             proj.nodes.forEach(id => {
-                const name = proj.nodeNames[id] || `NODE_${id}`; const aspect = proj.nodeAspects[id] || "16:9"; const res = proj.nodeRes[id] || "1920x1080";
+                const name = proj.nodeNames[id] || `NODE_${id}`;
+                const aspect = proj.nodeAspects[id] || "16:9";
+                const res = proj.nodeRes[id] || "1080p";
                 
                 let nodeHtml = `
                     <div class="node-card" id="container-${id}">
@@ -571,23 +742,24 @@
                             <div class="nh-section">
                                 <button class="btn-icon" onclick="toggleNodeBody(${id})" id="toggle-btn-${id}">▼</button>
                                 <input type="text" class="node-title-input" id="node-name-${id}" value="${name}" oninput="updateNodeMeta(${id})">
-                            </div>
-                            <div class="nh-section">
-                                <button class="btn-fintech" id="aspect-btn-${id}" onclick="toggleAspect(${id})" style="width:50px; line-height: 1.2; padding: 6px;">${aspect}</button>
-                                <select class="as-select" id="res-select-${id}" style="width:auto; padding: 6px 28px 6px 10px; font-size:11px; line-height: 1.2;" onchange="handleResChange(this, ${id})">
-                                    <option value="1920x1080" ${res==='1920x1080'?'selected':''}>1080p</option>
-                                    <option value="720x1080" ${res==='720x1080'?'selected':''}>720x1080</option>
-                                    <option value="1080x1920" ${res==='1080x1920'?'selected':''}>1080x1920</option>
-                                    <option value="3840x2160" ${res==='3840x2160'?'selected':''}>4K UHD</option>
-                                    <option value="${res}" style="display:${!['1920x1080','720x1080','1080x1920','3840x2160'].includes(res) ? 'block' : 'none'};" class="custom-val-opt" ${!['1920x1080','720x1080','1080x1920','3840x2160'].includes(res) ? 'selected' : ''}>${res}</option>
-                                    <option value="Custom">Custom...</option>
-                                </select>
+                                
+                                <button class="btn-fintech" id="aspect-btn-${id}" onclick="toggleAspect(${id})" style="width:50px;">${aspect}</button>
+                                
+                                <div class="custom-dd">
+                                    <button class="btn-fintech drop-btn" onclick="toggleCustomDropdown(${id})" id="res-btn-${id}">${res} ▼</button>
+                                    <div class="custom-dd-content" id="dd-content-${id}">
+                                        <a onclick="setNodeResolution(${id}, '720p')">720p</a>
+                                        <a onclick="setNodeResolution(${id}, '1080p')">1080p</a>
+                                        <a onclick="setNodeResolution(${id}, '4K')">4K</a>
+                                        <a onclick="openCustomResModal(${id})">Custom...</a>
+                                    </div>
+                                </div>
                             </div>
                             <div class="nh-section">
                                 <button type="button" class="btn-fintech btn-override" onclick="openOverrideModal(${id})">OVERRIDE</button>
-                                <button type="button" class="btn-fintech" onclick="triggerNodePreview(${id})">PREVIEW</button>
+                                <button type="button" class="btn-fintech" onclick="openNodePreview(${id})">PREVIEW</button>
                                 <button type="button" class="btn-fintech btn-deploy" id="btn-deploy-${id}" onclick="goLive(${id})">DEPLOY</button>
-                                <button type="button" class="btn-icon text-red" style="margin-left:10px;" onclick="requestDeleteNode(${id})" title="Delete Node">×</button>
+                                <button type="button" class="btn-icon text-red" style="margin-left:10px; font-size:18px;" onclick="requestDeleteNode(${id})" title="Delete Node">×</button>
                             </div>
                         </div>
                         <div class="node-body" id="node-body-${id}">
@@ -603,63 +775,77 @@
                         </div>
                     </div>
                 `;
-                container.insertAdjacentHTML('beforeend', nodeHtml); renderTable(id);
+                container.insertAdjacentHTML('beforeend', nodeHtml);
+                renderTable(id);
             });
         }
 
-        function updateNodeMeta(id) { const proj = db.projects[activeProjId]; proj.nodeNames[id] = document.getElementById(`node-name-${id}`).value; proj.nodeRes[id] = document.getElementById(`res-select-${id}`).value; autoSave(); }
-
-        /* --- Custom Resolution Logic --- */
-        function handleResChange(selectEl, id) {
-            if (selectEl.value === 'Custom') {
-                customResTargetNode = id;
-                document.getElementById('res-w').value = '1920'; document.getElementById('res-h').value = '1080';
-                document.getElementById('custom-res-modal').style.display = 'flex';
-            } else { updateNodeMeta(id); }
+        function updateNodeMeta(id) {
+            const proj = db.projects[activeProjId];
+            proj.nodeNames[id] = document.getElementById(`node-name-${id}`).value;
+            autoSave();
         }
 
-        function cancelCustomRes() {
-            if(customResTargetNode !== null) document.getElementById(`res-select-${customResTargetNode}`).value = '1920x1080';
-            document.getElementById('custom-res-modal').style.display = 'none'; customResTargetNode = null;
+        function setNodeResolution(id, val) {
+            const proj = db.projects[activeProjId];
+            proj.nodeRes[id] = val;
+            document.getElementById(`res-btn-${id}`).innerText = val + " ▼";
+            autoSave();
         }
 
-        function saveCustomRes() {
-            if(customResTargetNode !== null) {
-                const w = document.getElementById('res-w').value || '1920'; const h = document.getElementById('res-h').value || '1080'; const res = `${w}x${h}`;
-                const selectEl = document.getElementById(`res-select-${customResTargetNode}`);
-                let customOpt = selectEl.querySelector('.custom-val-opt');
-                if (!customOpt) { customOpt = document.createElement('option'); customOpt.className = 'custom-val-opt'; selectEl.insertBefore(customOpt, selectEl.querySelector('option[value="Custom"]')); }
-                customOpt.value = res; customOpt.text = res; customOpt.style.display = 'block'; customOpt.selected = true;
-                updateNodeMeta(customResTargetNode);
+        function openCustomResModal(id) {
+            document.getElementById('res-target-node').value = id;
+            document.getElementById('custom-res-modal').style.display = 'flex';
+        }
+
+        function applyCustomResolution() {
+            const w = document.getElementById('res-width').value;
+            const h = document.getElementById('res-height').value;
+            const id = document.getElementById('res-target-node').value;
+            if(w && h) {
+                setNodeResolution(id, `${w}x${h}`);
             }
-            document.getElementById('custom-res-modal').style.display = 'none'; customResTargetNode = null;
+            document.getElementById('custom-res-modal').style.display = 'none';
         }
 
-        function toggleAspect(id) { const proj = db.projects[activeProjId]; const btn = document.getElementById(`aspect-btn-${id}`); const newAspect = btn.innerText === "16:9" ? "9:16" : "16:9"; btn.innerText = newAspect; proj.nodeAspects[id] = newAspect; autoSave(); }
+        function toggleAspect(id) {
+            const proj = db.projects[activeProjId];
+            const btn = document.getElementById(`aspect-btn-${id}`);
+            const newAspect = btn.innerText === "16:9" ? "9:16" : "16:9";
+            btn.innerText = newAspect;
+            proj.nodeAspects[id] = newAspect;
+            autoSave();
+        }
 
         function requestDeleteNode(id) {
             showConfirm('Delete Node', `Are you sure you want to permanently erase NODE_${id}?`, () => {
-                const proj = db.projects[activeProjId]; proj.nodes = proj.nodes.filter(n => n !== id);
+                const proj = db.projects[activeProjId];
+                proj.nodes = proj.nodes.filter(n => n !== id);
                 delete proj.nodeNames[id]; delete proj.nodeAspects[id]; delete proj.nodeRes[id]; delete proj.data[id];
                 saveDB(); generateNodes(); showToast(`NODE DELETED`);
             });
         }
 
         function toggleNodeBody(id) {
-            const body = document.getElementById(`node-body-${id}`); const btn = document.getElementById(`toggle-btn-${id}`);
-            if (body.classList.contains('collapsed')) { body.classList.remove('collapsed'); btn.innerText = "▼"; } else { body.classList.add('collapsed'); btn.innerText = "▶"; }
+            const body = document.getElementById(`node-body-${id}`);
+            const btn = document.getElementById(`toggle-btn-${id}`);
+            if (body.classList.contains('collapsed')) { body.classList.remove('collapsed'); btn.innerText = "▼"; } 
+            else { body.classList.add('collapsed'); btn.innerText = "▶"; }
         }
 
         function refreshAllNodes() { const proj = db.projects[activeProjId]; proj.nodes.forEach(id => renderTable(id)); }
 
         function renderTable(tvId) {
-            const proj = db.projects[activeProjId]; const tbody = document.getElementById('tbody-' + tvId); if(!tbody) return; tbody.innerHTML = "";
+            const proj = db.projects[activeProjId];
+            const tbody = document.getElementById('tbody-' + tvId);
+            if(!tbody) return; tbody.innerHTML = "";
             const sched = (proj.data[tvId] && proj.data[tvId][activeDate]) ? proj.data[tvId][activeDate] : JSON.parse(JSON.stringify(defaultSchedule));
             sched.sort((a,b) => a.time.localeCompare(b.time)).forEach((item, index) => { appendRowHTML(tvId, index, item.time, item.type, item.value); });
         }
 
         function appendRowHTML(tvId, index, time, type, val) {
-            const tbody = document.getElementById('tbody-' + tvId); const row = tbody.insertRow(); let sourceHtml = '';
+            const tbody = document.getElementById('tbody-' + tvId); const row = tbody.insertRow();
+            let sourceHtml = '';
             if (type === 'url') { sourceHtml = `<input type="text" class="table-input" name="value-${index}" value="${val}" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`; } 
             else { let btnClass = val ? 'ready' : ''; let btnText = val || 'SELECT FILE'; sourceHtml = `<input type="hidden" name="value-${index}" value="${val}"><button type="button" class="upload-btn ${btnClass}" onclick="openBrowser(${tvId}, ${index})">${btnText}</button>`; }
 
@@ -671,8 +857,16 @@
             `;
         }
 
-        function checkAutoAddRow(el, tvId) { const tr = el.closest('tr'); const tbody = tr.parentNode; if (tr === tbody.lastElementChild) { const newIndex = tbody.rows.length; appendRowHTML(tvId, newIndex, "", "url", ""); } }
-        function removeRow(btn, tvId) { const tbody = btn.closest('tbody'); if (tbody.rows.length <= 1) return showToast("CANNOT DELETE FINAL ROW"); btn.closest('tr').remove(); saveCurrentUIToData(); renderTable(tvId); saveDB(); }
+        function checkAutoAddRow(el, tvId) {
+            const tr = el.closest('tr'); const tbody = tr.parentNode;
+            if (tr === tbody.lastElementChild) { const newIndex = tbody.rows.length; appendRowHTML(tvId, newIndex, "", "url", ""); }
+        }
+
+        function removeRow(btn, tvId) {
+            const tbody = btn.closest('tbody');
+            if (tbody.rows.length <= 1) return showToast("CANNOT DELETE FINAL ROW");
+            btn.closest('tr').remove(); saveCurrentUIToData(); renderTable(tvId); saveDB();
+        }
 
         function changeType(tvId, index, newType, selectEl) {
             const td = document.getElementById(`source-td-${tvId}-${index}`);
@@ -683,9 +877,10 @@
 
         function openBrowser(tvId, index) { uploadTarget = { tvId, index }; document.getElementById('hidden-file-browser').click(); }
 
-        /* --- Direct Supabase Cloud Storage Interaction --- */
+        /* --- STREAMING_CHUNK: Modals & External Interactions --- */
         async function handleFileSelect(input) {
-            if(!input.files[0]) return; const file = input.files[0]; const filename = file.name;
+            if(!input.files[0]) return;
+            const file = input.files[0]; const filename = file.name;
             const td = document.getElementById(`source-td-${uploadTarget.tvId}-${uploadTarget.index}`);
             if(td) td.innerHTML = `<button type="button" class="upload-btn">UPLOADING...</button>`;
             
@@ -711,121 +906,185 @@
             autoSave(); input.value = "";
         }
 
-        let saveTimeout; function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDB(); }, 800); }
+        let saveTimeout;
+        function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDB(); }, 800); }
 
         function saveCurrentUIToData() {
             if(!activeProjId) return; const proj = db.projects[activeProjId];
             document.querySelectorAll('form[id^="form-"]').forEach(f => {
-                const tvId = parseInt(f.elements['tv_id'].value); const tb = document.getElementById('tbody-' + tvId); const slots = [];
+                const tvId = parseInt(f.elements['tv_id'].value);
+                const tb = document.getElementById('tbody-' + tvId);
+                const slots = [];
                 for (let i = 0; i < tb.rows.length; i++) {
-                    const r = tb.rows[i]; const time = r.querySelector('input[name^="time-"]').value; const type = r.querySelector('select[name^="type-"]').value; const valEl = r.querySelector('[name^="value-"]');
+                    const r = tb.rows[i];
+                    const time = r.querySelector('input[name^="time-"]').value;
+                    const type = r.querySelector('select[name^="type-"]').value;
+                    const valEl = r.querySelector('[name^="value-"]');
                     slots.push({ time, type, value: valEl ? valEl.value : "" });
                 }
                 if(!proj.data[tvId]) proj.data[tvId] = {}; proj.data[tvId][activeDate] = slots;
             });
         }
 
-        /* --- Core Supabase DB Push (Deploying to Venues) --- */
         async function goLive(id) {
-            saveDB(); const sched = db.projects[activeProjId].data[id][activeDate];
+            saveDB();
+            const sched = db.projects[activeProjId].data[id][activeDate];
             if (!sched || sched.length === 0) return showToast("SCHEDULE EMPTY");
+            
             const btn = document.getElementById(`btn-deploy-${id}`);
             
-            if(btn.classList.contains('live')) { btn.classList.remove('live'); btn.innerText = "DEPLOY"; showToast(`NODE ${id} RETURNED TO STANDBY`); return; }
+            if(btn.classList.contains('live')) {
+                btn.classList.remove('live');
+                btn.innerText = "DEPLOY";
+                showToast(`NODE ${id} RETURNED TO STANDBY`);
+                return;
+            }
+
             btn.innerText = "SYNCING...";
             
-            if(!supabaseClient) { setTimeout(() => { btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SIMULATED DEPLOY`); }, 500); return; }
+            if(!supabaseClient) {
+                setTimeout(() => { btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SIMULATED DEPLOY`); }, 500);
+                return;
+            }
 
             try {
                 const { data: venue, error: vErr } = await supabaseClient.from('client_access').select('id').eq('is_active', true).limit(1).single();
                 if(vErr || !venue) throw new Error("No active venue gateway found");
                 
                 await supabaseClient.from('vtx_schedules').delete().eq('client_id', venue.id).eq('node_id', id);
-                const payload = sched.filter(s => s.time && s.value).map(s => ({ client_id: venue.id, node_id: parseInt(id), time: s.time.length === 5 ? s.time + ':00' : s.time, type: s.type, value: s.value }));
                 
-                if(payload.length > 0) { const { error } = await supabaseClient.from('vtx_schedules').insert(payload); if(error) throw error; }
-                btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SEQUENCE SYNCED TO CLOUD`);
+                const payload = sched.filter(s => s.time && s.value).map(s => ({
+                    client_id: venue.id, node_id: parseInt(id),
+                    time: s.time.length === 5 ? s.time + ':00' : s.time,
+                    type: s.type, value: s.value
+                }));
+                
+                if(payload.length > 0) {
+                    const { error } = await supabaseClient.from('vtx_schedules').insert(payload);
+                    if(error) throw error;
+                }
+                
+                btn.classList.add('live'); btn.innerText = "LIVE";
+                showToast(`SEQUENCE SYNCED TO CLOUD`);
             } catch(e) {
-                btn.innerText = "ERROR"; btn.style.borderColor = "var(--alert-red)"; btn.style.color = "var(--alert-red)";
+                btn.innerText = "ERROR";
+                btn.style.borderColor = "var(--alert-red)"; btn.style.color = "var(--alert-red)";
                 setTimeout(() => { btn.innerText = "DEPLOY"; btn.style.borderColor = ""; btn.style.color = ""; }, 2000);
             }
         }
 
-        /* --- Live Override Modal Logic --- */
+        /* Override Modal */
         function openOverrideModal(id) {
-            const proj = db.projects[activeProjId]; document.getElementById('override-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
-            document.getElementById('override-target-id').value = id; document.getElementById('override-modal').style.display = 'flex'; resetOverrideModal();
+            const proj = db.projects[activeProjId];
+            document.getElementById('override-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
+            document.getElementById('override-target-id').value = id;
+            document.getElementById('override-modal').style.display = 'flex';
+            resetOverrideModal();
         }
 
         function closeOverrideModal() { document.getElementById('override-modal').style.display = 'none'; }
 
         function resetOverrideModal() {
-            document.getElementById('override-type').value = 'image'; document.getElementById('override-value').value = ''; document.getElementById('override-mute').checked = true;
-            document.getElementById('override-img').style.display = 'none'; document.getElementById('override-vid').style.display = 'none'; document.getElementById('override-iframe').style.display = 'none';
-            document.getElementById('override-placeholder').style.display = 'block'; toggleOverrideInput();
+            document.getElementById('override-type').value = 'image';
+            document.getElementById('override-value').value = '';
+            document.getElementById('override-mute').checked = true;
+            document.getElementById('override-img').style.display = 'none';
+            document.getElementById('override-vid').style.display = 'none';
+            document.getElementById('override-iframe').style.display = 'none';
+            document.getElementById('override-placeholder').style.display = 'block';
+            toggleOverrideInput();
         }
 
         function toggleOverrideInput() {
-            const type = document.getElementById('override-type').value; const container = document.getElementById('override-input-container');
-            if (type === 'url') { container.innerHTML = `<input type="text" class="as-input" id="override-url-input" placeholder="https://..." oninput="handleOverrideURL(this.value)">`; } 
-            else { container.innerHTML = `<button class="btn-fintech" style="width:100%; height:100%;" onclick="document.getElementById('override-file-browser').click()">BROWSE FILE</button>`; }
+            const type = document.getElementById('override-type').value;
+            const container = document.getElementById('override-input-container');
+            if (type === 'url') {
+                container.innerHTML = `<input type="text" class="as-input" id="override-url-input" placeholder="https://..." oninput="handleOverrideURL(this.value)">`;
+            } else {
+                container.innerHTML = `<button class="btn-fintech" style="width:100%; height:100%;" onclick="document.getElementById('override-file-browser').click()">BROWSE FILE</button>`;
+            }
         }
 
         function handleOverrideURL(url) {
-            document.getElementById('override-value').value = url; const iframe = document.getElementById('override-iframe');
-            document.getElementById('override-placeholder').style.display = 'none'; document.getElementById('override-img').style.display = 'none'; document.getElementById('override-vid').style.display = 'none';
-            iframe.src = url; iframe.style.display = 'block';
+            document.getElementById('override-value').value = url;
+            const iframe = document.getElementById('override-iframe');
+            document.getElementById('override-placeholder').style.display = 'none';
+            document.getElementById('override-img').style.display = 'none';
+            document.getElementById('override-vid').style.display = 'none';
+            iframe.src = url;
+            iframe.style.display = 'block';
         }
 
         function handleOverrideFile(input) {
-            if(!input.files[0]) return; const file = input.files[0]; const type = document.getElementById('override-type').value; const reader = new FileReader();
-            document.getElementById('override-placeholder').style.display = 'none'; document.getElementById('override-iframe').style.display = 'none';
+            if(!input.files[0]) return;
+            const file = input.files[0];
+            const type = document.getElementById('override-type').value;
+            const reader = new FileReader();
+            
+            document.getElementById('override-placeholder').style.display = 'none';
+            document.getElementById('override-iframe').style.display = 'none';
+            
             reader.onload = function(e) {
                 document.getElementById('override-value').value = e.target.result;
                 if (type === 'image') {
-                    const img = document.getElementById('override-img'); img.src = e.target.result; img.style.display = 'block'; document.getElementById('override-vid').style.display = 'none';
+                    const img = document.getElementById('override-img');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('override-vid').style.display = 'none';
                 } else if (type === 'video') {
-                    const vid = document.getElementById('override-vid'); vid.src = e.target.result; vid.style.display = 'block'; document.getElementById('override-img').style.display = 'none';
+                    const vid = document.getElementById('override-vid');
+                    vid.src = e.target.result;
+                    vid.style.display = 'block';
+                    document.getElementById('override-img').style.display = 'none';
                 }
             }
             reader.readAsDataURL(file);
         }
 
         function pushOverride() {
-            const targetId = document.getElementById('override-target-id').value; const isMuted = document.getElementById('override-mute').checked;
-            showToast(`OVERRIDE PUSHED TO NODE ${targetId} (MUTE: ${isMuted})`); closeOverrideModal();
+            const targetId = document.getElementById('override-target-id').value;
+            const isMuted = document.getElementById('override-mute').checked;
+            showToast(`OVERRIDE PUSHED TO NODE ${targetId} (MUTE: ${isMuted})`);
+            closeOverrideModal();
         }
 
-        /* --- Live Node Preview Logic --- */
-        function triggerNodePreview(id) {
+        /* Node Preview Modal */
+        function openNodePreview(id) {
+            saveCurrentUIToData();
             const proj = db.projects[activeProjId];
-            document.getElementById('preview-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
-            document.getElementById('preview-modal').style.display = 'flex';
+            document.getElementById('np-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
+            document.getElementById('node-preview-modal').style.display = 'flex';
             
-            const sched = proj.data[id][activeDate];
-            const placeholder = document.getElementById('preview-content-placeholder');
-            const timeLabel = document.getElementById('preview-time-label');
+            const container = document.getElementById('np-preview-container');
+            const timeLabel = document.getElementById('np-time-label');
+            const sched = proj.data[id][activeDate] || [];
             
-            if (!sched || sched.length === 0) {
-                placeholder.innerText = "NO SCHEDULE FOUND"; timeLabel.innerText = "--:--:--"; return;
+            let d = new Date();
+            let nowStr = d.toTimeString().split(' ')[0];
+            
+            let activeSlot = null;
+            let sortedSched = [...sched].filter(s => s.time && s.value).sort((a,b) => a.time.localeCompare(b.time));
+            
+            for(let i=0; i<sortedSched.length; i++) {
+                if(nowStr >= sortedSched[i].time) activeSlot = sortedSched[i];
+            }
+            
+            if(!activeSlot) {
+                timeLabel.innerText = `Current Time: ${nowStr} | No active cues.`;
+                container.innerHTML = `<span class="preview-placeholder">Awaiting first scheduled cue...</span>`;
+                return;
             }
 
-            const now = new Date(); const currentStr = now.toTimeString().split(' ')[0];
-            let activeSlot = null; let sorted = [...sched].filter(s => s.time && s.value).sort((a,b) => a.time.localeCompare(b.time));
+            timeLabel.innerText = `Active Cue: ${activeSlot.time} | File: ${activeSlot.value.split('/').pop()}`;
             
-            for(let i=0; i<sorted.length; i++) { if (currentStr >= sorted[i].time) activeSlot = sorted[i]; else break; }
-
-            if (!activeSlot) {
-                placeholder.innerText = "WAITING FOR FIRST CUE";
-                timeLabel.innerText = "UPCOMING: " + (sorted[0] ? sorted[0].time : "--:--:--");
+            if(activeSlot.type === 'url') {
+                container.innerHTML = `<iframe src="${activeSlot.value}" style="width:100%; height:100%; border:none;"></iframe>`;
+            } else if(activeSlot.type === 'video') {
+                container.innerHTML = `<video src="${activeSlot.value}" controls autoplay muted style="width:100%; height:100%; object-fit:contain;"></video>`;
             } else {
-                placeholder.innerText = `[${activeSlot.type.toUpperCase()}] ${activeSlot.value}`;
-                timeLabel.innerText = activeSlot.time;
+                container.innerHTML = `<img src="${activeSlot.value}" style="width:100%; height:100%; object-fit:contain;" alt="Preview">`;
             }
         }
-
-        function closePreviewModal() { document.getElementById('preview-modal').style.display = 'none'; }
-
     </script>
 </body>
 </html>
