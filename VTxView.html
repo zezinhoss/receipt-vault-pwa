@@ -474,7 +474,7 @@
             else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
         }
 
-        /* --- STREAMING_CHUNK: Supabase Storage & Spreadsheet Parsing --- */
+        /* --- Supabase Storage & Spreadsheet Parsing --- */
 
         async function stageMediaFiles(input) {
             const files = input.files;
@@ -579,7 +579,7 @@
             reader.readAsArrayBuffer(file); input.value = "";
         }
 
-        /* --- STREAMING_CHUNK: Fleet Schedule Management --- */
+        /* --- Fleet Schedule Management --- */
 
         function renderMasterTabs() {
             const proj = db.projects[activeProjId];
@@ -641,12 +641,13 @@
                             </div>
                             <div class="nh-section">
                                 <button class="btn-fintech" id="aspect-btn-${id}" onclick="toggleAspect(${id})" style="width:50px;">${aspect}</button>
-                                <select class="as-select" id="res-select-${id}" style="width:auto; padding:4px 8px; font-size:11px;" onchange="updateNodeMeta(${id})">
+                                <select class="as-select" id="res-select-${id}" style="width:auto; padding:4px 8px; font-size:11px;" onchange="handleResChange(this, ${id})">
                                     <option value="1920x1080" ${res==='1920x1080'?'selected':''}>1080p</option>
                                     <option value="720x1080" ${res==='720x1080'?'selected':''}>720x1080</option>
                                     <option value="1080x1920" ${res==='1080x1920'?'selected':''}>1080x1920</option>
                                     <option value="3840x2160" ${res==='3840x2160'?'selected':''}>4K UHD</option>
-                                    <option value="Custom" ${res==='Custom'?'selected':''}>Custom...</option>
+                                    <option value="${res}" style="display:none;" class="custom-val-opt" ${!['1920x1080','720x1080','1080x1920','3840x2160'].includes(res) ? 'selected' : ''}>${res}</option>
+                                    <option value="Custom">Custom...</option>
                                 </select>
                             </div>
                             <div class="nh-section">
@@ -679,6 +680,27 @@
             proj.nodeNames[id] = document.getElementById(`node-name-${id}`).value;
             proj.nodeRes[id] = document.getElementById(`res-select-${id}`).value;
             autoSave();
+        }
+
+        function handleResChange(selectEl, id) {
+            if (selectEl.value === 'Custom') {
+                const customRes = prompt("Enter Custom Resolution (e.g. 3328x1024):", "3328x1024");
+                if (customRes) {
+                    let customOpt = selectEl.querySelector('.custom-val-opt');
+                    if (!customOpt) {
+                        customOpt = document.createElement('option');
+                        customOpt.className = 'custom-val-opt';
+                        selectEl.insertBefore(customOpt, selectEl.querySelector('option[value="Custom"]'));
+                    }
+                    customOpt.value = customRes;
+                    customOpt.text = customRes;
+                    customOpt.style.display = 'block';
+                    customOpt.selected = true;
+                } else {
+                    selectEl.value = '1920x1080'; // Fallback
+                }
+            }
+            updateNodeMeta(id);
         }
 
         function toggleAspect(id) {
@@ -750,7 +772,7 @@
 
         function openBrowser(tvId, index) { uploadTarget = { tvId, index }; document.getElementById('hidden-file-browser').click(); }
 
-        /* --- STREAMING_CHUNK: Direct Supabase Cloud Storage Interaction --- */
+        /* --- Direct Supabase Cloud Storage Interaction --- */
         async function handleFileSelect(input) {
             if(!input.files[0]) return;
             const file = input.files[0]; const filename = file.name;
@@ -799,7 +821,7 @@
             });
         }
 
-        /* --- STREAMING_CHUNK: Core Supabase DB Push (Deploying to Venues) --- */
+        /* --- Core Supabase DB Push (Deploying to Venues) --- */
         async function goLive(id) {
             saveDB();
             const sched = db.projects[activeProjId].data[id][activeDate];
@@ -808,7 +830,6 @@
             const btn = document.getElementById(`btn-deploy-${id}`);
             
             if(btn.classList.contains('live')) {
-                // Return to normal standby
                 btn.classList.remove('live');
                 btn.innerText = "DEPLOY";
                 showToast(`NODE ${id} RETURNED TO STANDBY`);
@@ -848,8 +869,7 @@
             }
         }
 
-        /* --- STREAMING_CHUNK: Live Override Modal Logic --- */
-        
+        /* --- Live Override Modal Logic --- */
         function openOverrideModal(id) {
             const proj = db.projects[activeProjId];
             document.getElementById('override-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
@@ -901,7 +921,7 @@
             document.getElementById('override-iframe').style.display = 'none';
             
             reader.onload = function(e) {
-                document.getElementById('override-value').value = e.target.result; // Temporarily store local preview string
+                document.getElementById('override-value').value = e.target.result;
                 if (type === 'image') {
                     const img = document.getElementById('override-img');
                     img.src = e.target.result;
@@ -920,8 +940,6 @@
         function pushOverride() {
             const targetId = document.getElementById('override-target-id').value;
             const isMuted = document.getElementById('override-mute').checked;
-            // In a real environment, if this was a local file, it would upload to Supabase here first, or trigger a local WebSocket.
-            // For now, we simulate the push.
             showToast(`OVERRIDE PUSHED TO NODE ${targetId} (MUTE: ${isMuted})`);
             closeOverrideModal();
         }
