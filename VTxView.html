@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VTx | PRODUCTION SUITE</title>
+    <title>VTx | Fleet Scheduler</title>
     
+    <!-- Fonts & Tailwind -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 🔌 LOAD SPREADSHEET PARSER & SUPABASE -->
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- 🔌 LOAD FLATPICKR (Dark Theme) -->
+    <!-- Flatpickr (Premium Calendar) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <!-- SheetJS & Supabase -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         :root {
@@ -48,9 +49,9 @@
             -webkit-appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23facc15' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 8px center;
+            background-position: right 10px center;
             background-size: 14px;
-            padding-right: 28px;
+            padding-right: 32px;
         }
         select option { background-color: #0f0f14; color: #f8fafc; }
 
@@ -69,7 +70,7 @@
         .hq-btn-override { color: var(--override-blue); border-color: rgba(14, 165, 233, 0.3); background: rgba(14, 165, 233, 0.05); }
         .hq-btn-override:hover { background: var(--override-blue); color: #000; box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
 
-        .hq-btn-deploy.live { background: var(--danger-red); color: #fff; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); animation: pulseRed 2s infinite; border-color: var(--danger-red); }
+        .hq-btn-deploy.live { background: var(--danger-red); color: #fff; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); border-color: var(--danger-red); animation: pulseRed 2s infinite; }
 
         @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
@@ -456,7 +457,7 @@
             container.innerHTML = "";
             for (const [folderName, files] of Object.entries(localSessionFiles)) {
                 let html = `
-                    <div class="glass-panel flex flex-col h-[280px] p-5 w-full">
+                    <div class="glass-panel flex flex-col min-h-[250px] p-5 w-full">
                         <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
                             <div class="flex items-center gap-3">
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
@@ -477,11 +478,11 @@
                 files.forEach(f => {
                     let thumbHtml = '';
                     if (f.file.type.startsWith('image/')) {
-                        thumbHtml = `<img src="${f.url}" class="w-full h-24 object-cover rounded border border-white/10">`;
+                        thumbHtml = `<div class="w-full h-48 flex items-center justify-center bg-black/40 rounded border border-white/10 overflow-hidden"><img src="${f.url}" class="max-w-full max-h-full object-contain"></div>`;
                     } else if (f.file.type.startsWith('video/')) {
-                        thumbHtml = `<video src="${f.url}" class="w-full h-24 object-cover rounded border border-white/10" preload="metadata"></video>`;
+                        thumbHtml = `<div class="w-full h-48 flex items-center justify-center bg-black/40 rounded border border-white/10 overflow-hidden"><video src="${f.url}" class="max-w-full max-h-full object-contain" preload="metadata"></video></div>`;
                     } else {
-                        thumbHtml = `<div class="w-full h-24 bg-black/50 rounded border border-white/10 flex items-center justify-center text-2xl text-slate-600"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg></div>`;
+                        thumbHtml = `<div class="w-full h-48 bg-black/50 rounded border border-white/10 flex items-center justify-center text-2xl text-slate-600"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg></div>`;
                     }
                     let sizeMb = (f.file.size / (1024 * 1024)).toFixed(1);
                     
@@ -808,8 +809,8 @@
                 if(payload.length > 0) { const { error } = await supabaseClient.from('vtx_schedules').insert(payload); if(error) throw error; }
                 btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SEQUENCE SYNCED TO CLOUD`);
             } catch(e) {
-                btn.innerText = "ERROR"; btn.classList.add('text-red-500', 'border-red-500');
-                setTimeout(() => { btn.innerText = "DEPLOY"; btn.classList.remove('text-red-500', 'border-red-500'); }, 2000);
+                btn.innerText = "ERROR"; btn.style.borderColor = "var(--danger-red)"; btn.style.color = "var(--danger-red)";
+                setTimeout(() => { btn.innerText = "DEPLOY"; btn.style.borderColor = ""; btn.style.color = ""; }, 2000);
             }
         }
 
