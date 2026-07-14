@@ -3,232 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>WORKSTATION | Production Suite</title>
+    <title>VTx | Fleet Scheduler</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- 🔌 FONTS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <!-- 🔌 TAILWIND CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 🔌 SPREADSHEET PARSER -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- 🔌 SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- 🔌 FLATPICKR (PREMIUM DATE PICKER) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     
     <style>
-        :root {
-            --bg-base: #030303;
-            --bg-gradient: radial-gradient(circle at top center, #111827 0%, #030303 100%);
-            --panel-bg: rgba(15, 15, 20, 0.6);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
+        :root { 
             --accent: #facc15; 
-            --accent-hover: #eab308;
-            --danger-red: #ef4444;
-            --success-green: #10b981;
-            --override-blue: #3b82f6;
+            --accent-glow: rgba(250, 204, 21, 0.15);
+            --bg-deep: #030303; 
+            --bg-panel: #0a0a0a; 
+            --bg-surface: #111111;
+            --border-thin: rgba(255, 255, 255, 0.1);
+            --border-accent: rgba(250, 204, 21, 0.4); 
+            --text-primary: #e2e8f0;
+            --text-muted: #64748b;
+            --alert-red: #ef4444;
+            --live-green: #10b981;
+            --override-blue: #0ea5e9;
         }
 
-        body { font-family: 'Nunito', sans-serif; background-color: var(--bg-base); background-image: var(--bg-gradient); color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-        input[type="date"], select { color-scheme: dark; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-deep); 
+            color: var(--text-primary); 
+            margin: 0; padding: 0; overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px; 
+            min-height: 100vh;
+        }
+
         .mono { font-family: 'JetBrains Mono', monospace; }
 
-        .glass-panel { background: var(--panel-bg); border: 1px solid var(--border-color); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transition: border-color 0.3s ease; }
-        .glass-panel:hover { border-color: rgba(255, 255, 255, 0.15); }
+        /* Crisp, sharp panels */
+        .fintech-panel { 
+            background: var(--bg-panel); 
+            border: 1px solid var(--border-thin); 
+            padding: 24px; box-sizing: border-box; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+            border-radius: 4px;
+        }
 
-        .hq-input { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; width: 100%; border-radius: 6px; transition: all 0.3s ease; }
-        .hq-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.15); background: rgba(0, 0, 0, 0.8); }
-
-        select.hq-select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 8px center; background-size: 14px; padding-right: 28px; }
-
-        .hq-btn { background: var(--accent); color: #000; border: 1px solid transparent; padding: 8px 16px; font-weight: 800; cursor: pointer; border-radius: 6px; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; font-family: 'Nunito', sans-serif;}
-        .hq-btn:hover { background: var(--accent-hover); box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4); }
-        .hq-btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); }
-        .hq-btn-outline:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+        /* Minimalist Buttons */
+        .btn-fintech { 
+            font-family: 'Inter', sans-serif; background: transparent; color: var(--text-primary); 
+            border: 1px solid var(--border-thin); padding: 6px 12px; cursor: pointer; 
+            font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; 
+            transition: all 0.2s ease; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-fintech:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.3); color: #fff;}
+        .btn-fintech.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
         
-        .hq-btn-live { background: rgba(239, 68, 68, 0.1); color: var(--danger-red); border-color: rgba(239, 68, 68, 0.3); }
-        .hq-btn-live.active { background: var(--danger-red); color: #fff; border-color: var(--danger-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
-
-        .hq-btn-override { background: rgba(59, 130, 246, 0.05); color: var(--override-blue); border: 1px solid rgba(59, 130, 246, 0.3); }
-        .hq-btn-override:hover { background: var(--override-blue); color: #fff; border-color: var(--override-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-
-        .hq-tab { padding: 8px 16px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
-        .hq-tab:hover { color: var(--text-primary); }
-        .hq-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-        .table-row-hover:hover { background: rgba(255,255,255,0.02); }
+        .btn-action { background: var(--accent-glow); color: var(--accent); border-color: var(--border-accent); }
+        .btn-action:hover { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow);}
         
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; animation: fadeIn 0.2s ease;}
-        .modal-box { background: rgba(15, 15, 20, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 90%; max-width: 500px; padding: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-
-        .custom-chk input { display: none; }
-        .custom-chk div { width: 14px; height: 14px; border: 1px solid var(--text-secondary); border-radius: 3px; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: rgba(0,0,0,0.5);}
-        .custom-chk input:checked + div { background: var(--danger-red); border-color: var(--danger-red); }
-        .custom-chk input:checked + div::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 900; }
-
-        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: #000; padding: 10px 24px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: none; z-index: 2000; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .fade-in { animation: fadeIn 0.4s ease; }
+        .btn-deploy { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-deploy.live { background: var(--alert-red); color: #fff; border-color: var(--alert-red); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
         
-        /* Node specific styles */
-        .node-body { transition: max-height 0.3s ease-in-out; overflow: hidden; }
-        .node-collapsed { max-height: 0 !important; }
+        .btn-override { color: var(--override-blue); border-color: rgba(14, 165, 233, 0.3); background: rgba(14, 165, 233, 0.05); }
+        .btn-override:hover { background: var(--override-blue); color: #000; border-color: var(--override-blue); box-shadow: 0 0 10px rgba(14, 165, 233, 0.3); }
+
+        .btn-icon { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 2px 6px; transition: 0.2s; border-radius: 3px; display: flex; align-items: center; justify-content: center;}
+        .btn-icon:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .btn-icon.text-red:hover { color: var(--alert-red); background: rgba(239, 68, 68, 0.1); }
+
+        /* Inputs */
+        .as-input { 
+            background: var(--bg-surface); border: 1px solid var(--border-thin); color: #fff; 
+            padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; width: 100%; 
+            box-sizing: border-box; transition: all 0.2s; border-radius: 3px;
+        }
+        .as-input:focus { border-color: var(--border-accent); }
+        
+        /* Custom Selects - Overriding Windows 3.1 look */
+        .custom-select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23facc15' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 8px center; background-size: 12px; padding-right: 28px; cursor: pointer;}
+        .custom-select option { background: var(--bg-surface); color: #fff; padding: 10px; }
+
+        /* Node Tables */
+        .data-table-wrap { max-height: 400px; overflow-y: auto; padding: 0; background: var(--bg-deep); }
+        table { width: 100%; border-collapse: collapse; }
+        th { position: sticky; top: 0; background: #000; text-align: left; font-family: 'Inter', sans-serif; font-size: 10px; color: var(--text-muted); padding: 10px 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-thin); z-index: 10; }
+        td { padding: 6px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+
+        .table-input { background: transparent; border: 1px solid transparent; color: #fff; padding: 6px 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; width: 100%; box-sizing: border-box; transition: 0.2s; border-radius: 3px; }
+        .table-input:hover { border-color: rgba(255,255,255,0.1); }
+        .table-input:focus { border-color: var(--accent); background: var(--bg-surface); }
+        
+        .upload-btn { background: transparent; border: 1px dashed rgba(255,255,255,0.2); color: var(--text-muted); padding: 6px; width: 100%; cursor: pointer; font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; border-radius: 3px; }
+        .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .upload-btn.ready { border-style: solid; border-color: rgba(255,255,255,0.1); color: #fff; background: var(--bg-surface); }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .modal-box { background: var(--bg-panel); border: 1px solid var(--border-thin); width: 100%; padding: 24px; box-sizing: border-box; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);}
+        
+        .custom-checkbox { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; color:#fff; user-select: none; font-family: 'JetBrains Mono', monospace;}
+        .custom-checkbox input { accent-color: var(--alert-red); width: 14px; height: 14px; margin:0;}
+
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 20px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: none; z-index: 2000; border-radius: 3px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        
+        /* SVG Animation */
+        @keyframes pulseGlow { 0% { filter: drop-shadow(0 0 2px var(--accent)); } 50% { filter: drop-shadow(0 0 15px var(--accent)); } 100% { filter: drop-shadow(0 0 2px var(--accent)); } }
+        @keyframes flowDash { to { stroke-dashoffset: -100; } }
+        .svg-core { fill: var(--bg-deep); stroke: var(--accent); stroke-width: 2; animation: pulseGlow 2s infinite; }
+        .svg-line { stroke: var(--border-accent); stroke-width: 1.5; stroke-dasharray: 4; animation: flowDash 2s linear infinite; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-left: 1px solid var(--border-thin); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 0;}
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
     </style>
 </head>
-<body onload="initApp()" class="flex flex-col items-center justify-start pt-8 pb-20">
+<body onload="initApp()" class="text-slate-200">
 
     <div class="toast" id="sys-toast">ACTION COMPLETED</div>
+    
     <input type="file" id="hidden-file-browser" class="hidden" onchange="handleFileSelect(this)">
-    <input type="date" id="master-calendar" class="hidden absolute opacity-0 pointer-events-none" onchange="addMasterDate(this.value)">
     <input type="date" id="copy-target-calendar" class="hidden absolute opacity-0 pointer-events-none" onchange="executeCopyDay(this.value)">
 
-    <div id="launcher-screen" class="w-full max-w-3xl flex flex-col items-center justify-center mt-20 fade-in">
-        <h1 class="text-4xl font-extrabold text-white tracking-[0.2em] mb-2">WORKSTATION</h1>
-        <div class="text-xs font-bold text-yellow-400 tracking-widest uppercase mb-12">Fleet Scheduler & Control</div>
+    <!-- LAUNCHER SCREEN -->
+    <div id="launcher-screen">
+        <svg class="w-64 h-32 mb-8" viewBox="0 0 300 150">
+            <path d="M150,75 L40,40" class="svg-line" />
+            <path d="M150,75 L40,110" class="svg-line" />
+            <path d="M150,75 L260,75" class="svg-line" />
+            <circle cx="150" cy="75" r="12" class="svg-core" />
+            <rect x="20" y="20" width="20" height="40" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
+            <rect x="20" y="90" width="20" height="40" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
+            <rect x="260" y="55" width="20" height="40" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
+        </svg>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-6">
-            <div class="glass-panel p-6">
-                <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4">New Project</h3>
-                <input type="text" id="new-proj-name" class="hq-input mb-4" placeholder="e.g. Summit 2026">
-                <button class="hq-btn w-full" onclick="createNewProject()">Initialize Fleet</button>
+        <h1 class="text-4xl tracking-[0.2em] text-white">VTx</h1>
+        <div class="text-[10px] font-bold tracking-[0.15em] text-yellow-400 mt-2 uppercase">Fleet Scheduler & Control</div>
+
+        <div class="launcher-grid">
+            <div class="fintech-panel flex flex-col">
+                <h3 class="text-xs mb-4">New Project</h3>
+                <input type="text" id="new-proj-name" class="as-input mb-4" placeholder="e.g. Summit 2026">
+                <button class="btn-fintech btn-action w-full py-2.5 mt-auto" onclick="createNewProject()">Initialize Fleet</button>
             </div>
             
-            <div class="glass-panel p-6">
-                <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4">Saved Projects</h3>
-                <select id="load-proj-select" class="hq-input hq-select mb-4">
-                    <option value="">No saved projects...</option>
-                </select>
-                <button class="hq-btn hq-btn-outline w-full" onclick="loadSelectedProject()">Load Setup</button>
+            <div class="fintech-panel flex flex-col">
+                <h3 class="text-xs mb-4">Saved Projects</h3>
+                <!-- Custom Dropdown to replace Windows 3.1 select -->
+                <div class="relative w-full mb-4 dropdown-container" id="load-proj-container">
+                    <button class="as-input text-left flex justify-between items-center" onclick="toggleDropdown('load-proj-menu')">
+                        <span id="load-proj-label">Select a project...</span>
+                        <svg class="w-3 h-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="load-proj-menu" class="hidden absolute z-50 w-full mt-1 bg-[#111] border border-white/10 rounded shadow-xl max-h-48 overflow-y-auto">
+                        <ul class="py-1 text-xs mono" id="load-proj-list">
+                            <li class="px-3 py-2 text-slate-500">No saved projects...</li>
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" id="load-proj-select">
+                <button class="btn-fintech w-full py-2.5 mt-auto" onclick="loadSelectedProject()">Load Setup</button>
             </div>
         </div>
     </div>
 
-    <div id="dashboard-screen" class="w-full max-w-[1500px] px-6 flex-col gap-6 hidden fade-in">
-        
+    <!-- DASHBOARD SCREEN -->
+    <div id="dashboard-screen" class="hidden">
         <!-- Header -->
-        <div class="flex justify-between items-end border-b border-white/10 pb-4">
+        <div class="header-bar">
             <div>
-                <div class="flex items-center gap-2 text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span> Cloud Sync Online
+                <div class="text-[10px] font-bold tracking-widest flex items-center gap-2 mb-3">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span> 
+                    CLOUD SYNC ONLINE
                 </div>
-                <div class="flex items-center gap-4">
-                    <button class="text-xs text-slate-500 hover:text-white font-bold tracking-widest transition" onclick="goToLauncher()">[ HOME ]</button>
-                    <h1 class="text-2xl font-extrabold text-white tracking-widest uppercase">WORKSTATION</h1>
-                    <span class="text-slate-700">|</span>
-                    <div class="flex gap-2">
-                        <div class="hq-tab" id="tab-assets" onclick="switchWorkspace('assets')">Asset Hub</div>
-                        <div class="hq-tab active" id="tab-fleet" onclick="switchWorkspace('fleet')">Timeline</div>
-                    </div>
+                <div class="flex items-center gap-4 flex-wrap">
+                    <button class="btn-fintech" onclick="goToLauncher()">[ HOME ]</button>
+                    <h2 class="text-xl font-bold tracking-widest text-white">VTx</h2>
+                    <span class="text-slate-700 mx-1">|</span>
+                    <button class="btn-fintech" id="tab-assets" onclick="switchWorkspace('assets')">ASSET HUB</button>
+                    <button class="btn-fintech active" id="tab-fleet" onclick="switchWorkspace('fleet')">TIMELINE</button>
                 </div>
-                <div class="mono text-[11px] text-yellow-500 mt-2" id="active-proj-title">PROJECT_NAME</div>
+                <div class="text-[11px] font-bold tracking-widest mono text-yellow-400 mt-3" id="active-proj-title">PROJECT_NAME</div>
             </div>
-            <div class="text-right pb-1">
-                <div class="mono text-2xl font-bold text-white tracking-widest" id="master-clock">00:00:00</div>
+            <div class="text-right">
+                <div class="text-[10px] font-bold text-yellow-400 tracking-[0.2em] mb-1">LIVE SYNC...</div>
+                <div class="local-clock mono font-bold" id="master-clock">00:00:00</div>
             </div>
         </div>
 
-        <div id="asset-workspace" class="hidden grid-cols-1 lg:grid-cols-2 gap-6 fade-in">
-            <div class="glass-panel p-6 flex flex-col">
-                <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4">Project Notepad</h3>
-                <textarea class="hq-input flex-1 min-h-[300px] resize-y" id="project-notepad" oninput="saveNotepad()" placeholder="Paste Drive links, instructions, and master cues here..."></textarea>
-            </div>
-            
-            <div class="glass-panel p-6 flex flex-col gap-6">
-                <div>
-                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4">Asset Staging & Sync</h3>
-                    <div class="bg-black/40 border border-white/5 p-4 rounded-lg">
+        <!-- WORKSPACE: ASSETS -->
+        <div id="asset-workspace" class="hidden animate-[fadeIn_0.4s_ease]">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="fintech-panel flex flex-col">
+                    <h3 class="text-xs mb-4">Project Notepad</h3>
+                    <textarea class="as-input flex-1 min-h-[300px] resize-vertical" id="project-notepad" oninput="saveNotepad()" placeholder="Paste Drive links, instructions, and master cues here..."></textarea>
+                </div>
+                
+                <div class="fintech-panel flex flex-col">
+                    <h3 class="text-xs mb-5">Asset Staging & Sync</h3>
+                    
+                    <div class="bg-[#111] p-4 border border-white/10 rounded mb-5">
                         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">1. Stage Media Files (Cloud Upload)</div>
-                        <div class="flex gap-3">
-                            <button class="hq-btn hq-btn-outline flex-1" onclick="document.getElementById('staging-media-upload').click()">Browse Files</button>
-                            <button class="hq-btn hq-btn-outline flex-1" onclick="document.getElementById('staging-folder-upload').click()">Browse Folder</button>
+                        <div class="flex gap-3 mb-4">
+                            <button class="btn-fintech flex-1" onclick="document.getElementById('staging-media-upload').click()">BROWSE FILES</button>
+                            <button class="btn-fintech flex-1" onclick="document.getElementById('staging-folder-upload').click()">BROWSE FOLDER</button>
                         </div>
                         <input type="file" id="staging-media-upload" multiple class="hidden" onchange="stageMediaFiles(this)">
                         <input type="file" id="staging-folder-upload" webkitdirectory directory multiple class="hidden" onchange="stageMediaFiles(this)">
                         
-                        <div id="staged-media-list" class="mono text-[11px] text-slate-300 mt-4 max-h-[120px] overflow-y-auto border-t border-white/5 pt-2"></div>
+                        <div id="staged-media-list" class="mono text-[11px] text-slate-300 max-h-[120px] overflow-y-auto border-t border-white/5 pt-3"></div>
                     </div>
-                </div>
 
-                <div class="bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-lg">
-                    <div class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mb-2">2. Spreadsheet Cue List Import (CSV/XLSX)</div>
-                    <div class="text-xs text-slate-400 mb-4 leading-relaxed">
-                        Format required: <strong class="text-slate-200">Node, Time, Type, File</strong><br>
-                        Example: <em class="mono text-[11px]">1, 08:00:00, image, bg.jpg</em>
+                    <div class="bg-emerald-500/5 p-4 border border-emerald-500/20 rounded">
+                        <div class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mb-2">2. Spreadsheet Cue List Import (CSV/XLSX)</div>
+                        <div class="text-[11px] text-slate-400 mb-4 leading-relaxed">
+                            Format required: <strong class="text-slate-200">Node, Time, Type, File</strong><br>
+                            Example: <em class="mono">1, 08:00:00, image, bg.jpg</em>
+                        </div>
+                        <button class="btn-fintech w-full !bg-emerald-500 hover:!bg-emerald-400 !text-black !border-emerald-500" onclick="document.getElementById('spreadsheet-upload').click()">SYNC FROM SPREADSHEET</button>
+                        <input type="file" id="spreadsheet-upload" accept=".csv, .xlsx, .xls" class="hidden" onchange="processSpreadsheet(this)">
                     </div>
-                    <button class="hq-btn w-full !bg-emerald-500 hover:!bg-emerald-400 !text-black shadow-[0_0_15px_rgba(16,185,129,0.2)]" onclick="document.getElementById('spreadsheet-upload').click()">Sync From Spreadsheet</button>
-                    <input type="file" id="spreadsheet-upload" accept=".csv, .xlsx, .xls" class="hidden" onchange="processSpreadsheet(this)">
                 </div>
             </div>
         </div>
 
-        <div id="fleet-workspace" class="flex flex-col gap-6 fade-in">
-            <!-- Master Control Bar -->
-            <div class="glass-panel p-4 flex flex-wrap justify-between items-center gap-4">
+        <!-- WORKSPACE: FLEET -->
+        <div id="fleet-workspace" class="animate-[fadeIn_0.4s_ease]">
+            <div class="fintech-panel p-4 mb-5 flex justify-between items-center flex-wrap gap-4">
                 <div class="flex items-center gap-4">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Schedule Date:</span>
-                    <div id="master-date-tabs" class="flex gap-2 flex-wrap"></div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SCHEDULE DATE:</span>
+                    <div id="master-date-tabs" class="flex gap-2"></div>
                 </div>
-                <div class="flex gap-3">
-                    <button class="hq-btn hq-btn-outline !py-1.5" onclick="document.getElementById('master-calendar').showPicker()">+ Add Date</button>
-                    <button class="hq-btn hq-btn-outline !py-1.5" onclick="document.getElementById('copy-target-calendar').showPicker()">Duplicate Day</button>
-                    <button class="hq-btn hq-btn-outline !py-1.5 !border-yellow-500/30 !text-yellow-500" onclick="addNewNode()">+ Add Node</button>
+                <div class="flex gap-3 items-center">
+                    <!-- Premium Flatpickr Integration -->
+                    <button class="btn-fintech" id="master-calendar-btn">+ ADD DATE</button>
+                    <button class="btn-fintech" onclick="document.getElementById('copy-target-calendar').showPicker()">DUPLICATE DAY</button>
+                    <button class="btn-fintech" onclick="addNewNode()">+ ADD NODE</button>
                 </div>
             </div>
 
-            <!-- Nodes Container -->
-            <div class="flex flex-col gap-6" id="node-grid-container"></div>
+            <div class="node-grid" id="node-grid-container"></div>
         </div>
     </div>
 
-    <!-- Custom Resolution Modal -->
-    <div class="modal-overlay" id="custom-res-modal">
-        <div class="modal-box !max-w-sm">
-            <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-1">Custom Resolution</h3>
-            <p class="text-xs text-slate-400 mb-5">Define canvas pixel dimensions.</p>
-            <div class="flex gap-4 mb-6">
-                <div class="flex-1">
-                    <label class="block text-[10px] text-slate-500 uppercase font-bold mb-1 text-left">Width (px)</label>
-                    <input type="number" id="res-w" class="hq-input" placeholder="3328">
-                </div>
-                <div class="flex-1">
-                    <label class="block text-[10px] text-slate-500 uppercase font-bold mb-1 text-left">Height (px)</label>
-                    <input type="number" id="res-h" class="hq-input" placeholder="1024">
-                </div>
-            </div>
-            <input type="hidden" id="res-target-node">
-            <div class="flex justify-end gap-3">
-                <button class="hq-btn hq-btn-outline" onclick="closeResModal()">Cancel</button>
-                <button class="hq-btn" onclick="applyCustomRes()">Apply</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Override Modal -->
-    <div class="modal-overlay" id="override-modal">
-        <div class="modal-box">
+    <!-- PREVIEW MODAL -->
+    <div class="modal-overlay" id="preview-modal">
+        <div class="modal-box !max-w-2xl">
             <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <span class="text-blue-500">●</span> Live Override - <span id="override-node-label" class="mono text-yellow-500">NODE_XX</span>
+                    <span class="text-blue-500">●</span> LIVE PREVIEW - <span id="preview-node-label" class="mono text-yellow-500">NODE_XX</span>
                 </h3>
-                <button class="text-slate-500 hover:text-white transition" onclick="closeOverrideModal()">×</button>
+                <button class="btn-icon" onclick="document.getElementById('preview-modal').style.display='none'">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
             
-            <div class="w-full aspect-video bg-black border border-white/10 rounded-lg flex justify-center items-center mb-5 overflow-hidden relative">
-                <span class="mono text-xs text-slate-600" id="override-placeholder">Select Media to Preview</span>
+            <div class="w-full aspect-video bg-black border border-white/10 rounded flex justify-center items-center mb-4 overflow-hidden relative" id="preview-screen">
+                <span class="mono text-xs text-slate-600" id="preview-placeholder">Loading...</span>
+            </div>
+            
+            <div class="flex justify-between items-center border-t border-white/10 pt-3">
+                <div class="text-xs text-slate-400 mono">CURRENT SLOT: <span id="preview-time" class="text-white font-bold">--:--:--</span></div>
+                <div class="text-xs text-slate-400 mono">TARGET: <span id="preview-file" class="text-yellow-400 font-bold truncate max-w-[250px] inline-block align-bottom">None</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERRIDE MODAL -->
+    <div class="modal-overlay" id="override-modal">
+        <div class="modal-box !max-w-xl">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <span class="text-override-blue">●</span> MANUAL OVERRIDE - <span id="override-node-label" class="mono text-yellow-500">NODE_XX</span>
+                </h3>
+                <button class="btn-icon" onclick="document.getElementById('override-modal').style.display='none'">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="w-full aspect-video bg-black border border-white/10 rounded flex justify-center items-center mb-4 overflow-hidden relative">
+                <span class="mono text-xs text-slate-600" id="override-placeholder">Select Media to Target</span>
                 <img id="override-img" src="" alt="Preview" class="max-w-full max-h-full object-contain hidden">
                 <video id="override-vid" src="" controls muted class="max-w-full max-h-full object-contain hidden"></video>
                 <iframe id="override-iframe" src="" class="w-full h-full border-none hidden"></iframe>
             </div>
 
-            <div class="flex gap-3 mb-5">
-                <select class="hq-input hq-select w-28" id="override-type" onchange="toggleOverrideInput()">
+            <div class="flex gap-3 mb-4">
+                <select class="as-input custom-select !w-28" id="override-type" onchange="toggleOverrideInput()">
                     <option value="image">Image</option>
                     <option value="video">Video</option>
                     <option value="url">URL</option>
                 </select>
                 <div id="override-input-container" class="flex-1">
-                    <button class="hq-btn hq-btn-outline w-full h-full" onclick="document.getElementById('override-file-browser').click()">Browse File</button>
+                    <button class="btn-fintech w-full h-full" onclick="document.getElementById('override-file-browser').click()">BROWSE LOCAL FILE</button>
                 </div>
                 <input type="file" id="override-file-browser" class="hidden" accept="image/*,video/*,.pdf" onchange="handleOverrideFile(this)">
             </div>
@@ -237,29 +317,50 @@
             <input type="hidden" id="override-value">
 
             <div class="flex justify-between items-center border-t border-white/10 pt-4">
-                <label class="custom-chk flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="override-mute" checked>
-                    <div></div> <span class="text-xs text-slate-300 font-bold uppercase tracking-wider">Force Mute</span>
+                <label class="custom-checkbox">
+                    <input type="checkbox" id="override-mute" checked> FORCE MUTE OUTPUT
                 </label>
-                <button class="hq-btn hq-btn-live active !px-6" onclick="pushOverride()">Push Live</button>
+                <button class="btn-fintech btn-deploy live !px-8" onclick="pushOverride()">PUSH LIVE</button>
             </div>
         </div>
     </div>
 
-    <!-- Confirm Modal -->
+    <!-- Universal Confirmation Modal -->
     <div class="modal-overlay" id="confirm-modal">
         <div class="modal-box !max-w-sm text-center">
             <h3 class="text-sm font-bold text-red-500 uppercase tracking-wider mb-2" id="confirm-title">Confirm Action</h3>
             <p class="text-xs text-slate-400 mb-6" id="confirm-desc">Are you sure?</p>
             <div class="flex justify-center gap-3">
-                <button class="hq-btn hq-btn-outline" onclick="document.getElementById('confirm-modal').style.display='none'">Cancel</button>
-                <button class="hq-btn hq-btn-live active" id="confirm-btn">Execute</button>
+                <button class="btn-fintech" onclick="document.getElementById('confirm-modal').style.display='none'">CANCEL</button>
+                <button class="btn-fintech btn-deploy live" id="confirm-btn">EXECUTE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Resolution Modal -->
+    <div class="modal-overlay" id="custom-res-modal">
+        <div class="modal-box !max-w-sm text-center">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-1">Custom Resolution</h3>
+            <p class="text-xs text-slate-400 mb-5">Define exact canvas pixel dimensions.</p>
+            <div class="flex gap-4 mb-6">
+                <div class="flex-1 text-left">
+                    <label class="block text-[10px] text-slate-500 uppercase font-bold mb-1">Width (px)</label>
+                    <input type="number" id="res-w" class="as-input mono" placeholder="3328">
+                </div>
+                <div class="flex-1 text-left">
+                    <label class="block text-[10px] text-slate-500 uppercase font-bold mb-1">Height (px)</label>
+                    <input type="number" id="res-h" class="as-input mono" placeholder="1024">
+                </div>
+            </div>
+            <input type="hidden" id="res-target-node">
+            <div class="flex justify-end gap-3">
+                <button class="btn-fintech" onclick="document.getElementById('custom-res-modal').style.display='none'">CANCEL</button>
+                <button class="btn-fintech btn-action" onclick="applyCustomRes()">APPLY</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 🔒 SUPABASE CLOUD CONNECTION
         const SUPABASE_URL = "https://neubhkdyxkidegndrpow.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldWJoa2R5eGtpZGVnbmRycG93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjU5NzYsImV4cCI6MjA5OTU0MTk3Nn0.9s645EtQQptWQOOa5SJcF-MtJW_37pvnDxq-PsheCOE";
         let supabaseClient;
@@ -277,16 +378,41 @@
 
         function initApp() {
             if (window.supabase) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            setInterval(() => { document.getElementById('master-clock').innerText = new Date().toTimeString().split(' ')[0]; }, 1000); 
+            startClock();
+            loadDBFromStorage();
+            refreshLauncherDropdown();
             
+            // Initialize Premium Flatpickr
+            flatpickr("#master-calendar-btn", {
+                theme: "dark",
+                onChange: function(selectedDates, dateStr, instance) {
+                    addMasterDate(dateStr);
+                }
+            });
+
+            // Global click listener to close custom dropdowns
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.dropdown-container')) {
+                    document.querySelectorAll('.dropdown-container > div:last-child').forEach(menu => menu.classList.add('hidden'));
+                }
+            });
+        }
+
+        function loadDBFromStorage() {
             const saved = localStorage.getItem('vtx_db_v9');
             if (saved) { try { db = JSON.parse(saved); } catch(e) { db = { projects: {} }; } }
-            refreshLauncherDropdown();
         }
 
         function saveDB() {
             if (activeProjId) saveCurrentUIToData();
             localStorage.setItem('vtx_db_v9', JSON.stringify(db));
+        }
+
+        function startClock() { 
+            setInterval(() => { 
+                let d = new Date();
+                document.getElementById('master-clock').innerText = d.toTimeString().split(' ')[0];
+            }, 1000); 
         }
 
         function showToast(msg) {
@@ -301,11 +427,18 @@
             confirmAction = action;
             document.getElementById('confirm-modal').style.display = 'flex';
         }
-        
         document.getElementById('confirm-btn').onclick = () => {
             if(confirmAction) confirmAction();
             document.getElementById('confirm-modal').style.display = 'none';
         };
+
+        function toggleDropdown(menuId) {
+            const menu = document.getElementById(menuId);
+            document.querySelectorAll('.dropdown-container > div:last-child').forEach(m => {
+                if(m.id !== menuId) m.classList.add('hidden');
+            });
+            menu.classList.toggle('hidden');
+        }
 
         function switchWorkspace(mode) {
             document.getElementById('fleet-workspace').classList.add('hidden');
@@ -335,16 +468,25 @@
         function goToLauncher() {
             saveDB(); activeProjId = null;
             document.getElementById('dashboard-screen').classList.add('hidden');
-            document.getElementById('launcher-screen').classList.remove('hidden');
+            document.getElementById('launcher-screen').style.display = 'flex';
             refreshLauncherDropdown();
         }
 
         function refreshLauncherDropdown() {
-            const sel = document.getElementById('load-proj-select');
-            sel.innerHTML = '<option value="">Select a project...</option>';
+            const list = document.getElementById('load-proj-list');
+            list.innerHTML = '';
+            let hasProjects = false;
             for (const [id, proj] of Object.entries(db.projects)) {
-                sel.innerHTML += `<option value="${id}">${proj.name}</option>`;
+                hasProjects = true;
+                list.innerHTML += `<li class="px-3 py-2 hover:bg-yellow-500/20 hover:text-yellow-400 cursor-pointer transition" onclick="selectProjectToLoad('${id}', '${proj.name}')">${proj.name}</li>`;
             }
+            if(!hasProjects) list.innerHTML = '<li class="px-3 py-2 text-slate-500">No saved projects...</li>';
+        }
+
+        function selectProjectToLoad(id, name) {
+            document.getElementById('load-proj-select').value = id;
+            document.getElementById('load-proj-label').innerText = name;
+            document.getElementById('load-proj-menu').classList.add('hidden');
         }
 
         function createNewProject() {
@@ -360,12 +502,13 @@
                 data: { "1": { [today]: JSON.parse(JSON.stringify(defaultSchedule)) } },
                 notepad: "", stagedMedia: []
             };
+            
             saveDB(); openProject(id, true);
         }
 
         function loadSelectedProject() {
             const id = document.getElementById('load-proj-select').value;
-            if (!id) return;
+            if (!id) return showToast("SELECT A PROJECT FIRST");
             openProject(id, false);
         }
 
@@ -376,7 +519,7 @@
             if(!proj.nodeRes) proj.nodeRes = {};
             
             document.getElementById('active-proj-title').innerText = proj.name;
-            document.getElementById('launcher-screen').classList.add('hidden');
+            document.getElementById('launcher-screen').style.display = 'none';
             document.getElementById('dashboard-screen').classList.remove('hidden');
             document.getElementById('dashboard-screen').classList.add('flex');
             
@@ -386,7 +529,6 @@
             else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
         }
 
-        /* --- STREAMING_CHUNK: Asset Handlers --- */
         async function stageMediaFiles(input) {
             const files = input.files;
             if(files.length === 0) return;
@@ -416,7 +558,7 @@
             const list = document.getElementById('staged-media-list');
             list.innerHTML = "";
             if(proj.stagedMedia && proj.stagedMedia.length > 0) {
-                proj.stagedMedia.forEach(m => { list.innerHTML += `<div class="py-1 border-b border-white/5">FILE: ${m}</div>`; });
+                proj.stagedMedia.forEach(m => { list.innerHTML += `<div class="py-1.5 border-b border-white/5">FILE: ${m}</div>`; });
             } else { list.innerHTML = "No media staged yet."; }
         }
 
@@ -473,13 +615,13 @@
             reader.readAsArrayBuffer(file); input.value = "";
         }
 
-        /* --- STREAMING_CHUNK: Fleet Schedule Rendering --- */
+        /* --- STREAMING_CHUNK: Fleet Nodes & Tables --- */
         function renderMasterTabs() {
             const proj = db.projects[activeProjId];
             const bar = document.getElementById('master-date-tabs'); bar.innerHTML = "";
             proj.dates.sort().forEach(date => {
-                const btn = document.createElement('div');
-                btn.className = `hq-tab ${activeDate === date ? 'active' : ''}`;
+                const btn = document.createElement('button');
+                btn.className = `btn-fintech ${activeDate === date ? 'active' : ''}`;
                 btn.innerText = date;
                 btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); };
                 bar.appendChild(btn);
@@ -514,61 +656,56 @@
 
         function generateNodes() {
             const proj = db.projects[activeProjId];
-            const container = document.getElementById('node-grid-container');
-            container.innerHTML = "";
+            const container = document.getElementById('node-grid-container'); container.innerHTML = "";
             
             proj.nodes.forEach(id => {
                 const name = proj.nodeNames[id] || `NODE_${id}`;
                 const aspect = proj.nodeAspects[id] || "16:9";
                 const res = proj.nodeRes[id] || "1080p";
-                
-                let isCustom = !['1080p','720p','4K'].includes(res);
+                let isCustom = !['1080p','4K'].includes(res);
                 
                 let nodeHtml = `
-                    <div class="glass-panel flex flex-col" id="container-${id}">
-                        
-                        <!-- Premium Node Header -->
-                        <div class="flex justify-between items-center p-4 border-b border-white/10 bg-black/20 rounded-t-xl flex-wrap gap-4">
-                            <div class="flex items-center gap-4">
-                                <button class="text-slate-400 hover:text-white transition px-2" onclick="toggleNodeBody(${id})" id="toggle-btn-${id}">▼</button>
-                                <input class="bg-transparent text-yellow-400 font-bold font-mono outline-none border-b border-transparent focus:border-yellow-400 transition w-32" id="node-name-${id}" value="${name}" oninput="updateNodeMeta(${id})">
+                    <div class="node-card" id="container-${id}">
+                        <div class="node-header">
+                            <div class="nh-section">
+                                <button class="btn-icon" onclick="toggleNodeBody(${id})" id="toggle-btn-${id}">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                                <input type="text" class="node-title-input" id="node-name-${id}" value="${name}" oninput="updateNodeMeta(${id})">
+                            </div>
+                            <div class="nh-section">
+                                <button class="btn-fintech !px-2" id="aspect-btn-${id}" onclick="toggleAspect(${id})" style="width:45px;">${aspect}</button>
                                 
-                                <!-- Resolution & Aspect Settings -->
-                                <div class="flex bg-black/40 rounded-lg p-1 border border-white/5 items-center">
-                                    <button class="px-3 py-1 text-xs text-slate-300 hover:text-white rounded mono transition" id="aspect-btn-${id}" onclick="toggleAspect(${id})">${aspect}</button>
-                                    <span class="text-white/10 mx-1">|</span>
-                                    <select class="bg-transparent text-xs text-slate-300 outline-none px-2 cursor-pointer appearance-none mono" id="res-select-${id}" onchange="handleResChange(this, ${id})">
-                                        <option value="1080p" ${res==='1080p'?'selected':''}>1080p</option>
-                                        <option value="720p" ${res==='720p'?'selected':''}>720p</option>
-                                        <option value="4K" ${res==='4K'?'selected':''}>4K</option>
-                                        <option value="${res}" style="display:${isCustom?'block':'none'};" class="custom-val-opt" ${isCustom?'selected':''}>${res}</option>
-                                        <option value="Custom">Custom...</option>
-                                    </select>
+                                <!-- Custom Tailwind Select for Resolution -->
+                                <div class="relative inline-block text-left dropdown-container" id="res-container-${id}">
+                                    <button class="flex items-center justify-between w-[90px] px-3 py-1.5 text-[11px] text-slate-300 bg-black/40 border border-white/10 rounded mono transition hover:border-yellow-500/50" onclick="toggleDropdown('res-menu-${id}')">
+                                        <span id="res-val-${id}" class="truncate">${res}</span>
+                                        <svg class="w-3 h-3 ml-1 text-yellow-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </button>
+                                    <div id="res-menu-${id}" class="hidden absolute right-0 z-50 w-full mt-1 bg-[#111] border border-white/10 rounded shadow-xl">
+                                        <ul class="py-1 text-[11px] text-slate-300 mono">
+                                            <li class="px-3 py-1.5 hover:bg-yellow-500/20 hover:text-yellow-400 cursor-pointer" onclick="selectRes(${id}, '1080p')">1080p</li>
+                                            <li class="px-3 py-1.5 hover:bg-yellow-500/20 hover:text-yellow-400 cursor-pointer" onclick="selectRes(${id}, '4K')">4K</li>
+                                            <li class="px-3 py-1.5 hover:bg-yellow-500/20 hover:text-yellow-400 cursor-pointer border-t border-white/5 mt-1" onclick="openCustomResModal(${id})">Custom...</li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <!-- Action Buttons -->
-                            <div class="flex items-center gap-3">
-                                <button class="hq-btn hq-btn-override" onclick="openOverrideModal(${id})">Override</button>
-                                <button class="hq-btn bg-yellow-500 text-black hover:bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.1)]" id="btn-deploy-${id}" onclick="goLive(${id})">Deploy</button>
-                                <button class="text-red-500 hover:text-red-400 text-2xl font-light px-2 transition ml-2" onclick="requestDeleteNode(${id})" title="Delete Node">&times;</button>
+                            <div class="nh-section">
+                                <button type="button" class="btn-fintech btn-override" onclick="openOverrideModal(${id})">OVERRIDE</button>
+                                <button type="button" class="btn-fintech" onclick="openNodePreview(${id})">PREVIEW</button>
+                                <button type="button" class="btn-fintech btn-deploy" id="btn-deploy-${id}" onclick="goLive(${id})">DEPLOY</button>
+                                <button type="button" class="btn-icon text-red ml-1" onclick="requestDeleteNode(${id})" title="Delete Node">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
                             </div>
                         </div>
-
-                        <!-- Node Body (Table) -->
-                        <div class="node-body bg-black/20 rounded-b-xl" id="node-body-${id}">
-                            <div class="max-h-[400px] overflow-y-auto">
+                        <div class="node-body" id="node-body-${id}">
+                            <div class="data-table-wrap">
                                 <form id="form-${id}">
                                     <input type="hidden" name="tv_id" value="${id}">
-                                    <table class="w-full text-left text-xs">
-                                        <thead class="bg-black/60 sticky top-0 z-10 backdrop-blur-md">
-                                            <tr class="text-slate-500 uppercase tracking-wider border-b border-white/10">
-                                                <th class="py-3 px-4 w-28 font-bold">Time</th>
-                                                <th class="py-3 px-4 w-24 font-bold">Mode</th>
-                                                <th class="py-3 px-4 font-bold">Target Source</th>
-                                                <th class="py-3 px-4 w-10"></th>
-                                            </tr>
-                                        </thead>
+                                    <table>
+                                        <thead><tr><th style="width:100px;">Time</th><th style="width:90px;">Mode</th><th>Target Source (File/URL)</th><th style="width:30px;"></th></tr></thead>
                                         <tbody id="tbody-${id}"></tbody>
                                     </table>
                                 </form>
@@ -581,63 +718,43 @@
             });
         }
 
-        /* --- STREAMING_CHUNK: Node Meta & Custom Res --- */
         function updateNodeMeta(id) {
             const proj = db.projects[activeProjId];
             proj.nodeNames[id] = document.getElementById(`node-name-${id}`).value;
-            proj.nodeRes[id] = document.getElementById(`res-select-${id}`).value;
             autoSave();
         }
 
-        function handleResChange(selectEl, id) {
-            if (selectEl.value === 'Custom') {
-                document.getElementById('res-target-node').value = id;
-                document.getElementById('res-w').value = '';
-                document.getElementById('res-h').value = '';
-                document.getElementById('custom-res-modal').style.display = 'flex';
-                // Reset select temporarily until applied
-                selectEl.value = db.projects[activeProjId].nodeRes[id] || '1080p'; 
-            } else {
-                updateNodeMeta(id);
-            }
+        function toggleAspect(id) {
+            const proj = db.projects[activeProjId]; const btn = document.getElementById(`aspect-btn-${id}`);
+            const newAspect = btn.innerText === "16:9" ? "9:16" : "16:9";
+            btn.innerText = newAspect; proj.nodeAspects[id] = newAspect; autoSave();
         }
 
-        function closeResModal() { document.getElementById('custom-res-modal').style.display = 'none'; }
-        
+        function selectRes(id, val) {
+            db.projects[activeProjId].nodeRes[id] = val;
+            document.getElementById(`res-val-${id}`).innerText = val;
+            document.getElementById(`res-menu-${id}`).classList.add('hidden');
+            autoSave();
+        }
+
+        function openCustomResModal(id) {
+            document.getElementById(`res-menu-${id}`).classList.add('hidden');
+            document.getElementById('res-target-node').value = id;
+            document.getElementById('res-w').value = '';
+            document.getElementById('res-h').value = '';
+            document.getElementById('custom-res-modal').style.display = 'flex';
+        }
+
         function applyCustomRes() {
             const w = document.getElementById('res-w').value.trim();
             const h = document.getElementById('res-h').value.trim();
             const id = document.getElementById('res-target-node').value;
-            const selectEl = document.getElementById(`res-select-${id}`);
-            
-            if (w && h) {
-                const customRes = `${w}x${h}`;
-                let customOpt = selectEl.querySelector('.custom-val-opt');
-                if (!customOpt) {
-                    customOpt = document.createElement('option');
-                    customOpt.className = 'custom-val-opt';
-                    selectEl.insertBefore(customOpt, selectEl.options[selectEl.options.length - 1]);
-                }
-                customOpt.value = customRes;
-                customOpt.text = customRes;
-                customOpt.style.display = 'block';
-                selectEl.value = customRes;
-                updateNodeMeta(id);
-            }
-            closeResModal();
-        }
-
-        function toggleAspect(id) {
-            const proj = db.projects[activeProjId];
-            const btn = document.getElementById(`aspect-btn-${id}`);
-            const newAspect = btn.innerText === "16:9" ? "9:16" : "16:9";
-            btn.innerText = newAspect;
-            proj.nodeAspects[id] = newAspect;
-            autoSave();
+            if (w && h) selectRes(id, `${w}x${h}`);
+            document.getElementById('custom-res-modal').style.display = 'none';
         }
 
         function requestDeleteNode(id) {
-            showConfirm('Delete Node', `Permanently erase NODE_${id} and its schedule?`, () => {
+            showConfirm('Delete Node', `Permanently erase NODE_${id}?`, () => {
                 const proj = db.projects[activeProjId];
                 proj.nodes = proj.nodes.filter(n => n !== id);
                 delete proj.nodeNames[id]; delete proj.nodeAspects[id]; delete proj.nodeRes[id]; delete proj.data[id];
@@ -646,22 +763,51 @@
         }
 
         function toggleNodeBody(id) {
-            const body = document.getElementById(`node-body-${id}`);
-            const btn = document.getElementById(`toggle-btn-${id}`);
-            if (body.classList.contains('node-collapsed')) { 
-                body.classList.remove('node-collapsed'); 
-                btn.innerText = "▼"; 
+            const body = document.getElementById(`node-body-${id}`); const btn = document.getElementById(`toggle-btn-${id}`);
+            if (body.classList.contains('collapsed')) { 
+                body.classList.remove('collapsed'); 
+                btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`; 
             } else { 
-                body.classList.add('node-collapsed'); 
-                btn.innerText = "▶"; 
+                body.classList.add('collapsed'); 
+                btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`; 
             }
+        }
+
+        function openNodePreview(id) {
+            const proj = db.projects[activeProjId];
+            const sched = proj.data[id][activeDate];
+            if (!sched || sched.length === 0) return showToast("SCHEDULE IS EMPTY");
+
+            document.getElementById('preview-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
+            
+            const now = new Date().toTimeString().split(' ')[0]; // HH:MM:SS
+            let activeSlot = sched[0]; 
+            
+            for(let i=0; i<sched.length; i++) {
+                if(sched[i].time && sched[i].time <= now) { activeSlot = sched[i]; }
+            }
+
+            const screen = document.getElementById('preview-screen');
+            document.getElementById('preview-time').innerText = activeSlot.time || "--:--:--";
+            document.getElementById('preview-file').innerText = activeSlot.value || "None";
+            
+            if(!activeSlot.value) {
+                screen.innerHTML = `<span class="mono text-xs text-slate-600">NO MEDIA CONFIGURED FOR THIS SLOT</span>`;
+            } else if (activeSlot.type === 'url') {
+                screen.innerHTML = `<iframe src="${activeSlot.value}" class="w-full h-full border-none"></iframe>`;
+            } else if (activeSlot.type === 'image') {
+                screen.innerHTML = `<img src="${activeSlot.value}" class="max-w-full max-h-full object-contain">`;
+            } else if (activeSlot.type === 'video') {
+                screen.innerHTML = `<video src="${activeSlot.value}" autoplay loop muted class="max-w-full max-h-full object-contain"></video>`;
+            }
+
+            document.getElementById('preview-modal').style.display = 'flex';
         }
 
         function refreshAllNodes() { const proj = db.projects[activeProjId]; proj.nodes.forEach(id => renderTable(id)); }
 
         function renderTable(tvId) {
-            const proj = db.projects[activeProjId];
-            const tbody = document.getElementById('tbody-' + tvId);
+            const proj = db.projects[activeProjId]; const tbody = document.getElementById('tbody-' + tvId);
             if(!tbody) return; tbody.innerHTML = "";
             const sched = (proj.data[tvId] && proj.data[tvId][activeDate]) ? proj.data[tvId][activeDate] : JSON.parse(JSON.stringify(defaultSchedule));
             sched.sort((a,b) => a.time.localeCompare(b.time)).forEach((item, index) => { appendRowHTML(tvId, index, item.time, item.type, item.value); });
@@ -669,22 +815,15 @@
 
         function appendRowHTML(tvId, index, time, type, val) {
             const tbody = document.getElementById('tbody-' + tvId); const row = tbody.insertRow();
-            row.className = "border-b border-white/5 table-row-hover transition";
-            
             let sourceHtml = '';
-            if (type === 'url') { 
-                sourceHtml = `<input type="text" class="hq-input" name="value-${index}" value="${val}" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`; 
-            } else { 
-                let isReady = val ? 'border-yellow-500/50 text-yellow-400 bg-yellow-500/10' : 'border-white/10 text-slate-500 border-dashed'; 
-                let btnText = val || 'Select File'; 
-                sourceHtml = `<input type="hidden" name="value-${index}" value="${val}"><button type="button" class="w-full py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wider border transition hover:border-yellow-500/50 hover:text-yellow-400 mono ${isReady}" onclick="openBrowser(${tvId}, ${index})">${btnText}</button>`; 
-            }
+            if (type === 'url') { sourceHtml = `<input type="text" class="table-input" name="value-${index}" value="${val}" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`; } 
+            else { let btnClass = val ? 'ready' : ''; let btnText = val || 'SELECT LOCAL FILE'; sourceHtml = `<input type="hidden" name="value-${index}" value="${val}"><button type="button" class="upload-btn ${btnClass}" onclick="openBrowser(${tvId}, ${index})">${btnText}</button>`; }
 
             row.innerHTML = `
-                <td class="py-2 px-4"><input type="text" class="hq-input" name="time-${index}" value="${time}" placeholder="HH:MM:SS" oninput="checkAutoAddRow(this, ${tvId}); autoSave()"></td>
-                <td class="py-2 px-4"><select class="hq-input hq-select" name="type-${index}" onchange="changeType(${tvId}, ${index}, this.value, this); autoSave()"><option value="url" ${type==='url'?'selected':''}>URL</option><option value="image" ${type==='image'?'selected':''}>IMG</option><option value="video" ${type==='video'?'selected':''}>VID</option></select></td>
-                <td class="py-2 px-4" id="source-td-${tvId}-${index}">${sourceHtml}</td>
-                <td class="py-2 px-4 text-center"><button type="button" class="text-slate-500 hover:text-red-500 text-lg transition" onclick="removeRow(this, ${tvId})">&times;</button></td>
+                <td><input type="text" class="table-input" name="time-${index}" value="${time}" placeholder="HH:MM:SS" oninput="checkAutoAddRow(this, ${tvId}); autoSave()"></td>
+                <td><select class="table-input custom-select !px-2 !bg-transparent" name="type-${index}" onchange="changeType(${tvId}, ${index}, this.value, this); autoSave()"><option value="url" ${type==='url'?'selected':''}>URL</option><option value="image" ${type==='image'?'selected':''}>IMG</option><option value="video" ${type==='video'?'selected':''}>VID</option></select></td>
+                <td id="source-td-${tvId}-${index}">${sourceHtml}</td>
+                <td class="text-center"><button type="button" class="btn-icon text-red mx-auto" onclick="removeRow(this, ${tvId})"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></td>
             `;
         }
 
@@ -694,26 +833,24 @@
         }
 
         function removeRow(btn, tvId) {
-            const tbody = btn.closest('tbody');
-            if (tbody.rows.length <= 1) return showToast("CANNOT DELETE FINAL ROW");
+            const tbody = btn.closest('tbody'); if (tbody.rows.length <= 1) return showToast("CANNOT DELETE FINAL ROW");
             btn.closest('tr').remove(); saveCurrentUIToData(); renderTable(tvId); saveDB();
         }
 
         function changeType(tvId, index, newType, selectEl) {
             const td = document.getElementById(`source-td-${tvId}-${index}`);
-            if (newType === 'url') { td.innerHTML = `<input type="text" class="hq-input" name="value-${index}" value="" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`; } 
-            else { td.innerHTML = `<input type="hidden" name="value-${index}" value=""><button type="button" class="w-full py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wider border border-white/10 border-dashed text-slate-500 transition hover:border-yellow-500/50 hover:text-yellow-400 mono" onclick="openBrowser(${tvId}, ${index})">Select File</button>`; }
+            if (newType === 'url') { td.innerHTML = `<input type="text" class="table-input" name="value-${index}" value="" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`; } 
+            else { td.innerHTML = `<input type="hidden" name="value-${index}" value=""><button type="button" class="upload-btn" onclick="openBrowser(${tvId}, ${index})">SELECT LOCAL FILE</button>`; }
             if(selectEl) checkAutoAddRow(selectEl, tvId);
         }
 
         function openBrowser(tvId, index) { uploadTarget = { tvId, index }; document.getElementById('hidden-file-browser').click(); }
 
-        /* --- STREAMING_CHUNK: Cloud Storage & Deployment --- */
         async function handleFileSelect(input) {
             if(!input.files[0]) return;
             const file = input.files[0]; const filename = file.name;
             const td = document.getElementById(`source-td-${uploadTarget.tvId}-${uploadTarget.index}`);
-            if(td) td.innerHTML = `<button type="button" class="w-full py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wider border border-blue-500/50 text-blue-400 bg-blue-500/10 mono">UPLOADING...</button>`;
+            if(td) td.innerHTML = `<button type="button" class="upload-btn">UPLOADING...</button>`;
             
             if(supabaseClient) {
                 try {
@@ -723,96 +860,58 @@
                     const { data } = supabaseClient.storage.from('vtx_assets').getPublicUrl(`media/${cleanName}`);
                     
                     if(td) {
-                        td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${data.publicUrl}"><button type="button" class="w-full py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wider border border-yellow-500/50 text-yellow-400 bg-yellow-500/10 mono" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
+                        td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${data.publicUrl}"><button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
                         checkAutoAddRow(td.querySelector('button'), uploadTarget.tvId);
                     }
                     showToast("FILE CLOUD SYNCED");
-                } catch(e) { if(td) td.innerHTML = `<button type="button" class="w-full py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wider border border-red-500/50 text-red-500 bg-red-500/10 mono" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">UPLOAD FAILED</button>`; }
+                } catch(e) { if(td) td.innerHTML = `<button type="button" class="upload-btn" style="border-color:var(--alert-red); color:var(--alert-red);" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">UPLOAD FAILED</button>`; }
             } else {
                 if(td) {
-                    td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${filename}"><button type="button" class="w-full py-1.5 px-3 rounded text-xs font-bold uppercase tracking-wider border border-yellow-500/50 text-yellow-400 bg-yellow-500/10 mono" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
+                    td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${filename}"><button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
                     checkAutoAddRow(td.querySelector('button'), uploadTarget.tvId);
                 }
             }
             autoSave(); input.value = "";
         }
 
-        let saveTimeout;
-        function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDB(); }, 800); }
+        let saveTimeout; function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDB(); }, 800); }
 
         function saveCurrentUIToData() {
             if(!activeProjId) return; const proj = db.projects[activeProjId];
             document.querySelectorAll('form[id^="form-"]').forEach(f => {
-                const tvId = parseInt(f.elements['tv_id'].value);
-                const tb = document.getElementById('tbody-' + tvId);
-                const slots = [];
+                const tvId = parseInt(f.elements['tv_id'].value); const tb = document.getElementById('tbody-' + tvId); const slots = [];
                 for (let i = 0; i < tb.rows.length; i++) {
-                    const r = tb.rows[i];
-                    const time = r.querySelector('input[name^="time-"]').value;
-                    const type = r.querySelector('select[name^="type-"]').value;
-                    const valEl = r.querySelector('[name^="value-"]');
+                    const r = tb.rows[i]; const time = r.querySelector('input[name^="time-"]').value;
+                    const type = r.querySelector('select[name^="type-"]').value; const valEl = r.querySelector('[name^="value-"]');
                     slots.push({ time, type, value: valEl ? valEl.value : "" });
                 }
                 if(!proj.data[tvId]) proj.data[tvId] = {}; proj.data[tvId][activeDate] = slots;
             });
         }
 
+        /* --- STREAMING_CHUNK: Overrides & Deploy --- */
         async function goLive(id) {
-            saveDB();
-            const sched = db.projects[activeProjId].data[id][activeDate];
+            saveDB(); const sched = db.projects[activeProjId].data[id][activeDate];
             if (!sched || sched.length === 0) return showToast("SCHEDULE EMPTY");
             
             const btn = document.getElementById(`btn-deploy-${id}`);
-            
-            if(btn.classList.contains('active')) {
-                btn.classList.remove('hq-btn-live', 'active');
-                btn.classList.add('bg-yellow-500', 'text-black', 'hover:bg-yellow-400');
-                btn.innerText = "Deploy";
-                showToast(`NODE ${id} RETURNED TO STANDBY`);
-                return;
-            }
+            if(btn.classList.contains('live')) { btn.classList.remove('live'); btn.innerText = "DEPLOY"; showToast(`NODE ${id} RETURNED TO STANDBY`); return; }
 
-            btn.innerText = "Syncing...";
-            
-            if(!supabaseClient) {
-                setTimeout(() => { 
-                    btn.classList.remove('bg-yellow-500', 'text-black', 'hover:bg-yellow-400');
-                    btn.classList.add('hq-btn-live', 'active');
-                    btn.innerText = "LIVE"; 
-                    showToast(`SIMULATED DEPLOY`); 
-                }, 500);
-                return;
-            }
+            btn.innerText = "SYNCING...";
+            if(!supabaseClient) { setTimeout(() => { btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SIMULATED DEPLOY`); }, 500); return; }
 
             try {
                 const { data: venue, error: vErr } = await supabaseClient.from('client_access').select('id').eq('is_active', true).limit(1).single();
                 if(vErr || !venue) throw new Error("No active venue gateway found");
                 
                 await supabaseClient.from('vtx_schedules').delete().eq('client_id', venue.id).eq('node_id', id);
+                const payload = sched.filter(s => s.time && s.value).map(s => ({ client_id: venue.id, node_id: parseInt(id), time: s.time.length === 5 ? s.time + ':00' : s.time, type: s.type, value: s.value }));
                 
-                const payload = sched.filter(s => s.time && s.value).map(s => ({
-                    client_id: venue.id, node_id: parseInt(id),
-                    time: s.time.length === 5 ? s.time + ':00' : s.time,
-                    type: s.type, value: s.value
-                }));
-                
-                if(payload.length > 0) {
-                    const { error } = await supabaseClient.from('vtx_schedules').insert(payload);
-                    if(error) throw error;
-                }
-                
-                btn.classList.remove('bg-yellow-500', 'text-black', 'hover:bg-yellow-400');
-                btn.classList.add('hq-btn-live', 'active');
-                btn.innerText = "LIVE";
-                showToast(`SEQUENCE SYNCED TO CLOUD`);
-            } catch(e) {
-                btn.innerText = "ERROR";
-                btn.style.borderColor = "var(--danger-red)"; btn.style.color = "var(--danger-red)";
-                setTimeout(() => { btn.innerText = "Deploy"; btn.style.borderColor = ""; btn.style.color = ""; }, 2000);
-            }
+                if(payload.length > 0) { const { error } = await supabaseClient.from('vtx_schedules').insert(payload); if(error) throw error; }
+                btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SEQUENCE SYNCED TO CLOUD`);
+            } catch(e) { btn.innerText = "ERROR"; btn.style.borderColor = "var(--alert-red)"; btn.style.color = "var(--alert-red)"; setTimeout(() => { btn.innerText = "DEPLOY"; btn.style.borderColor = ""; btn.style.color = ""; }, 2000); }
         }
 
-        /* --- STREAMING_CHUNK: Live Override Modal --- */
         function openOverrideModal(id) {
             const proj = db.projects[activeProjId];
             document.getElementById('override-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
@@ -830,63 +929,37 @@
             document.getElementById('override-img').classList.add('hidden');
             document.getElementById('override-vid').classList.add('hidden');
             document.getElementById('override-iframe').classList.add('hidden');
-            document.getElementById('override-placeholder').classList.remove('hidden');
+            document.getElementById('override-placeholder').style.display = 'block';
             toggleOverrideInput();
         }
 
         function toggleOverrideInput() {
-            const type = document.getElementById('override-type').value;
-            const container = document.getElementById('override-input-container');
-            if (type === 'url') {
-                container.innerHTML = `<input type="text" class="hq-input w-full" id="override-url-input" placeholder="https://..." oninput="handleOverrideURL(this.value)">`;
-            } else {
-                container.innerHTML = `<button class="hq-btn hq-btn-outline w-full h-full" onclick="document.getElementById('override-file-browser').click()">Browse File</button>`;
-            }
+            const type = document.getElementById('override-type').value; const container = document.getElementById('override-input-container');
+            if (type === 'url') { container.innerHTML = `<input type="text" class="as-input mono" id="override-url-input" placeholder="https://..." oninput="handleOverrideURL(this.value)">`; } 
+            else { container.innerHTML = `<button class="btn-fintech w-full h-full" onclick="document.getElementById('override-file-browser').click()">BROWSE LOCAL FILE</button>`; }
         }
 
         function handleOverrideURL(url) {
-            document.getElementById('override-value').value = url;
-            const iframe = document.getElementById('override-iframe');
-            document.getElementById('override-placeholder').classList.add('hidden');
-            document.getElementById('override-img').classList.add('hidden');
-            document.getElementById('override-vid').classList.add('hidden');
-            iframe.src = url;
-            iframe.classList.remove('hidden');
+            document.getElementById('override-value').value = url; const iframe = document.getElementById('override-iframe');
+            document.getElementById('override-placeholder').style.display = 'none'; document.getElementById('override-img').classList.add('hidden'); document.getElementById('override-vid').classList.add('hidden');
+            iframe.src = url; iframe.classList.remove('hidden');
         }
 
         function handleOverrideFile(input) {
-            if(!input.files[0]) return;
-            const file = input.files[0];
-            const type = document.getElementById('override-type').value;
-            const reader = new FileReader();
-            
-            document.getElementById('override-placeholder').classList.add('hidden');
-            document.getElementById('override-iframe').classList.add('hidden');
-            
+            if(!input.files[0]) return; const file = input.files[0]; const type = document.getElementById('override-type').value; const reader = new FileReader();
+            document.getElementById('override-placeholder').style.display = 'none'; document.getElementById('override-iframe').classList.add('hidden');
             reader.onload = function(e) {
                 document.getElementById('override-value').value = e.target.result;
-                if (type === 'image') {
-                    const img = document.getElementById('override-img');
-                    img.src = e.target.result;
-                    img.classList.remove('hidden');
-                    document.getElementById('override-vid').classList.add('hidden');
-                } else if (type === 'video') {
-                    const vid = document.getElementById('override-vid');
-                    vid.src = e.target.result;
-                    vid.classList.remove('hidden');
-                    document.getElementById('override-img').classList.add('hidden');
-                }
+                if (type === 'image') { const img = document.getElementById('override-img'); img.src = e.target.result; img.classList.remove('hidden'); document.getElementById('override-vid').classList.add('hidden'); } 
+                else if (type === 'video') { const vid = document.getElementById('override-vid'); vid.src = e.target.result; vid.classList.remove('hidden'); document.getElementById('override-img').classList.add('hidden'); }
             }
             reader.readAsDataURL(file);
         }
 
         function pushOverride() {
-            const targetId = document.getElementById('override-target-id').value;
-            const isMuted = document.getElementById('override-mute').checked;
-            showToast(`OVERRIDE PUSHED TO NODE ${targetId} (MUTE: ${isMuted})`);
-            closeOverrideModal();
+            const targetId = document.getElementById('override-target-id').value; const isMuted = document.getElementById('override-mute').checked;
+            showToast(`OVERRIDE PUSHED TO NODE ${targetId} (MUTE: ${isMuted})`); closeOverrideModal();
         }
-
     </script>
 </body>
 </html>
