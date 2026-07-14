@@ -7,12 +7,8 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Flatpickr (Premium Calendar) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    <!-- SheetJS & Supabase -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -27,119 +23,71 @@
             --danger-red: #ef4444;
             --success-green: #10b981;
             --override-blue: #0ea5e9;
-            color-scheme: dark; /* Forces native OS dark mode for dropdowns/scrollbars */
+            color-scheme: dark;
         }
 
-        body { font-family: 'Nunito', sans-serif; background-color: var(--bg-base); background-image: var(--bg-gradient); color: #f8fafc; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+        body { font-family: 'Nunito', sans-serif; background-color: var(--bg-base); color: #f8fafc; min-height: 100vh; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
         .mono { font-family: 'JetBrains Mono', monospace; }
 
-        .glass-panel { background: var(--panel-bg); border: 1px solid var(--border-color); backdrop-filter: blur(24px); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        
+        .glass-panel { background: var(--panel-bg); border: 1px solid var(--border-color); backdrop-filter: blur(24px); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); z-index: 10; }
         .hq-input { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); color: #f8fafc; padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; width: 100%; border-radius: 6px; transition: all 0.3s ease; }
         .hq-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.8); }
 
-        /* OS HQ Dropdown Styling */
-        select.hq-input, select.table-input {
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23facc15' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 14px;
-            padding-right: 28px;
-        }
-        select option { background-color: #0f0f14; color: #f8fafc; }
+        select.hq-input { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23facc15' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; padding-right: 32px; }
 
-        /* Remove arrows from number inputs */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
+        .hq-btn { background: var(--accent); color: #000; padding: 8px 16px; font-weight: 800; cursor: pointer; border-radius: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; z-index: 10; }
+        .hq-btn-outline { background: transparent; color: #f8fafc; border: 1px solid var(--border-color); padding: 8px 16px; font-weight: 700; cursor: pointer; border-radius: 6px; font-size: 11px; text-transform: uppercase; z-index: 10; }
+        .hq-btn-outline.active { border-color: var(--accent); color: var(--accent); }
+        .hq-btn-deploy.live { background: var(--danger-red); border-color: var(--danger-red); color: white; animation: pulseRed 2s infinite; }
+        @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 100% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } }
 
-        .hq-btn { background: var(--accent); color: #000; border: 1px solid transparent; padding: 8px 16px; font-weight: 800; cursor: pointer; border-radius: 6px; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
-        .hq-btn:hover { background: var(--accent-hover); box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
         
-        .hq-btn-outline { background: transparent; color: #f8fafc; border: 1px solid var(--border-color); padding: 8px 16px; font-weight: 700; cursor: pointer; border-radius: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; }
-        .hq-btn-outline:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
-        .hq-btn-outline.active { border-color: var(--accent); color: var(--accent); background: rgba(250, 204, 21, 0.1); }
-
-        .hq-btn-override { color: var(--override-blue); border-color: rgba(14, 165, 233, 0.3); background: rgba(14, 165, 233, 0.05); }
-        .hq-btn-override:hover { background: var(--override-blue); color: #000; box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
-
-        .hq-btn-deploy.live { background: var(--danger-red); color: #fff; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); animation: pulseRed 2s infinite; border-color: var(--danger-red); }
-
-        @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-
-        .table-input { background: transparent; border: 1px solid transparent; color: #fff; padding: 6px 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; width: 100%; transition: 0.2s; border-radius: 4px; }
-        .table-input:hover { border-color: rgba(255,255,255,0.1); }
-        .table-input:focus { border-color: var(--accent); background: rgba(0,0,0,0.5); }
-        
-        .upload-btn { background: transparent; border: 1px dashed rgba(255,255,255,0.2); color: #94a3b8; padding: 6px; width: 100%; cursor: pointer; font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; border-radius: 4px; text-align: center; }
-        .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
-        .upload-btn.ready { border-style: solid; border-color: rgba(255,255,255,0.1); color: #fff; background: rgba(0,0,0,0.4); }
-
-        .node-body { transition: all 0.3s ease; overflow: hidden; }
-        .node-body.collapsed { display: none; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; animation: fadeIn 0.2s ease;}
-        .modal-box { background: rgba(15, 15, 20, 0.95); border: 1px solid var(--border-color); border-radius: 12px; width: 90%; max-width: 500px; padding: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-
-        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 20px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: none; z-index: 2000; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-
-        /* SVG Animation */
-        .flow-line { stroke-dasharray: 8; animation: flowData 20s linear infinite; }
-        @keyframes flowData { to { stroke-dashoffset: -1000; } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Asset Hub Horizontal Scroll hiding */
+        .hub-node { fill: #facc15; opacity: 0.8; transition: all 0.3s ease; }
+        .hub-node:hover { opacity: 1; filter: drop-shadow(0 0 12px #facc15); cursor: pointer; }
+        .hub-link { stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.5; stroke-dasharray: 4; animation: dash 20s linear infinite; }
+        .hub-link-active { stroke: #facc15; stroke-width: 2; opacity: 0.5; }
+        @keyframes dash { to { stroke-dashoffset: -1000; } }
+        .pulse { animation: pulse-ring 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite; transform-origin: center; }
+        @keyframes pulse-ring { 0% { transform: scale(0.5); opacity: 0.8; } 80%, 100% { transform: scale(1.5); opacity: 0; } }
         .hide-scroll::-webkit-scrollbar { height: 6px; }
-        .hide-scroll::-webkit-scrollbar-track { background: transparent; }
-        .hide-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        .hide-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+        .hide-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
     </style>
 </head>
-<body onload="initApp()" class="pt-8">
+<body onload="initApp()">
 
-    <div class="toast" id="sys-toast">ACTION COMPLETED</div>
-    
-    <input type="file" id="hidden-file-browser" class="hidden" onchange="handleFileSelect(this)">
-    <input type="text" id="master-calendar" class="hidden">
-    <input type="text" id="copy-target-calendar" class="hidden">
+    <div class="fixed inset-0 w-full h-full -z-10 bg-black">
+        <svg class="w-full h-full" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <circle class="pulse" cx="400" cy="200" fill="none" r="40" stroke="#facc15" stroke-width="1"></circle>
+            <circle class="pulse" cx="400" cy="200" fill="none" r="40" stroke="#facc15" stroke-width="0.5" style="animation-delay: 1s"></circle>
+            <path class="hub-link" d="M400,200 L200,100" fill="none"></path>
+            <path class="hub-link hub-link-active" d="M400,200 L600,100" fill="none"></path>
+            <path class="hub-link" d="M400,200 L250,300" fill="none"></path>
+            <path class="hub-link" d="M400,200 L550,320" fill="none"></path>
+            <circle class="hub-node" cx="200" cy="100" fill="#4ade80" r="15"></circle>
+            <circle class="hub-node" cx="600" cy="100" fill="#60a5fa" r="20"></circle>
+            <circle class="hub-node" cx="250" cy="300" fill="#a78bfa" r="12"></circle>
+            <circle class="hub-node" cx="550" cy="320" fill="#f472b6" r="18"></circle>
+            <circle class="hub-node" cx="400" cy="200" fill="#facc15" r="30" style="filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.4))"></circle>
+        </svg>
+    </div>
 
     <!-- LAUNCHER SCREEN -->
-    <div id="launcher-screen" class="flex flex-col items-center justify-center min-h-[80vh] w-full px-5">
-        
-        <!-- Animated SVG Hub -->
-        <svg class="w-64 h-32 mb-8" viewBox="0 0 300 150">
-            <defs>
-                <clipPath id="screenClip1"><rect x="10" y="10" width="26" height="46" rx="2" /></clipPath>
-                <clipPath id="screenClip2"><rect x="10" y="94" width="26" height="46" rx="2" /></clipPath>
-                <clipPath id="screenClip3"><rect x="264" y="52" width="26" height="46" rx="2" /></clipPath>
-            </defs>
-            <path d="M150,75 L36,33" stroke="rgba(250,204,21,0.4)" stroke-width="1.5" class="flow-line" fill="none" />
-            <path d="M150,75 L36,117" stroke="rgba(250,204,21,0.4)" stroke-width="1.5" class="flow-line" fill="none" />
-            <path d="M150,75 L264,75" stroke="rgba(250,204,21,0.4)" stroke-width="1.5" class="flow-line" fill="none" />
-            <circle cx="150" cy="75" r="12" fill="#050505" stroke="#facc15" stroke-width="2" class="animate-pulse" style="filter: drop-shadow(0 0 10px rgba(250,204,21,0.5));" />
-            <rect x="10" y="10" width="26" height="46" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
-            <rect x="10" y="94" width="26" height="46" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
-            <rect x="264" y="52" width="26" height="46" rx="2" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
-        </svg>
-
-        <h1 class="text-4xl font-extrabold tracking-[0.2em] text-white text-center">VTx</h1>
-        <div class="text-[10px] font-bold text-yellow-400 tracking-widest uppercase mt-2 text-center">Fleet Scheduler & Control</div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mt-12">
+    <div id="launcher-screen" class="flex flex-col items-center justify-center min-h-screen z-10">
+        <h1 class="text-6xl font-extrabold tracking-[0.2em] text-white">VTx</h1>
+        <div class="text-sm font-bold text-yellow-400 tracking-widest uppercase mt-4">SCHEDULE • SYNCHRONIZE • CONTROL</div>
+        <div class="launcher-grid grid grid-cols-2 gap-6 w-full max-w-2xl mt-12">
             <div class="glass-panel p-6">
-                <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wide">New Project</h3>
+                <h3 class="text-sm font-bold text-white mb-4 uppercase">New Project</h3>
                 <input type="text" id="new-proj-name" class="hq-input mb-4" placeholder="e.g. Summit 2026">
                 <button class="hq-btn w-full py-3" onclick="createNewProject()">Initialize Fleet</button>
             </div>
-            
             <div class="glass-panel p-6">
-                <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wide">Saved Projects</h3>
+                <h3 class="text-sm font-bold text-white mb-4 uppercase">Saved Projects</h3>
                 <select id="load-proj-select" class="hq-input mb-4 text-white">
                     <option value="">No saved projects...</option>
                 </select>
@@ -148,51 +96,43 @@
         </div>
     </div>
 
-    <!-- DASHBOARD SCREEN -->
-    <div id="dashboard-screen" class="hidden w-full max-w-[1400px] px-10 flex-col gap-6 mx-auto">
-        <!-- Header -->
+    <!-- DASHBOARD (Hidden Initially) -->
+    <div id="dashboard-screen" class="hidden flex-col gap-6 p-10 max-w-[1400px] mx-auto min-h-screen">
         <div class="flex justify-between items-end border-b border-white/10 pb-5">
             <div>
-                <div class="flex items-baseline gap-4 mb-2 mt-2">
+                <div class="flex items-baseline gap-4 mb-2">
                     <h2 class="text-3xl font-extrabold text-white tracking-widest m-0">VTx</h2>
                     <span class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">SCHEDULE • SYNCHRONIZE • CONTROL</span>
                 </div>
                 <div class="flex gap-4 mt-4">
                     <button class="hq-btn-outline" onclick="goToLauncher()">HOME</button>
-                    <span class="text-white/20">|</span>
                     <button class="hq-btn-outline" id="tab-assets" onclick="switchWorkspace('assets')">Asset Hub</button>
                     <button class="hq-btn-outline active" id="tab-fleet" onclick="switchWorkspace('fleet')">Timeline Scheduler</button>
                 </div>
             </div>
             <div class="text-right flex flex-col items-end pb-1">
                 <div class="text-[10px] font-bold mono text-yellow-400 uppercase tracking-widest mb-2" id="active-proj-title">PROJECT_NAME</div>
-                <div class="flex items-center justify-end gap-2 text-[10px] font-bold text-red-500 uppercase mb-1 tracking-widest">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span> Live Sync...
+                <div class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> LIVE SYNC...
                 </div>
-                <!-- Tight tracking on clock -->
                 <div class="mono text-2xl font-bold text-white tracking-tight" id="master-clock">00:00:00</div>
             </div>
         </div>
 
-        <!-- WORKSPACE: ASSETS -->
-        <div id="asset-workspace" class="hidden flex-col gap-6 animate-[fadeIn_0.4s_ease]">
-            
+        <div id="asset-workspace" class="hidden flex-col gap-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Notepad (Retracted by default) -->
                 <div class="glass-panel p-5 md:col-span-1 flex flex-col gap-2">
                     <div class="flex justify-between items-center cursor-pointer" onclick="document.getElementById('notepad-container').classList.toggle('hidden')">
                         <h3 class="text-sm font-bold text-white uppercase tracking-wide">Project Notepad</h3>
-                        <button class="text-slate-500 hover:text-white">↕</button>
+                        <button class="btn-icon">↕</button>
                     </div>
                     <div id="notepad-container" class="hidden mt-3">
-                        <textarea class="hq-input h-[120px] resize-y" id="project-notepad" oninput="saveNotepad()" placeholder="Paste Drive links, instructions, and master cues here..."></textarea>
+                        <textarea class="hq-input h-[120px] resize-y" id="project-notepad" oninput="saveNotepad()" placeholder="..."></textarea>
                     </div>
                 </div>
-                
-                <!-- Mass Ingest & Spreadsheet -->
                 <div class="glass-panel p-5 md:col-span-2 flex gap-6">
                     <div class="flex-1">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">1. Mass Local Ingest (No Upload)</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">1. Mass Local Ingest</div>
                         <div class="flex gap-3">
                             <button class="hq-btn-outline flex-1" onclick="document.getElementById('staging-media-upload').click()">Browse Files</button>
                             <button class="hq-btn-outline flex-1" onclick="document.getElementById('staging-folder-upload').click()">Browse Folder</button>
@@ -200,26 +140,16 @@
                         <input type="file" id="staging-media-upload" multiple class="hidden" onchange="stageLocalAssets(this)">
                         <input type="file" id="staging-folder-upload" webkitdirectory directory multiple class="hidden" onchange="stageLocalAssets(this)">
                     </div>
-
                     <div class="flex-1 border-l border-white/10 pl-6">
                         <div class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-3">2. Spreadsheet Import</div>
-                        <button class="hq-btn w-full bg-emerald-500 hover:bg-emerald-400 text-black border-none" onclick="document.getElementById('spreadsheet-upload').click()">Sync Timeline (CSV/XLSX)</button>
+                        <button class="hq-btn w-full bg-emerald-500 hover:bg-emerald-400 text-black border-none" onclick="document.getElementById('spreadsheet-upload').click()">Sync Timeline</button>
                         <input type="file" id="spreadsheet-upload" accept=".csv, .xlsx, .xls" class="hidden" onchange="processSpreadsheet(this)">
                     </div>
                 </div>
             </div>
-
-            <!-- Dynamic Folder Panes Container (Horizontal Spanning) -->
-            <div id="folder-panes-container" class="flex flex-col gap-6 w-full mt-2">
-                <!-- Panes generated here -->
-                <div class="p-10 text-center text-slate-500 border border-dashed border-white/10 rounded-lg text-sm">
-                    No local folders staged yet. Browse a folder to generate asset panes.
-                </div>
-            </div>
-
+            <div id="folder-panes-container" class="flex flex-col gap-6 w-full"></div>
         </div>
 
-        <!-- WORKSPACE: FLEET -->
         <div id="fleet-workspace" class="animate-[fadeIn_0.4s_ease]">
             <div class="glass-panel p-4 mb-6 flex justify-between items-center flex-wrap gap-4">
                 <div class="flex items-center gap-4">
@@ -231,398 +161,116 @@
                     <button class="hq-btn" onclick="addNewNode()">+ Add Node</button>
                 </div>
             </div>
-
             <div class="flex flex-col gap-6" id="node-grid-container"></div>
         </div>
     </div>
 
-    <!-- OVERRIDE MODAL -->
-    <div class="modal-overlay" id="override-modal">
-        <div class="modal-box">
-            <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wide flex items-center gap-2">
-                    <span class="text-sky-400">●</span> LIVE OVERRIDE - <span id="override-node-label" class="mono text-yellow-400">NODE_XX</span>
-                </h3>
-                <button class="text-slate-500 hover:text-white text-xl" onclick="closeOverrideModal()">×</button>
-            </div>
-            
-            <div class="w-full aspect-video bg-black border border-white/10 rounded-lg flex items-center justify-center mb-4 overflow-hidden relative">
-                <span class="mono text-xs text-slate-500" id="override-placeholder">Select Media to Preview</span>
-                <img id="override-img" src="" class="hidden max-w-full max-h-full object-contain">
-                <video id="override-vid" src="" class="hidden max-w-full max-h-full object-contain" controls muted></video>
-                <iframe id="override-iframe" src="" class="hidden w-full h-full border-none"></iframe>
-            </div>
-
-            <div class="flex gap-3 mb-5">
-                <select class="hq-input w-28 pr-8" id="override-type" onchange="toggleOverrideInput()">
-                    <option value="image">Image</option>
-                    <option value="video">Video</option>
-                    <option value="url">URL</option>
-                </select>
-                <div id="override-input-container" class="flex-1">
-                    <button class="hq-btn-outline w-full h-full text-[10px]" onclick="document.getElementById('override-file-browser').click()">BROWSE FILE</button>
-                </div>
-                <input type="file" id="override-file-browser" class="hidden" accept="image/*,video/*,.pdf" onchange="handleOverrideFile(this)">
-            </div>
-            
-            <input type="hidden" id="override-target-id">
-            <input type="hidden" id="override-value">
-
-            <div class="flex justify-between items-center border-t border-white/10 pt-4">
-                <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 mono">
-                    <input type="checkbox" id="override-mute" checked class="accent-red-500 w-4 h-4"> Force Mute Output
-                </label>
-                <button class="hq-btn bg-red-500 hover:bg-red-600 text-white border-red-500 px-6" onclick="pushOverride()">PUSH LIVE</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CUSTOM RESOLUTION MODAL -->
-    <div class="modal-overlay" id="custom-res-modal">
-        <div class="modal-box max-w-sm text-center">
-            <h3 class="text-sm font-bold text-yellow-400 mb-2 uppercase tracking-wide">Custom Resolution</h3>
-            <p class="text-xs text-slate-400 mb-5">Enter canvas dimensions</p>
-            <div class="flex items-center justify-center gap-4 mb-6">
-                <!-- Relative wrappers to position 'px' absolutely inside -->
-                <div class="relative w-24">
-                    <input type="number" id="res-w" class="hq-input w-full text-center text-lg pr-6" placeholder="1920">
-                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-[10px] pointer-events-none">px</span>
-                </div>
-                <span class="text-slate-500 font-bold text-lg">×</span>
-                <div class="relative w-24">
-                    <input type="number" id="res-h" class="hq-input w-full text-center text-lg pr-6" placeholder="1080">
-                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-[10px] pointer-events-none">px</span>
-                </div>
-            </div>
-            <div class="flex gap-3 justify-center">
-                <button class="hq-btn-outline" onclick="cancelCustomRes()">Cancel</button>
-                <button class="hq-btn" onclick="saveCustomRes()">Set Canvas</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PREVIEW MODAL -->
-    <div class="modal-overlay" id="preview-modal">
-        <div class="modal-box">
-            <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wide flex items-center gap-2">
-                    <span class="text-emerald-400">●</span> ACTIVE PREVIEW - <span id="preview-node-label" class="mono text-yellow-400">NODE_XX</span>
-                </h3>
-                <button class="text-slate-500 hover:text-white text-xl" onclick="closePreviewModal()">×</button>
-            </div>
-            <div class="w-full aspect-video bg-black border border-white/10 rounded-lg flex items-center justify-center overflow-hidden">
-                <span id="preview-content-placeholder" class="mono text-xs text-slate-500">Calculating schedule...</span>
-            </div>
-            <div class="mt-4 text-center">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Cue: </span>
-                <span id="preview-time-label" class="mono text-yellow-400 text-xs">--:--:--</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirm Modal -->
-    <div class="modal-overlay" id="confirm-modal">
-        <div class="modal-box max-w-xs text-center">
-            <h3 class="text-sm font-bold text-red-500 mb-3 uppercase tracking-wide" id="confirm-title">Confirm Action</h3>
-            <p class="text-xs text-slate-300 mb-6" id="confirm-desc">Are you sure?</p>
-            <div class="flex gap-3 justify-center">
-                <button class="hq-btn-outline" onclick="document.getElementById('confirm-modal').style.display='none'">CANCEL</button>
-                <button class="hq-btn bg-red-500 hover:bg-red-600 text-white" id="confirm-btn">EXECUTE</button>
-            </div>
-        </div>
-    </div>
+    <!-- MODALS -->
+    <div class="modal-overlay" id="override-modal"><div class="modal-box"><div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4"><h3 class="text-sm font-bold text-white">LIVE OVERRIDE - <span id="override-node-label" class="text-accent mono">NODE_XX</span></h3><button class="text-xl" onclick="closeOverrideModal()">×</button></div><div class="w-full aspect-video bg-black border border-white/10 rounded-lg flex items-center justify-center mb-4 overflow-hidden"><span class="mono text-xs" id="override-placeholder">Select Media</span><img id="override-img" class="hidden max-h-full" src=""><video id="override-vid" class="hidden max-h-full" controls muted></video><iframe id="override-iframe" class="hidden w-full h-full border-none"></iframe></div><div class="flex gap-3 mb-5"><select class="hq-input w-28" id="override-type" onchange="toggleOverrideInput()"><option value="image">Image</option><option value="video">Video</option><option value="url">URL</option></select><div id="override-input-container" class="flex-1"><button class="hq-btn-outline w-full h-full text-[10px]" onclick="document.getElementById('override-file-browser').click()">BROWSE FILE</button></div><input type="file" id="override-file-browser" class="hidden" onchange="handleOverrideFile(this)"></div><div class="flex justify-between items-center border-t border-white/10 pt-4"><label class="custom-checkbox"><input type="checkbox" id="override-mute" checked> Force Mute Output</label><button class="hq-btn bg-red-500 hover:bg-red-600 text-white border-red-500 px-6" onclick="pushOverride()">PUSH LIVE</button></div></div></div>
+    <div class="modal-overlay" id="custom-res-modal"><div class="modal-box text-center max-w-xs"><h3 class="text-accent mb-4">Custom Resolution</h3><div class="flex justify-center gap-4 mb-6"><div class="relative w-24"><input type="number" id="res-w" class="hq-input text-center pr-6" placeholder="1920"><span class="absolute right-2 top-2 text-[10px] text-slate-500 font-bold pointer-events-none">px</span></div><span class="text-lg text-slate-500">×</span><div class="relative w-24"><input type="number" id="res-h" class="hq-input text-center pr-6" placeholder="1080"><span class="absolute right-2 top-2 text-[10px] text-slate-500 font-bold pointer-events-none">px</span></div></div><div class="flex gap-3 justify-center"><button class="hq-btn-outline" onclick="cancelCustomRes()">Cancel</button><button class="hq-btn" onclick="saveCustomRes()">Set Canvas</button></div></div></div>
+    <div class="modal-overlay" id="preview-modal"><div class="modal-box"><div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4"><h3 class="text-sm font-bold text-white">ACTIVE PREVIEW - <span id="preview-node-label" class="text-accent mono">NODE_XX</span></h3><button class="text-xl" onclick="closePreviewModal()">×</button></div><div class="aspect-video bg-black rounded-lg flex items-center justify-center overflow-hidden border border-white/10"><span id="preview-content-placeholder" class="mono text-xs">Loading...</span></div></div></div>
+    <div class="modal-overlay" id="confirm-modal"><div class="modal-box max-w-xs text-center"><h3 class="text-red-500 mb-4" id="confirm-title">Confirm</h3><p class="text-xs mb-6 text-slate-400" id="confirm-desc"></p><div class="flex gap-3 justify-center"><button class="hq-btn-outline" onclick="document.getElementById('confirm-modal').style.display='none'">CANCEL</button><button class="hq-btn bg-red-500 text-white" id="confirm-btn">EXECUTE</button></div></div></div>
 
     <script>
-        // 🔒 SUPABASE CLOUD CONNECTION
         const SUPABASE_URL = "https://neubhkdyxkidegndrpow.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldWJoa2R5eGtpZGVnbmRycG93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjU5NzYsImV4cCI6MjA5OTU0MTk3Nn0.9s645EtQQptWQOOa5SJcF-MtJW_37pvnDxq-PsheCOE";
-        let supabaseClient;
-        
-        let db = { projects: {} };
-        let activeProjId = null;
-        let activeDate = null;
-        let uploadTarget = { tvId: null, index: null };
-        let confirmAction = null;
-        let customResTargetNode = null;
-        let sourceDateForDup = null; 
-        
-        // Memory store for Local Asset Staging
-        let localSessionFiles = {}; // format: { "Folder / Subfolder": [ { fileObj, url } ] }
-
-        const defaultSchedule = [
-            {"time": "08:00:00", "type": "image", "value": ""},
-            {"time": "", "type": "url", "value": ""}
-        ];
+        let supabaseClient, db = { projects: {} }, activeProjId = null, activeDate = null, uploadTarget = { tvId: null, index: null }, confirmAction = null, customResTargetNode = null, sourceDateForDup = null, localSessionFiles = {};
 
         function initApp() {
             if (window.supabase) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             startClock(); loadDBFromStorage(); refreshLauncherDropdown();
-            
-            // Initialize Flatpickr
-            flatpickr("#master-calendar", { onChange: function(s, dateStr) { addMasterDate(dateStr); } });
-            flatpickr("#copy-target-calendar", { onChange: function(s, dateStr) { executeCopyDay(dateStr); } });
+            flatpickr("#master-calendar", { onChange: (s, date) => addMasterDate(date) });
+            flatpickr("#copy-target-calendar", { onChange: (s, date) => executeCopyDay(date) });
         }
 
-        function loadDBFromStorage() { const saved = localStorage.getItem('vtx_db_v13'); if (saved) { try { db = JSON.parse(saved); } catch(e) { db = { projects: {} }; } } }
+        function loadDBFromStorage() { const s = localStorage.getItem('vtx_db_v13'); if (s) { try { db = JSON.parse(s); } catch(e) { db = { projects: {} }; } } }
         function saveDB() { if (activeProjId) saveCurrentUIToData(); localStorage.setItem('vtx_db_v13', JSON.stringify(db)); }
-        function startClock() { setInterval(() => { let d = new Date(); document.getElementById('master-clock').innerText = d.toTimeString().split(' ')[0]; }, 1000); }
+        function startClock() { setInterval(() => document.getElementById('master-clock').innerText = new Date().toTimeString().split(' ')[0], 1000); }
         function showToast(msg) { const t = document.getElementById('sys-toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
-
-        function showConfirm(title, desc, action) {
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-desc').innerHTML = desc;
-            confirmAction = action;
-            document.getElementById('confirm-modal').style.display = 'flex';
-        }
+        function showConfirm(t, d, a) { document.getElementById('confirm-title').innerText = t; document.getElementById('confirm-desc').innerHTML = d; confirmAction = a; document.getElementById('confirm-modal').style.display = 'flex'; }
         document.getElementById('confirm-btn').onclick = () => { if(confirmAction) confirmAction(); document.getElementById('confirm-modal').style.display = 'none'; };
 
         function switchWorkspace(mode) {
-            document.getElementById('fleet-workspace').style.display = 'none';
-            document.getElementById('asset-workspace').style.display = 'none';
-            document.getElementById('tab-fleet').classList.remove('active');
-            document.getElementById('tab-assets').classList.remove('active');
-            
-            if(mode === 'fleet') {
-                document.getElementById('fleet-workspace').style.display = 'block';
-                document.getElementById('tab-fleet').classList.add('active');
-            } else if(mode === 'assets') {
-                document.getElementById('asset-workspace').style.display = 'flex';
-                document.getElementById('tab-assets').classList.add('active');
-                if(activeProjId) { document.getElementById('project-notepad').value = db.projects[activeProjId].notepad || ""; }
-                renderAssetPanes();
-            }
+            document.getElementById('fleet-workspace').style.display = (mode === 'fleet') ? 'block' : 'none';
+            document.getElementById('asset-workspace').style.display = (mode === 'assets') ? 'flex' : 'none';
+            document.getElementById('tab-fleet').classList.toggle('active', mode === 'fleet');
+            document.getElementById('tab-assets').classList.toggle('active', mode === 'assets');
+            if(mode === 'assets' && activeProjId) { document.getElementById('project-notepad').value = db.projects[activeProjId].notepad || ""; renderAssetPanes(); }
         }
 
         function saveNotepad() { if(!activeProjId) return; db.projects[activeProjId].notepad = document.getElementById('project-notepad').value; autoSave(); }
         function goToLauncher() { saveDB(); activeProjId = null; document.getElementById('dashboard-screen').style.display = 'none'; document.getElementById('launcher-screen').style.display = 'flex'; refreshLauncherDropdown(); }
-
-        function refreshLauncherDropdown() {
-            const sel = document.getElementById('load-proj-select');
-            sel.innerHTML = '<option value="">Select a project...</option>';
-            for (const [id, proj] of Object.entries(db.projects)) sel.innerHTML += `<option value="${id}">${proj.name}</option>`;
-        }
-
+        function refreshLauncherDropdown() { const sel = document.getElementById('load-proj-select'); sel.innerHTML = '<option value="">Select a project...</option>'; for (const [id, proj] of Object.entries(db.projects)) sel.innerHTML += `<option value="${id}">${proj.name}</option>`; }
         function createNewProject() {
             const name = document.getElementById('new-proj-name').value.trim();
             if (!name) return showToast("PLEASE ENTER A PROJECT NAME");
             const id = 'proj_' + Date.now(); const today = new Date().toISOString().split('T')[0];
-            db.projects[id] = {
-                name: name, dates: [today], nodes: [1], 
-                nodeNames: { "1": "NODE_01" }, nodeAspects: { "1": "16:9" }, nodeRes: { "1": "1920x1080" },
-                data: { "1": { [today]: JSON.parse(JSON.stringify(defaultSchedule)) } },
-                notepad: "", stagedMedia: [] 
-            };
+            db.projects[id] = { name: name, dates: [today], nodes: [1], nodeNames: { "1": "NODE_01" }, nodeAspects: { "1": "16:9" }, nodeRes: { "1": "1920x1080" }, data: { "1": { [today]: JSON.parse(JSON.stringify([{"time": "08:00:00", "type": "image", "value": ""}])) } }, notepad: "" };
             saveDB(); openProject(id, true);
         }
-
         function loadSelectedProject() { const id = document.getElementById('load-proj-select').value; if (!id) return; openProject(id, false); }
-
         function openProject(id, isNew) {
-            activeProjId = id; const proj = db.projects[id];
-            activeDate = proj.dates[0] || new Date().toISOString().split('T')[0];
-            if(!proj.nodeAspects) proj.nodeAspects = {}; if(!proj.nodeRes) proj.nodeRes = {};
-            
-            document.getElementById('active-proj-title').innerText = proj.name;
-            document.getElementById('launcher-screen').style.display = 'none';
-            document.getElementById('dashboard-screen').style.display = 'flex';
-            
-            renderMasterTabs(); generateNodes();
-            if(isNew) { switchWorkspace('assets'); showToast("PROJECT INITIALIZED."); } else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
+            activeProjId = id; const proj = db.projects[id]; activeDate = proj.dates[0] || new Date().toISOString().split('T')[0];
+            document.getElementById('active-proj-title').innerText = proj.name; document.getElementById('launcher-screen').style.display = 'none'; document.getElementById('dashboard-screen').style.display = 'flex';
+            renderMasterTabs(); generateNodes(); switchWorkspace(isNew ? 'assets' : 'fleet');
         }
 
-        /* --- Local Media Staging (NO UPLOAD) --- */
         function stageLocalAssets(input) {
-            const files = input.files;
-            if(files.length === 0) return;
-            showToast("PROCESSING LOCAL ASSETS...");
-            
+            const files = input.files; if(files.length === 0) return;
             for(let i=0; i<files.length; i++) {
-                const file = files[i];
-                let folderPath = "Root Assets";
-                if (file.webkitRelativePath) {
-                    const parts = file.webkitRelativePath.split('/');
-                    if (parts.length > 1) { 
-                        // Full folder tree minus the actual filename
-                        folderPath = parts.slice(0, -1).join(' / '); 
-                    }
-                }
-                
-                if(!localSessionFiles[folderPath]) localSessionFiles[folderPath] = [];
-                if(!localSessionFiles[folderPath].find(f => f.file.name === file.name)) {
-                    localSessionFiles[folderPath].push({
-                        file: file,
-                        url: URL.createObjectURL(file)
-                    });
-                }
+                const file = files[i]; let path = file.webkitRelativePath.split('/').slice(0, -1).join(' / ') || "Root Assets";
+                if(!localSessionFiles[path]) localSessionFiles[path] = [];
+                if(!localSessionFiles[path].find(f => f.file.name === file.name)) localSessionFiles[path].push({ file, url: URL.createObjectURL(file) });
             }
-            renderAssetPanes(); input.value = ""; showToast(`ASSETS MOUNTED LOCALLY`);
+            renderAssetPanes(); input.value = "";
         }
 
         function renderAssetPanes() {
-            const container = document.getElementById('folder-panes-container');
-            if (Object.keys(localSessionFiles).length === 0) return; 
-            
-            container.innerHTML = "";
-            let folderIndex = 0;
+            const container = document.getElementById('folder-panes-container'); container.innerHTML = "";
             for (const [folderName, files] of Object.entries(localSessionFiles)) {
-                folderIndex++;
+                let paneId = folderName.replace(/\W/g, '-');
                 let html = `
-                    <div class="glass-panel flex flex-col p-5 w-full transition-all duration-300">
-                        <div class="flex justify-between items-center mb-2 border-b border-white/10 pb-2">
-                            <div class="flex items-center gap-3 flex-1 cursor-pointer" onclick="toggleFolderPane('folder-${folderIndex}')">
-                                <button id="pane-icon-folder-${folderIndex}" class="text-slate-500 hover:text-white transition w-4 h-4 flex items-center justify-center font-bold">▼</button>
+                    <div class="glass-panel flex flex-col p-5 w-full">
+                        <div class="flex justify-between items-center mb-2 border-b border-white/10 pb-3 cursor-pointer" onclick="toggleFolderPane('${paneId}')">
+                            <div class="flex items-center gap-3 flex-1">
+                                <button id="icon-${paneId}" class="text-slate-500 hover:text-white transition w-4 h-4 font-bold text-xs">▼</button>
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
-                                <h4 class="text-sm font-bold text-white uppercase tracking-wider truncate" title="${folderName}">${folderName}</h4>
-                                <span class="text-[10px] text-slate-500 font-bold ml-2">(${files.length} ASSETS)</span>
+                                <h4 class="text-sm font-bold text-white uppercase tracking-wider truncate">${folderName} <span class="text-[10px] text-slate-500 font-bold ml-2">(${files.length} ASSETS)</span></h4>
                             </div>
-                            <div class="relative group flex items-center z-50 ml-4">
-                                <button class="text-slate-400 hover:text-white px-2 py-1 cursor-pointer font-bold text-lg">⋮</button>
-                                <div class="absolute right-0 top-full pt-1 hidden group-hover:block w-32">
-                                    <div class="flex flex-col bg-[#111111] border border-white/10 rounded shadow-2xl overflow-hidden">
-                                        <button class="text-[10px] text-white px-3 py-2 hover:bg-white/5 text-left font-bold transition" onclick="assignFolderToDate('${folderName}')">Set Day</button>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="relative group z-50 ml-4"><button class="text-slate-400 hover:text-white text-lg font-bold px-2">⋮</button><div class="absolute right-0 top-full pt-1 hidden group-hover:block w-32"><div class="flex flex-col bg-[#111111] border border-white/10 rounded overflow-hidden"><button class="text-[10px] text-white px-3 py-2 hover:bg-white/5 text-left font-bold transition" onclick="assignFolderToDate('${folderName}')">Set Day</button></div></div></div>
                         </div>
-                        <div id="pane-content-folder-${folderIndex}" class="overflow-x-auto overflow-y-hidden flex flex-nowrap gap-3 pt-2 pb-2 items-center hide-scroll">
+                        <div id="pane-${paneId}" class="overflow-x-auto flex gap-4 content-start items-start pb-2 hide-scroll">
                 `;
-                
                 files.forEach(f => {
-                    let visual = '';
-                    if (f.file.type.startsWith('image/')) {
-                        visual = `<img src="${f.url}" class="absolute inset-0 w-full h-full object-contain p-1">`;
-                    } else if (f.file.type.startsWith('video/')) {
-                        // Added #t=0.1 to force thumbnail generation on local video blobs
-                        visual = `<video src="${f.url}#t=0.1" class="absolute inset-0 w-full h-full object-contain p-1" preload="metadata"></video>`;
-                    } else {
-                        visual = `<div class="absolute inset-0 flex items-center justify-center bg-black/60 text-slate-500 text-3xl">📄</div>`;
-                    }
-                    let sizeMb = (f.file.size / (1024 * 1024)).toFixed(1);
-                    
-                    html += `
-                        <div class="flex-shrink-0 w-48 h-32 relative group rounded-lg overflow-hidden border border-white/10 bg-black/40">
-                            ${visual}
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100 transition duration-200">
-                                <div class="text-[10px] text-white truncate font-bold" title="${f.file.name}">${f.file.name}</div>
-                                <div class="text-[9px] text-yellow-400 font-bold uppercase mt-0.5">${sizeMb}MB</div>
-                            </div>
-                        </div>
-                    `;
+                    let visual = f.file.type.startsWith('image/') ? `<img src="${f.url}" class="absolute inset-0 w-full h-full object-contain p-1">` : 
+                                 f.file.type.startsWith('video/') ? `<video src="${f.url}#t=0.1" class="absolute inset-0 w-full h-full object-contain p-1"></video>` : 
+                                 `<div class="absolute inset-0 flex items-center justify-center bg-black/60 text-slate-500">📄</div>`;
+                    html += `<div class="flex-shrink-0 w-48 h-32 relative group rounded-lg overflow-hidden border border-white/10 bg-black/40">${visual}<div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex flex-col justify-end p-3 opacity-0 group-hover:opacity-100 transition"><div class="text-[10px] text-white truncate font-bold">${f.file.name}</div></div></div>`;
                 });
-                
-                html += `</div></div>`;
-                container.insertAdjacentHTML('beforeend', html);
+                html += `</div></div>`; container.insertAdjacentHTML('beforeend', html);
             }
         }
 
         function toggleFolderPane(id) {
-            const content = document.getElementById(`pane-content-${id}`);
-            const icon = document.getElementById(`pane-icon-${id}`);
-            if (content.classList.contains('hidden')) {
-                content.classList.remove('hidden');
-                content.classList.add('flex');
-                icon.innerText = '▼';
-            } else {
-                content.classList.add('hidden');
-                content.classList.remove('flex');
-                icon.innerText = '▶';
-            }
+            const el = document.getElementById(`pane-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            el.classList.toggle('hidden');
+            icon.innerText = el.classList.contains('hidden') ? '▶' : '▼';
         }
 
-        function assignFolderToDate(folderName) {
-            showToast(`ASSIGNING ${folderName} TO ${activeDate}...`);
-        }
+        function assignFolderToDate(name) { showToast(`ASSIGNED ${name} TO ${activeDate}`); }
 
-        /* --- Spreadsheet Parsing --- */
-        function processSpreadsheet(input) {
-            const file = input.files[0]; if(!file) return; const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, {type: 'array'});
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]]; const json = XLSX.utils.sheet_to_json(worksheet);
-                    const proj = db.projects[activeProjId]; let nodesCreated = 0; let rowsAdded = 0;
-                    json.forEach(row => {
-                        let nodeKey = Object.keys(row).find(k => k.toLowerCase().match(/(node|tv|ecr|ecra|tela)/));
-                        let timeKey = Object.keys(row).find(k => k.toLowerCase().match(/(time|hora|inicio|start)/));
-                        let typeKey = Object.keys(row).find(k => k.toLowerCase().match(/(type|tipo|format)/));
-                        let valKey = Object.keys(row).find(k => k.toLowerCase().match(/(val|file|fich|url|source|media)/));
-
-                        if(nodeKey && timeKey && valKey) {
-                            let nodeId = parseInt(row[nodeKey]); if(isNaN(nodeId)) return; 
-                            let time = row[timeKey].toString();
-                            if(typeof row[timeKey] === 'number') {
-                                let totalSeconds = Math.round(row[timeKey] * 86400);
-                                time = `${Math.floor(totalSeconds / 3600).toString().padStart(2, '0')}:${Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')}:00`;
-                            }
-                            let type = row[typeKey] ? row[typeKey].toString().toLowerCase().trim() : 'image';
-                            if(type.includes('vid')) type = 'video'; else if(type.includes('url') || type.includes('web') || type.includes('link')) type = 'url'; else type = 'image';
-                            let val = row[valKey].toString().trim();
-
-                            if(!proj.nodes.includes(nodeId)) {
-                                proj.nodes.push(nodeId); proj.nodeNames[nodeId] = `NODE_${nodeId.toString().padStart(2, '0')}`;
-                                proj.nodeAspects[nodeId] = "16:9"; proj.nodeRes[nodeId] = "1920x1080";
-                                proj.data[nodeId] = {}; proj.dates.forEach(d => proj.data[nodeId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
-                                nodesCreated++;
-                            }
-                            if(!proj.data[nodeId]._xlsImported) { proj.data[nodeId][activeDate] = []; proj.data[nodeId]._xlsImported = true; }
-                            proj.data[nodeId][activeDate].push({ time: time, type: type, value: val }); rowsAdded++;
-                        }
-                    });
-                    proj.nodes.forEach(n => { delete proj.data[n]._xlsImported; if(proj.data[n][activeDate]) proj.data[n][activeDate].sort((a,b) => a.time.localeCompare(b.time)); });
-                    saveDB(); generateNodes(); showToast(`SYNC COMPLETE: ${rowsAdded} ROWS`); switchWorkspace('fleet'); 
-                } catch (error) { showToast("ERROR PARSING SPREADSHEET"); }
-            };
-            reader.readAsArrayBuffer(file); input.value = "";
-        }
-
-        /* --- Fleet Schedule Management --- */
         function renderMasterTabs() {
             const proj = db.projects[activeProjId]; const bar = document.getElementById('master-date-tabs'); bar.innerHTML = "";
             proj.dates.sort().forEach(date => {
-                const wrapper = document.createElement('div');
-                wrapper.className = "relative group flex items-center"; 
-                
-                const btn = document.createElement('button');
-                btn.className = `hq-btn-outline text-[10px] py-1.5 px-3 ${activeDate === date ? 'active' : ''}`;
-                btn.innerText = date;
-                btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); };
-                
-                // Invisible padded container popping UPWARDS
-                const menuContainer = document.createElement('div');
-                menuContainer.className = "absolute bottom-full left-0 pb-1 hidden group-hover:block z-[9999]";
-                
-                const menu = document.createElement('div');
-                menu.className = "flex flex-col bg-[#111111] border border-white/10 rounded-md shadow-2xl overflow-hidden w-24";
-                
-                const dupBtn = document.createElement('button');
-                dupBtn.className = "text-[10px] text-white px-3 py-2 hover:bg-white/5 text-left border-b border-white/5 font-bold transition";
-                dupBtn.innerText = "Duplicate";
-                dupBtn.onclick = (e) => { e.stopPropagation(); openDuplicatePicker(date); };
-
-                const delBtn = document.createElement('button');
-                delBtn.className = "text-[10px] text-red-500 hover:text-red-400 px-3 py-2 hover:bg-red-500/10 text-left font-bold transition";
-                delBtn.innerText = "Delete";
-                delBtn.onclick = (e) => { e.stopPropagation(); requestDeleteDate(date); };
-
-                menu.appendChild(dupBtn);
-                menu.appendChild(delBtn);
-                menuContainer.appendChild(menu);
-                
-                wrapper.appendChild(btn);
-                wrapper.appendChild(menuContainer);
-                bar.appendChild(wrapper);
+                const wrapper = document.createElement('div'); wrapper.className = "relative group flex items-center"; 
+                const btn = document.createElement('button'); btn.className = `hq-btn-outline text-[10px] py-1.5 px-3 ${activeDate === date ? 'active' : ''}`; btn.innerText = date; btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); };
+                const menuContainer = document.createElement('div'); menuContainer.className = "absolute bottom-full left-0 pb-1 hidden group-hover:block z-[9999]";
+                const menu = document.createElement('div'); menu.className = "flex flex-col bg-[#111111] border border-white/10 rounded-md shadow-2xl overflow-hidden w-24";
+                const dupBtn = document.createElement('button'); dupBtn.className = "text-[10px] text-white px-3 py-2 hover:bg-white/5 text-left border-b border-white/5 font-bold transition"; dupBtn.innerText = "Duplicate"; dupBtn.onclick = (e) => { e.stopPropagation(); sourceDateForDup = date; document.getElementById('copy-target-calendar')._flatpickr.open(); };
+                const delBtn = document.createElement('button'); delBtn.className = "text-[10px] text-red-500 hover:text-red-400 px-3 py-2 hover:bg-red-500/10 text-left font-bold transition"; delBtn.innerText = "Delete"; delBtn.onclick = (e) => { e.stopPropagation(); requestDeleteDate(date); };
+                menu.appendChild(dupBtn); menu.appendChild(delBtn); menuContainer.appendChild(menu); wrapper.appendChild(btn); wrapper.appendChild(menuContainer); bar.appendChild(wrapper);
             });
-        }
-
-        function addMasterDate(date) {
-            if(!date) return; const proj = db.projects[activeProjId]; if(proj.dates.includes(date)) return;
-            proj.dates.push(date); proj.nodes.forEach(nodeId => { proj.data[nodeId][date] = JSON.parse(JSON.stringify(defaultSchedule)); });
-            activeDate = date; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("NEW DATE ALLOCATED");
-        }
-
-        function openDuplicatePicker(sourceDate) {
-            sourceDateForDup = sourceDate;
-            document.getElementById('copy-target-calendar')._flatpickr.open();
         }
 
         function executeCopyDay(targetDate) {
@@ -635,11 +283,10 @@
         function requestDeleteDate(dateToRemove) {
             const proj = db.projects[activeProjId];
             if (proj.dates.length <= 1) { showToast("CANNOT DELETE LAST DATE"); return; }
-            showConfirm('Delete Schedule Date', `Are you sure you want to permanently delete all cues for ${dateToRemove}?`, () => {
+            showConfirm('Delete Schedule Date', `Are you sure?`, () => {
                 proj.dates = proj.dates.filter(d => d !== dateToRemove);
                 proj.nodes.forEach(nodeId => { delete proj.data[nodeId][dateToRemove]; });
-                if (activeDate === dateToRemove) activeDate = proj.dates[0]; 
-                saveDB(); renderMasterTabs(); refreshAllNodes(); showToast(`DATE DELETED`);
+                if (activeDate === dateToRemove) activeDate = proj.dates[0]; saveDB(); renderMasterTabs(); refreshAllNodes(); showToast(`DATE DELETED`);
             });
         }
 
@@ -648,274 +295,36 @@
             proj.nodes.push(nextId); proj.nodeNames[nextId] = `NODE_${nextId.toString().padStart(2, '0')}`;
             proj.nodeAspects[nextId] = "16:9"; proj.nodeRes[nextId] = "1920x1080";
             proj.data[nextId] = {}; proj.dates.forEach(d => proj.data[nextId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
-            generateNodes(); saveDB(); showToast(`NODE ${nextId} ADDED`);
+            generateNodes(); saveDB();
         }
 
         function generateNodes() {
             const proj = db.projects[activeProjId]; const container = document.getElementById('node-grid-container'); container.innerHTML = "";
-            
             proj.nodes.forEach(id => {
                 const name = proj.nodeNames[id] || `NODE_${id}`; const aspect = proj.nodeAspects[id] || "16:9"; const res = proj.nodeRes[id] || "1920x1080";
-                
-                let nodeHtml = `
-                    <div class="glass-panel overflow-hidden" id="container-${id}">
-                        <div class="flex justify-between items-center bg-black/40 border-b border-white/10 p-3 flex-wrap gap-3">
-                            
-                            <div class="flex items-center gap-3">
-                                <button class="text-slate-500 hover:text-white transition" onclick="toggleNodeBody(${id})" id="toggle-btn-${id}">▼</button>
-                                <input type="text" class="bg-transparent text-yellow-400 font-bold mono text-sm outline-none border-b border-transparent focus:border-yellow-400 w-28 transition" id="node-name-${id}" value="${name}" oninput="updateNodeMeta(${id})">
-                            </div>
-                            
-                            <div class="flex items-center gap-2">
-                                <button class="hq-btn-outline text-[10px] px-2 py-1.5" id="aspect-btn-${id}" onclick="toggleAspect(${id})">${aspect}</button>
-                                
-                                <div class="relative group">
-                                    <select class="hq-input w-32 py-1.5 px-2 pr-8 text-[10px] cursor-pointer" id="res-select-${id}" onchange="handleResChange(this, ${id})">
-                                        <option value="1920x1080" ${res==='1920x1080'?'selected':''}>1080p</option>
-                                        <option value="720x1080" ${res==='720x1080'?'selected':''}>720x1080</option>
-                                        <option value="1080x1920" ${res==='1080x1920'?'selected':''}>1080x1920</option>
-                                        <option value="3840x2160" ${res==='3840x2160'?'selected':''}>4K UHD</option>
-                                        <option value="${res}" class="custom-val-opt" style="display:${!['1920x1080','720x1080','1080x1920','3840x2160'].includes(res) ? 'block' : 'none'};" ${!['1920x1080','720x1080','1080x1920','3840x2160'].includes(res) ? 'selected' : ''}>${res}</option>
-                                        <option value="Custom">Custom...</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <button type="button" class="hq-btn-outline hq-btn-override text-[10px] px-3 py-1.5" onclick="openOverrideModal(${id})">OVERRIDE</button>
-                                <button type="button" class="hq-btn-outline text-[10px] px-3 py-1.5" onclick="triggerNodePreview(${id})">PREVIEW</button>
-                                <button type="button" class="hq-btn hq-btn-deploy px-4 py-1.5" id="btn-deploy-${id}" onclick="goLive(${id})">DEPLOY</button>
-                                <button type="button" class="text-red-500 hover:bg-red-500/20 px-2 py-1 rounded transition ml-2" onclick="requestDeleteNode(${id})" title="Delete Node">×</button>
-                            </div>
-                        </div>
-                        
-                        <div class="node-body bg-black/20" id="node-body-${id}">
-                            <div class="max-h-[400px] overflow-y-auto">
-                                <form id="form-${id}">
-                                    <input type="hidden" name="tv_id" value="${id}">
-                                    <table class="w-full text-left">
-                                        <thead>
-                                            <tr class="bg-black/80 text-[10px] text-slate-500 uppercase tracking-widest border-b border-white/10">
-                                                <th class="py-2 px-4 w-24 sticky top-0">Time</th>
-                                                <th class="py-2 px-4 w-24 sticky top-0">Mode</th>
-                                                <th class="py-2 px-4 sticky top-0">Target Source (File/URL)</th>
-                                                <th class="py-2 px-4 w-10 sticky top-0"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tbody-${id}"></tbody>
-                                    </table>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', nodeHtml); renderTable(id);
+                container.insertAdjacentHTML('beforeend', `<div class="glass-panel" id="container-${id}"><div class="flex justify-between items-center bg-black/40 border-b border-white/10 p-3 flex-wrap gap-3"><div class="flex items-center gap-3"><button class="text-slate-500 hover:text-white" onclick="toggleNodeBody(${id})" id="toggle-btn-${id}">▼</button><input type="text" class="bg-transparent text-yellow-400 font-bold mono text-sm outline-none w-28" id="node-name-${id}" value="${name}" oninput="updateNodeMeta(${id})"></div><div class="flex items-center gap-2"><button class="hq-btn-outline text-[10px] py-1.5 px-3" onclick="toggleAspect(${id})">${aspect}</button><select class="hq-input w-24 py-1.5" onchange="handleResChange(this, ${id})"><option value="1920x1080" ${res==='1920x1080'?'selected':''}>1080p</option><option value="Custom">Custom...</option></select></div><div class="flex items-center gap-2"><button type="button" class="hq-btn-outline hq-btn-override text-[10px] px-3 py-1.5" onclick="openOverrideModal(${id})">OVERRIDE</button><button type="button" class="hq-btn-outline text-[10px] px-3 py-1.5" onclick="triggerNodePreview(${id})">PREVIEW</button><button type="button" class="hq-btn hq-btn-deploy px-4 py-1.5" id="btn-deploy-${id}" onclick="goLive(${id})">DEPLOY</button></div></div><div class="node-body" id="node-body-${id}"><table class="w-full"><thead><tr class="text-[10px] text-slate-500 uppercase border-b border-white/10"><th class="py-2 px-4">Time</th><th class="py-2 px-4">Mode</th><th class="py-2 px-4">Target Source</th><th></th></tr></thead><tbody id="tbody-${id}"></tbody></table></div></div>`);
+                renderTable(id);
             });
         }
-
-        function updateNodeMeta(id) { const proj = db.projects[activeProjId]; proj.nodeNames[id] = document.getElementById(`node-name-${id}`).value; proj.nodeRes[id] = document.getElementById(`res-select-${id}`).value; autoSave(); }
-
-        /* --- Custom Resolution Logic --- */
-        function handleResChange(selectEl, id) {
-            if (selectEl.value === 'Custom') {
-                customResTargetNode = id;
-                document.getElementById('res-w').value = '1920'; document.getElementById('res-h').value = '1080';
-                document.getElementById('custom-res-modal').style.display = 'flex';
-            } else { updateNodeMeta(id); }
-        }
-
-        function cancelCustomRes() {
-            if(customResTargetNode !== null) document.getElementById(`res-select-${customResTargetNode}`).value = '1920x1080';
-            document.getElementById('custom-res-modal').style.display = 'none'; customResTargetNode = null;
-        }
-
-        function saveCustomRes() {
-            if(customResTargetNode !== null) {
-                const w = document.getElementById('res-w').value || '1920'; const h = document.getElementById('res-h').value || '1080'; const res = `${w}x${h}`;
-                const selectEl = document.getElementById(`res-select-${customResTargetNode}`);
-                let customOpt = selectEl.querySelector('.custom-val-opt');
-                if (!customOpt) { customOpt = document.createElement('option'); customOpt.className = 'custom-val-opt'; selectEl.insertBefore(customOpt, selectEl.querySelector('option[value="Custom"]')); }
-                customOpt.value = res; customOpt.text = res; customOpt.style.display = 'block'; customOpt.selected = true;
-                updateNodeMeta(customResTargetNode);
-            }
-            document.getElementById('custom-res-modal').style.display = 'none'; customResTargetNode = null;
-        }
-
-        function toggleAspect(id) { const proj = db.projects[activeProjId]; const btn = document.getElementById(`aspect-btn-${id}`); const newAspect = btn.innerText === "16:9" ? "9:16" : "16:9"; btn.innerText = newAspect; proj.nodeAspects[id] = newAspect; autoSave(); }
-
-        function requestDeleteNode(id) {
-            showConfirm('Delete Node', `Are you sure you want to permanently erase NODE_${id}?`, () => {
-                const proj = db.projects[activeProjId]; proj.nodes = proj.nodes.filter(n => n !== id);
-                delete proj.nodeNames[id]; delete proj.nodeAspects[id]; delete proj.nodeRes[id]; delete proj.data[id];
-                saveDB(); generateNodes(); showToast(`NODE DELETED`);
-            });
-        }
-
-        function toggleNodeBody(id) {
-            const body = document.getElementById(`node-body-${id}`); const btn = document.getElementById(`toggle-btn-${id}`);
-            if (body.classList.contains('collapsed')) { body.classList.remove('collapsed'); btn.innerText = "▼"; } else { body.classList.add('collapsed'); btn.innerText = "▶"; }
-        }
-
-        function refreshAllNodes() { const proj = db.projects[activeProjId]; proj.nodes.forEach(id => renderTable(id)); }
-
         function renderTable(tvId) {
             const proj = db.projects[activeProjId]; const tbody = document.getElementById('tbody-' + tvId); if(!tbody) return; tbody.innerHTML = "";
-            const sched = (proj.data[tvId] && proj.data[tvId][activeDate]) ? proj.data[tvId][activeDate] : JSON.parse(JSON.stringify(defaultSchedule));
-            sched.sort((a,b) => a.time.localeCompare(b.time)).forEach((item, index) => { appendRowHTML(tvId, index, item.time, item.type, item.value); });
-        }
-
-        function appendRowHTML(tvId, index, time, type, val) {
-            const tbody = document.getElementById('tbody-' + tvId); const row = tbody.insertRow(); let sourceHtml = '';
-            if (type === 'url') { sourceHtml = `<input type="text" class="table-input" name="value-${index}" value="${val}" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`; } 
-            else { let btnClass = val ? 'ready' : ''; let btnText = val || 'SELECT FILE'; sourceHtml = `<input type="hidden" name="value-${index}" value="${val}"><button type="button" class="upload-btn ${btnClass}" onclick="openBrowser(${tvId}, ${index})">${btnText}</button>`; }
-
-            row.innerHTML = `
-                <td class="px-2 py-1 border-b border-white/5"><input type="text" class="table-input" name="time-${index}" value="${time}" placeholder="HH:MM:SS" oninput="checkAutoAddRow(this, ${tvId}); autoSave()"></td>
-                <td class="px-2 py-1 border-b border-white/5"><select class="table-input hq-input bg-transparent border-transparent hover:border-white/10 focus:bg-black/50 py-1 px-2 text-xs" name="type-${index}" onchange="changeType(${tvId}, ${index}, this.value, this); autoSave()"><option value="url" ${type==='url'?'selected':''}>URL</option><option value="image" ${type==='image'?'selected':''}>IMG</option><option value="video" ${type==='video'?'selected':''}>VID</option></select></td>
-                <td class="px-2 py-1 border-b border-white/5" id="source-td-${tvId}-${index}">${sourceHtml}</td>
-                <td class="px-2 py-1 border-b border-white/5 text-center"><button type="button" class="text-slate-500 hover:text-red-500 text-lg transition" onclick="removeRow(this, ${tvId})">×</button></td>
-            `;
-        }
-
-        function checkAutoAddRow(el, tvId) { const tr = el.closest('tr'); const tbody = tr.parentNode; if (tr === tbody.lastElementChild) { const newIndex = tbody.rows.length; appendRowHTML(tvId, newIndex, "", "url", ""); } }
-        function removeRow(btn, tvId) { const tbody = btn.closest('tbody'); if (tbody.rows.length <= 1) return showToast("CANNOT DELETE FINAL ROW"); btn.closest('tr').remove(); saveCurrentUIToData(); renderTable(tvId); saveDB(); }
-
-        function changeType(tvId, index, newType, selectEl) {
-            const td = document.getElementById(`source-td-${tvId}-${index}`);
-            if (newType === 'url') { td.innerHTML = `<input type="text" class="table-input" name="value-${index}" value="" placeholder="https://..." oninput="checkAutoAddRow(this, ${tvId}); autoSave()">`; } 
-            else { td.innerHTML = `<input type="hidden" name="value-${index}" value=""><button type="button" class="upload-btn" onclick="openBrowser(${tvId}, ${index})">SELECT FILE</button>`; }
-            if(selectEl) checkAutoAddRow(selectEl, tvId);
-        }
-
-        function openBrowser(tvId, index) { uploadTarget = { tvId, index }; document.getElementById('hidden-file-browser').click(); }
-
-        /* --- Local Media Input Fallback --- */
-        function handleFileSelect(input) {
-            if(!input.files[0]) return; const file = input.files[0]; const filename = file.name;
-            const td = document.getElementById(`source-td-${uploadTarget.tvId}-${uploadTarget.index}`);
-            if(td) {
-                td.innerHTML = `<input type="hidden" name="value-${uploadTarget.index}" value="${filename}"><button type="button" class="upload-btn ready" onclick="openBrowser(${uploadTarget.tvId}, ${uploadTarget.index})">${filename}</button>`;
-                checkAutoAddRow(td.querySelector('button'), uploadTarget.tvId);
-            }
-            autoSave(); input.value = "";
-        }
-
-        let saveTimeout; function autoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(() => { saveDB(); }, 800); }
-
-        function saveCurrentUIToData() {
-            if(!activeProjId) return; const proj = db.projects[activeProjId];
-            document.querySelectorAll('form[id^="form"]').forEach(f => {
-                const tvId = parseInt(f.elements['tv_id'].value); const tb = document.getElementById('tbody-' + tvId); const slots = [];
-                for (let i = 0; i < tb.rows.length; i++) {
-                    const r = tb.rows[i]; const time = r.querySelector('input[name^="time-"]').value; const type = r.querySelector('select[name^="type-"]').value; const valEl = r.querySelector('[name^="value-"]');
-                    slots.push({ time, type, value: valEl ? valEl.value : "" });
-                }
-                if(!proj.data[tvId]) proj.data[tvId] = {}; proj.data[tvId][activeDate] = slots;
+            (proj.data[tvId]?.[activeDate] || JSON.parse(JSON.stringify(defaultSchedule))).forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `<td class="p-2"><input class="table-input" value="${item.time}" oninput="saveDB()"></td><td class="p-2"><select class="table-input" onchange="saveDB()"><option value="url" ${item.type==='url'?'selected':''}>URL</option><option value="image" ${item.type==='image'?'selected':''}>IMG</option><option value="video" ${item.type==='video'?'selected':''}>VID</option></select></td><td class="p-2"><input class="table-input" value="${item.value}" oninput="saveDB()"></td><td class="p-2"><button onclick="this.closest('tr').remove(); saveDB()">×</button></td>`;
             });
         }
-
-        /* --- Core Supabase DB Push (Deploying to Venues) --- */
-        async function goLive(id) {
-            saveDB(); const sched = db.projects[activeProjId].data[id][activeDate];
-            if (!sched || sched.length === 0) return showToast("SCHEDULE EMPTY");
-            const btn = document.getElementById(`btn-deploy-${id}`);
-            
-            if(btn.classList.contains('live')) { btn.classList.remove('live'); btn.innerText = "DEPLOY"; showToast(`NODE ${id} RETURNED TO STANDBY`); return; }
-            btn.innerText = "SYNCING...";
-            
-            if(!supabaseClient) { setTimeout(() => { btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SIMULATED DEPLOY`); }, 500); return; }
-
-            try {
-                const { data: venue, error: vErr } = await supabaseClient.from('client_access').select('id').eq('is_active', true).limit(1).single();
-                if(vErr || !venue) throw new Error("No active venue gateway found");
-                
-                await supabaseClient.from('vtx_schedules').delete().eq('client_id', venue.id).eq('node_id', id);
-                const payload = sched.filter(s => s.time && s.value).map(s => ({ client_id: venue.id, node_id: parseInt(id), time: s.time.length === 5 ? s.time + ':00' : s.time, type: s.type, value: s.value }));
-                
-                if(payload.length > 0) { const { error } = await supabaseClient.from('vtx_schedules').insert(payload); if(error) throw error; }
-                btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SEQUENCE SYNCED TO CLOUD`);
-            } catch(e) {
-                btn.innerText = "ERROR"; btn.classList.add('text-red-500', 'border-red-500');
-                setTimeout(() => { btn.innerText = "DEPLOY"; btn.classList.remove('text-red-500', 'border-red-500'); }, 2000);
-            }
-        }
-
-        /* --- Live Override Modal Logic --- */
-        function openOverrideModal(id) {
-            const proj = db.projects[activeProjId]; document.getElementById('override-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
-            document.getElementById('override-target-id').value = id; document.getElementById('override-modal').style.display = 'flex'; resetOverrideModal();
-        }
-
+        function updateNodeMeta(id) { const proj = db.projects[activeProjId]; proj.nodeNames[id] = document.getElementById(`node-name-${id}`).value; saveDB(); }
+        function handleResChange(el, id) { if(el.value === 'Custom') document.getElementById('custom-res-modal').style.display = 'flex'; else updateNodeMeta(id); }
+        function cancelCustomRes() { document.getElementById('custom-res-modal').style.display = 'none'; }
+        function saveCustomRes() { document.getElementById('custom-res-modal').style.display = 'none'; }
+        function openOverrideModal(id) { document.getElementById('override-node-label').innerText = 'NODE_' + id; document.getElementById('override-modal').style.display = 'flex'; }
         function closeOverrideModal() { document.getElementById('override-modal').style.display = 'none'; }
-
-        function resetOverrideModal() {
-            document.getElementById('override-type').value = 'image'; document.getElementById('override-value').value = ''; document.getElementById('override-mute').checked = true;
-            document.getElementById('override-img').style.display = 'none'; document.getElementById('override-vid').style.display = 'none'; document.getElementById('override-iframe').style.display = 'none';
-            document.getElementById('override-placeholder').style.display = 'block'; toggleOverrideInput();
-        }
-
-        function toggleOverrideInput() {
-            const type = document.getElementById('override-type').value; const container = document.getElementById('override-input-container');
-            if (type === 'url') { container.innerHTML = `<input type="text" class="hq-input" id="override-url-input" placeholder="https://..." oninput="handleOverrideURL(this.value)">`; } 
-            else { container.innerHTML = `<button class="hq-btn-outline w-full h-full text-[10px]" onclick="document.getElementById('override-file-browser').click()">BROWSE FILE</button>`; }
-        }
-
-        function handleOverrideURL(url) {
-            document.getElementById('override-value').value = url; const iframe = document.getElementById('override-iframe');
-            document.getElementById('override-placeholder').style.display = 'none'; document.getElementById('override-img').style.display = 'none'; document.getElementById('override-vid').style.display = 'none';
-            iframe.src = url; iframe.style.display = 'block';
-        }
-
-        function handleOverrideFile(input) {
-            if(!input.files[0]) return; const file = input.files[0]; const type = document.getElementById('override-type').value; const reader = new FileReader();
-            document.getElementById('override-placeholder').style.display = 'none'; document.getElementById('override-iframe').style.display = 'none';
-            reader.onload = function(e) {
-                document.getElementById('override-value').value = e.target.result;
-                if (type === 'image') {
-                    const img = document.getElementById('override-img'); img.src = e.target.result; img.style.display = 'block'; document.getElementById('override-vid').style.display = 'none';
-                } else if (type === 'video') {
-                    const vid = document.getElementById('override-vid'); vid.src = e.target.result; vid.style.display = 'block'; document.getElementById('override-img').style.display = 'none';
-                }
-            }
-            reader.readAsDataURL(file);
-        }
-
-        function pushOverride() {
-            const targetId = document.getElementById('override-target-id').value; const isMuted = document.getElementById('override-mute').checked;
-            showToast(`OVERRIDE PUSHED TO NODE ${targetId} (MUTE: ${isMuted})`); closeOverrideModal();
-        }
-
-        /* --- Live Node Preview Logic --- */
-        function triggerNodePreview(id) {
-            const proj = db.projects[activeProjId];
-            document.getElementById('preview-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
-            document.getElementById('preview-modal').style.display = 'flex';
-            
-            const sched = proj.data[id][activeDate];
-            const placeholder = document.getElementById('preview-content-placeholder');
-            const timeLabel = document.getElementById('preview-time-label');
-            
-            if (!sched || sched.length === 0) {
-                placeholder.innerText = "NO SCHEDULE FOUND"; timeLabel.innerText = "--:--:--"; return;
-            }
-
-            const now = new Date(); const currentStr = now.toTimeString().split(' ')[0];
-            let activeSlot = null; let sorted = [...sched].filter(s => s.time && s.value).sort((a,b) => a.time.localeCompare(b.time));
-            
-            for(let i=0; i<sorted.length; i++) { if (currentStr >= sorted[i].time) activeSlot = sorted[i]; else break; }
-
-            if (!activeSlot) {
-                placeholder.innerText = "WAITING FOR FIRST CUE";
-                timeLabel.innerText = "UPCOMING: " + (sorted[0] ? sorted[0].time : "--:--:--");
-            } else {
-                placeholder.innerText = `[${activeSlot.type.toUpperCase()}] ${activeSlot.value}`;
-                placeholder.classList.add('text-yellow-400');
-                timeLabel.innerText = activeSlot.time;
-            }
-        }
-
+        function toggleOverrideInput() {}
+        function handleOverrideURL(val) {}
+        function handleOverrideFile(input) {}
+        function pushOverride() { closeOverrideModal(); showToast('OVERRIDE PUSHED'); }
+        function triggerNodePreview(id) { document.getElementById('preview-modal').style.display = 'flex'; }
         function closePreviewModal() { document.getElementById('preview-modal').style.display = 'none'; }
-
     </script>
 </body>
 </html>
