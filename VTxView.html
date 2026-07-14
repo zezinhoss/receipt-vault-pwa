@@ -91,13 +91,7 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Asset Hub Horizontal Scroll hiding */
-        .hide-scroll::-webkit-scrollbar { height: 6px; }
-        .hide-scroll::-webkit-scrollbar-track { background: transparent; }
-        .hide-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        .hide-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
-
-        /* Background Animation Styles */
+        /* Background SVG Animations */
         .hub-node { fill: #facc15; opacity: 0.8; transition: all 0.3s ease; }
         .hub-node:hover { opacity: 1; filter: drop-shadow(0 0 12px #facc15); cursor: pointer; }
         .hub-link { stroke: rgba(255, 255, 255, 0.1); stroke-width: 1.5; stroke-dasharray: 4; animation: dash 20s linear infinite; }
@@ -105,6 +99,12 @@
         @keyframes dash { to { stroke-dashoffset: -1000; } }
         .pulse { animation: pulse-ring 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite; transform-origin: center; }
         @keyframes pulse-ring { 0% { transform: scale(0.5); opacity: 0.8; } 80%, 100% { transform: scale(1.5); opacity: 0; } }
+
+        /* Asset Hub Horizontal Scroll hiding */
+        .hide-scroll::-webkit-scrollbar { height: 6px; }
+        .hide-scroll::-webkit-scrollbar-track { background: transparent; }
+        .hide-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .hide-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
     </style>
 </head>
 <body onload="initApp()" class="pt-8">
@@ -115,76 +115,77 @@
     <input type="text" id="master-calendar" class="hidden">
     <input type="text" id="copy-target-calendar" class="hidden">
 
+    <!-- BACKGROUND ANIMATION (Launcher Only) -->
+    <div id="launcher-bg" class="fixed top-0 left-0 w-full h-[500px] -z-10 pointer-events-none flex justify-center opacity-25 pt-16">
+        <svg class="w-full max-w-[800px] h-full" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+            <circle class="pulse" cx="400" cy="200" fill="none" r="40" stroke="#facc15" stroke-width="1"></circle>
+            <circle class="pulse" cx="400" cy="200" fill="none" r="40" stroke="#facc15" stroke-width="0.5" style="animation-delay: 1s"></circle>
+            <path class="hub-link" d="M400,200 L200,100" fill="none"></path>
+            <path class="hub-link hub-link-active" d="M400,200 L600,100" fill="none"></path>
+            <path class="hub-link" d="M400,200 L250,300" fill="none"></path>
+            <path class="hub-link" d="M400,200 L550,320" fill="none"></path>
+            <circle class="hub-node" cx="200" cy="100" fill="#4ade80" r="15"></circle>
+            <circle class="hub-node" cx="600" cy="100" fill="#60a5fa" r="20"></circle>
+            <circle class="hub-node" cx="250" cy="300" fill="#a78bfa" r="12"></circle>
+            <circle class="hub-node" cx="550" cy="320" fill="#f472b6" r="18"></circle>
+            <circle class="hub-node" cx="400" cy="200" fill="#facc15" r="30" style="filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.4))"></circle>
+        </svg>
+    </div>
+
     <!-- LAUNCHER SCREEN -->
-    <div id="launcher-screen" class="relative flex flex-col items-center justify-center min-h-[80vh] w-full px-5 overflow-hidden">
+    <div id="launcher-screen" class="relative flex flex-col items-center justify-center min-h-[80vh] w-full px-5 z-10">
         
-        <!-- Background Animation (25% Opacity) -->
-        <div class="absolute inset-0 w-full h-full -z-10 opacity-25 pointer-events-none flex items-center justify-center">
-            <svg class="w-full h-full max-w-[1200px]" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-                <!-- Pulse Rings for Hub -->
-                <circle class="pulse" cx="400" cy="200" fill="none" r="40" stroke="#facc15" stroke-width="1"></circle>
-                <circle class="pulse" cx="400" cy="200" fill="none" r="40" stroke="#facc15" stroke-width="0.5" style="animation-delay: 1s"></circle>
-                <!-- Links -->
-                <path class="hub-link" d="M400,200 L200,100" fill="none"></path>
-                <path class="hub-link hub-link-active" d="M400,200 L600,100" fill="none"></path>
-                <path class="hub-link" d="M400,200 L250,300" fill="none"></path>
-                <path class="hub-link" d="M400,200 L550,320" fill="none"></path>
-                <!-- Peripheral Nodes -->
-                <circle class="hub-node" cx="200" cy="100" fill="#4ade80" r="15"></circle>
-                <circle class="hub-node" cx="600" cy="100" fill="#60a5fa" r="20"></circle>
-                <circle class="hub-node" cx="250" cy="300" fill="#a78bfa" r="12"></circle>
-                <circle class="hub-node" cx="550" cy="320" fill="#f472b6" r="18"></circle>
-                <!-- Central Hub -->
-                <circle class="hub-node" cx="400" cy="200" fill="#facc15" r="30" style="filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.4))"></circle>
-            </svg>
+        <div class="flex flex-col items-center mb-8">
+            <h1 class="text-6xl font-extrabold tracking-[0.2em] text-white text-center shadow-black drop-shadow-2xl">VTx</h1>
+            <div class="text-[10px] font-bold text-yellow-400 tracking-[0.2em] uppercase mt-3 text-center">SCHEDULE • SYNCHRONIZE • CONTROL</div>
         </div>
 
-        <div class="z-10 flex flex-col md:flex-row gap-8 w-full max-w-5xl justify-center items-stretch mt-10">
-            <!-- Left Card: Fleet Dashboard (New Project) -->
-            <div class="flex-1 bg-[#0a0a0a]/80 border border-white/10 rounded-xl p-8 flex flex-col justify-between shadow-2xl backdrop-blur-md hover:border-yellow-400/30 transition duration-300">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mt-6">
+            <!-- Left Box (Fleet Dashboard) -->
+            <div class="glass-panel p-6 flex flex-col justify-between hover:border-yellow-400/30 transition duration-300">
                 <div>
                     <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-lg border border-white/10 flex items-center justify-center bg-white/5 text-yellow-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        <div class="w-10 h-10 rounded border border-white/10 flex items-center justify-center bg-white/5 text-yellow-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-white tracking-wide m-0">Fleet Dashboard</h2>
-                            <div class="mono text-[10px] text-slate-500 mt-1">vtx://fleet-scheduler/main</div>
+                            <h2 class="text-lg font-bold text-white tracking-wide m-0">Fleet Dashboard</h2>
+                            <div class="mono text-[9px] text-slate-500 mt-1">vtx://fleet-scheduler/main</div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-400 mb-8 leading-relaxed">Access the Timeline Scheduler and Asset Hub to manage incoming fleet media and build broadcast queues.</p>
+                    <p class="text-xs text-slate-400 mb-6 leading-relaxed">Access the Timeline Scheduler and Asset Hub to manage incoming fleet media and build broadcast queues.</p>
                     
                     <input type="text" id="new-proj-name" class="hq-input mb-4" placeholder="Enter Project Name (e.g. Summit 2026)">
-                    <button class="hq-btn-outline w-full py-2 hover:border-yellow-400 hover:text-yellow-400 transition" onclick="createNewProject()">INITIALIZE FLEET</button>
+                    <button class="hq-btn w-full py-2.5" onclick="createNewProject()">INITIALIZE FLEET</button>
                 </div>
                 <div class="flex justify-between items-center border-t border-white/10 pt-4 mt-6">
-                    <div class="flex items-center gap-2 text-[10px] text-emerald-500 font-bold"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Server Online</div>
-                    <div class="mono text-[10px] text-slate-500">Local</div>
+                    <div class="flex items-center gap-2 text-[9px] text-emerald-500 font-bold uppercase tracking-widest"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.8)]"></span> Server Online</div>
+                    <div class="mono text-[9px] text-slate-500 uppercase tracking-widest">Local</div>
                 </div>
             </div>
 
-            <!-- Right Card: Telemetry Viewer (Load Project) -->
-            <div class="flex-1 bg-[#0a0a0a]/80 border border-white/10 rounded-xl p-8 flex flex-col justify-between shadow-2xl backdrop-blur-md hover:border-white/30 transition duration-300">
+            <!-- Right Box (Telemetry Viewer) -->
+            <div class="glass-panel p-6 flex flex-col justify-between hover:border-white/30 transition duration-300">
                 <div>
                     <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-lg border border-white/10 flex items-center justify-center bg-white/5 text-slate-300">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <div class="w-10 h-10 rounded border border-white/10 flex items-center justify-center bg-white/5 text-slate-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-white tracking-wide m-0">Telemetry Viewer</h2>
-                            <div class="mono text-[10px] text-slate-500 mt-1">vtx://telemetry/live</div>
+                            <h2 class="text-lg font-bold text-white tracking-wide m-0">Telemetry Viewer</h2>
+                            <div class="mono text-[9px] text-slate-500 mt-1">vtx://telemetry/live</div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-400 mb-8 leading-relaxed">Load real-time performance metrics and diagnostics for remote ingest nodes and database connections.</p>
+                    <p class="text-xs text-slate-400 mb-6 leading-relaxed">Load real-time performance metrics and diagnostics for remote ingest nodes and database connections.</p>
                     
                     <select id="load-proj-select" class="hq-input mb-4 text-white">
                         <option value="">No saved projects...</option>
                     </select>
-                    <button class="hq-btn-outline w-full py-2 hover:border-white hover:text-white transition" onclick="loadSelectedProject()">LOAD SETUP</button>
+                    <button class="hq-btn-outline w-full py-2.5 hover:text-white transition" onclick="loadSelectedProject()">LOAD SETUP</button>
                 </div>
                 <div class="flex justify-between items-center border-t border-white/10 pt-4 mt-6">
-                    <div class="flex items-center gap-2 text-[10px] text-emerald-500 font-bold"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Database Connected</div>
-                    <div class="mono text-[10px] text-slate-500">Remote</div>
+                    <div class="flex items-center gap-2 text-[9px] text-emerald-500 font-bold uppercase tracking-widest"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.8)]"></span> Database Connected</div>
+                    <div class="mono text-[9px] text-slate-500 uppercase tracking-widest">Remote</div>
                 </div>
             </div>
         </div>
@@ -211,6 +212,7 @@
                 <div class="flex items-center justify-end gap-2 text-[10px] font-bold text-red-500 uppercase mb-1 tracking-widest">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span> Live Sync...
                 </div>
+                <!-- Tight tracking on clock -->
                 <div class="mono text-2xl font-bold text-white tracking-tight" id="master-clock">00:00:00</div>
             </div>
         </div>
@@ -435,7 +437,13 @@
         }
 
         function saveNotepad() { if(!activeProjId) return; db.projects[activeProjId].notepad = document.getElementById('project-notepad').value; autoSave(); }
-        function goToLauncher() { saveDB(); activeProjId = null; document.getElementById('dashboard-screen').style.display = 'none'; document.getElementById('launcher-screen').style.display = 'flex'; refreshLauncherDropdown(); }
+        function goToLauncher() {
+            saveDB(); activeProjId = null; 
+            document.getElementById('dashboard-screen').style.display = 'none'; 
+            document.getElementById('launcher-screen').style.display = 'flex'; 
+            document.getElementById('launcher-bg').style.display = 'flex'; // Restore BG
+            refreshLauncherDropdown(); 
+        }
 
         function refreshLauncherDropdown() {
             const sel = document.getElementById('load-proj-select');
@@ -465,6 +473,7 @@
             
             document.getElementById('active-proj-title').innerText = proj.name;
             document.getElementById('launcher-screen').style.display = 'none';
+            document.getElementById('launcher-bg').style.display = 'none'; // Hide BG on dashboard
             document.getElementById('dashboard-screen').style.display = 'flex';
             
             renderMasterTabs(); generateNodes();
@@ -876,8 +885,8 @@
                 if(payload.length > 0) { const { error } = await supabaseClient.from('vtx_schedules').insert(payload); if(error) throw error; }
                 btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SEQUENCE SYNCED TO CLOUD`);
             } catch(e) {
-                btn.innerText = "ERROR"; btn.style.borderColor = "var(--danger-red)"; btn.style.color = "var(--danger-red)";
-                setTimeout(() => { btn.innerText = "DEPLOY"; btn.style.borderColor = ""; btn.style.color = ""; }, 2000);
+                btn.innerText = "ERROR"; btn.classList.add('text-red-500', 'border-red-500');
+                setTimeout(() => { btn.innerText = "DEPLOY"; btn.classList.remove('text-red-500', 'border-red-500'); }, 2000);
             }
         }
 
