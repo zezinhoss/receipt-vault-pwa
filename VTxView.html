@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VTx | Fleet Scheduler</title>
+    <title>VTx | PRODUCTION SUITE</title>
     
-    <!-- Fonts & Tailwind -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -49,9 +48,9 @@
             -webkit-appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23facc15' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 10px center;
+            background-position: right 8px center;
             background-size: 14px;
-            padding-right: 32px;
+            padding-right: 28px;
         }
         select option { background-color: #0f0f14; color: #f8fafc; }
 
@@ -70,7 +69,7 @@
         .hq-btn-override { color: var(--override-blue); border-color: rgba(14, 165, 233, 0.3); background: rgba(14, 165, 233, 0.05); }
         .hq-btn-override:hover { background: var(--override-blue); color: #000; box-shadow: 0 0 15px rgba(14, 165, 233, 0.4); }
 
-        .hq-btn-deploy.live { background: var(--danger-red); color: #fff; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); border-color: var(--danger-red); animation: pulseRed 2s infinite; }
+        .hq-btn-deploy.live { background: var(--danger-red); color: #fff; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); animation: pulseRed 2s infinite; border-color: var(--danger-red); }
 
         @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
@@ -94,6 +93,12 @@
         .flow-line { stroke-dasharray: 8; animation: flowData 20s linear infinite; }
         @keyframes flowData { to { stroke-dashoffset: -1000; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Asset Hub Horizontal Scroll hiding */
+        .hide-scroll::-webkit-scrollbar { height: 4px; }
+        .hide-scroll::-webkit-scrollbar-track { background: transparent; }
+        .hide-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .hide-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
     </style>
 </head>
 <body onload="initApp()" class="pt-8">
@@ -164,7 +169,6 @@
                 <div class="flex items-center justify-end gap-2 text-[10px] font-bold text-red-500 uppercase mb-1 tracking-widest">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span> Live Sync...
                 </div>
-                <!-- Tight tracking on clock -->
                 <div class="mono text-2xl font-bold text-white tracking-tight" id="master-clock">00:00:00</div>
             </div>
         </div>
@@ -342,7 +346,7 @@
         let sourceDateForDup = null; 
         
         // Memory store for Local Asset Staging
-        let localSessionFiles = {}; // format: { "FolderName": [ { fileObj, url } ] }
+        let localSessionFiles = {}; // format: { "Folder / Subfolder": [ { fileObj, url } ] }
 
         const defaultSchedule = [
             {"time": "08:00:00", "type": "image", "value": ""},
@@ -433,15 +437,18 @@
             
             for(let i=0; i<files.length; i++) {
                 const file = files[i];
-                let folderName = "Root Assets";
+                let folderPath = "Root Assets";
                 if (file.webkitRelativePath) {
                     const parts = file.webkitRelativePath.split('/');
-                    if (parts.length > 1) { folderName = parts[0]; }
+                    if (parts.length > 1) { 
+                        // Full folder tree minus the actual filename
+                        folderPath = parts.slice(0, -1).join(' / '); 
+                    }
                 }
                 
-                if(!localSessionFiles[folderName]) localSessionFiles[folderName] = [];
-                if(!localSessionFiles[folderName].find(f => f.file.name === file.name)) {
-                    localSessionFiles[folderName].push({
+                if(!localSessionFiles[folderPath]) localSessionFiles[folderPath] = [];
+                if(!localSessionFiles[folderPath].find(f => f.file.name === file.name)) {
+                    localSessionFiles[folderPath].push({
                         file: file,
                         url: URL.createObjectURL(file)
                     });
@@ -457,8 +464,8 @@
             container.innerHTML = "";
             for (const [folderName, files] of Object.entries(localSessionFiles)) {
                 let html = `
-                    <div class="glass-panel flex flex-col min-h-[250px] p-5 w-full">
-                        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+                    <div class="glass-panel flex flex-col min-h-[220px] p-5 w-full">
+                        <div class="flex justify-between items-center mb-3 border-b border-white/10 pb-3">
                             <div class="flex items-center gap-3">
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                                 <h4 class="text-sm font-bold text-white uppercase tracking-wider truncate" title="${folderName}">${folderName}</h4>
@@ -472,27 +479,26 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex-1 overflow-x-auto overflow-y-hidden flex gap-4 content-start items-start pb-2">
+                        <div class="flex-1 overflow-x-auto overflow-y-hidden flex flex-nowrap gap-3 pb-2 items-center hide-scroll">
                 `;
                 
                 files.forEach(f => {
-                    let thumbHtml = '';
+                    let visual = '';
                     if (f.file.type.startsWith('image/')) {
-                        thumbHtml = `<div class="w-full h-48 flex items-center justify-center bg-black/40 rounded border border-white/10 overflow-hidden"><img src="${f.url}" class="max-w-full max-h-full object-contain"></div>`;
+                        visual = `<img src="${f.url}" class="absolute inset-0 w-full h-full object-contain">`;
                     } else if (f.file.type.startsWith('video/')) {
-                        thumbHtml = `<div class="w-full h-48 flex items-center justify-center bg-black/40 rounded border border-white/10 overflow-hidden"><video src="${f.url}" class="max-w-full max-h-full object-contain" preload="metadata"></video></div>`;
+                        visual = `<video src="${f.url}" class="absolute inset-0 w-full h-full object-contain" preload="metadata"></video>`;
                     } else {
-                        thumbHtml = `<div class="w-full h-48 bg-black/50 rounded border border-white/10 flex items-center justify-center text-2xl text-slate-600"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg></div>`;
+                        visual = `<div class="absolute inset-0 flex items-center justify-center bg-black/60 text-slate-500 text-3xl">📄</div>`;
                     }
                     let sizeMb = (f.file.size / (1024 * 1024)).toFixed(1);
                     
                     html += `
-                        <div class="flex-shrink-0 w-48 flex flex-col gap-2 bg-black/20 p-2 rounded border border-white/5 hover:border-yellow-400/30 transition">
-                            ${thumbHtml}
-                            <div class="text-[10px] text-slate-300 truncate font-bold mt-1" title="${f.file.name}">${f.file.name}</div>
-                            <div class="text-[9px] text-slate-500 uppercase flex justify-between font-bold">
-                                <span>${f.file.type.split('/')[1] || 'FILE'}</span>
-                                <span>${sizeMb}MB</span>
+                        <div class="flex-shrink-0 w-48 h-full relative group rounded-lg overflow-hidden border border-white/10 bg-black/40">
+                            ${visual}
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-3 opacity-80 group-hover:opacity-100 transition">
+                                <div class="text-[10px] text-white truncate font-bold" title="${f.file.name}">${f.file.name}</div>
+                                <div class="text-[9px] text-yellow-400 font-bold uppercase mt-0.5">${sizeMb}MB</div>
                             </div>
                         </div>
                     `;
@@ -561,9 +567,9 @@
                 btn.innerText = date;
                 btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); };
                 
-                // Wrap menu in a padded container to bridge the hover gap
+                // Invisible padded container popping UPWARDS
                 const menuContainer = document.createElement('div');
-                menuContainer.className = "absolute top-full left-0 pt-1 hidden group-hover:block z-[9999]";
+                menuContainer.className = "absolute bottom-full left-0 pb-1 hidden group-hover:block z-[9999]";
                 
                 const menu = document.createElement('div');
                 menu.className = "flex flex-col bg-[#111111] border border-white/10 rounded-md shadow-2xl overflow-hidden w-24";
@@ -809,8 +815,8 @@
                 if(payload.length > 0) { const { error } = await supabaseClient.from('vtx_schedules').insert(payload); if(error) throw error; }
                 btn.classList.add('live'); btn.innerText = "LIVE"; showToast(`SEQUENCE SYNCED TO CLOUD`);
             } catch(e) {
-                btn.innerText = "ERROR"; btn.style.borderColor = "var(--danger-red)"; btn.style.color = "var(--danger-red)";
-                setTimeout(() => { btn.innerText = "DEPLOY"; btn.style.borderColor = ""; btn.style.color = ""; }, 2000);
+                btn.innerText = "ERROR"; btn.classList.add('text-red-500', 'border-red-500');
+                setTimeout(() => { btn.innerText = "DEPLOY"; btn.classList.remove('text-red-500', 'border-red-500'); }, 2000);
             }
         }
 
