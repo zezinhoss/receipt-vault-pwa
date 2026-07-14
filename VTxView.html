@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>WORKSTATION | PRODUCTION SUITE</title>
+    <title>VTx | PRODUCTION SUITE</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <!-- 🔌 LOAD SPREADSHEET PARSER -->
+    
+    <!-- 🔌 LOAD LIBRARIES -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <!-- 🔌 LOAD SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- Flatpickr (Premium Calendar) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <style>
         /* FINTECH / TERMINAL THEME */
         :root { 
@@ -54,6 +59,19 @@
         .text-right { text-align: right; }
         .data-font { font-family: var(--font-data); }
 
+        /* SVG ANIMATIONS */
+        .hub-anim { width: 300px; height: 150px; margin-bottom: 20px; }
+        .hub-core { fill: var(--bg-deep); stroke: var(--accent); stroke-width: 2; animation: pulseCore 2s infinite; }
+        .hub-line { stroke: var(--border-accent); stroke-width: 1.5; stroke-dasharray: 4; animation: flowData 20s linear infinite; }
+        .hub-screen { fill: transparent; stroke: var(--text-primary); stroke-width: 1.5; }
+        @keyframes pulseCore { 0% { filter: drop-shadow(0 0 2px var(--accent)); } 50% { filter: drop-shadow(0 0 15px var(--accent)); } 100% { filter: drop-shadow(0 0 2px var(--accent)); } }
+        @keyframes flowData { to { stroke-dashoffset: -1000; } }
+        @keyframes scrollUpSVG { 0% { transform: translateY(0); } 100% { transform: translateY(-92px); } }
+        @keyframes scrollDownSVG { 0% { transform: translateY(-92px); } 100% { transform: translateY(0); } }
+        .anim-up { animation: scrollUpSVG 10s linear infinite; }
+        .anim-down { animation: scrollDownSVG 12s linear infinite; }
+        .anim-up-fast { animation: scrollUpSVG 8s linear infinite; }
+
         /* Crisp, sharp panels */
         .fintech-panel { 
             background: var(--bg-panel); 
@@ -68,7 +86,7 @@
             font-family: var(--font-ui); background: transparent; color: var(--text-primary); 
             border: 1px solid var(--border-thin); padding: 6px 12px; cursor: pointer; 
             font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; 
-            transition: all 0.2s ease; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            transition: all 0.2s ease; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap;
         }
         .btn-fintech:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.3); color: #fff;}
         .btn-fintech.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
@@ -82,9 +100,17 @@
         .btn-override { color: var(--override-blue); border-color: rgba(14, 165, 233, 0.3); background: rgba(14, 165, 233, 0.05); }
         .btn-override:hover { background: var(--override-blue); color: #000; border-color: var(--override-blue); box-shadow: 0 0 10px rgba(14, 165, 233, 0.3); }
 
-        .btn-icon { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 2px 6px; transition: 0.2s; border-radius: 3px; }
+        .btn-icon { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 2px 6px; transition: 0.2s; border-radius: 3px; display:flex; align-items:center; justify-content:center; }
         .btn-icon:hover { color: #fff; background: rgba(255,255,255,0.05); }
         .btn-icon.text-red:hover { color: var(--alert-red); background: rgba(239, 68, 68, 0.1); }
+
+        /* Custom Dropdown for Canvas Resolution */
+        .custom-dd { position: relative; display: inline-block; }
+        .custom-dd-content { display: none; position: absolute; background: var(--bg-panel); border: 1px solid var(--border-thin); min-width: 120px; box-shadow: 0px 8px 16px rgba(0,0,0,0.8); z-index: 100; border-radius: 3px; top: 100%; left: 0; margin-top: 4px; overflow: hidden; }
+        .custom-dd-content a { color: var(--text-primary); padding: 8px 12px; text-decoration: none; display: block; font-family: var(--font-data); font-size: 11px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.02);}
+        .custom-dd-content a:last-child { border-bottom: none; }
+        .custom-dd-content a:hover { background: rgba(255,255,255,0.05); color: #fff; border-left: 2px solid var(--accent); padding-left: 10px;}
+        .show-dd { display: block; }
 
         /* Inputs */
         .as-input, .as-select { 
@@ -152,14 +178,15 @@
         .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
         .upload-btn.ready { border-style: solid; border-color: rgba(255,255,255,0.1); color: #fff; background: var(--bg-surface); }
 
-        /* Override Modal */
+        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; }
         .modal-box { background: var(--bg-panel); border: 1px solid var(--border-thin); width: 100%; max-width: 500px; padding: 24px; box-sizing: border-box; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);}
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-thin); padding-bottom: 12px; margin-bottom: 16px; }
         .modal-title { font-size: 14px; color: #fff; letter-spacing: 1px; margin:0; display:flex; align-items:center; gap:8px;}
+        
         .preview-box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid var(--border-thin); border-radius: 4px; display: flex; justify-content: center; align-items: center; margin-bottom: 16px; overflow: hidden; position: relative;}
         .preview-box img, .preview-box video { max-width: 100%; max-height: 100%; object-fit: contain; display: none; }
-        .preview-placeholder { font-family: var(--font-data); font-size: 12px; color: var(--text-muted); }
+        .preview-placeholder { font-family: var(--font-data); font-size: 12px; color: var(--text-muted); text-align: center; padding: 20px;}
         
         .custom-checkbox { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; color:#fff; user-select: none; font-family: var(--font-data);}
         .custom-checkbox input { accent-color: var(--alert-red); width: 14px; height: 14px; margin:0;}
@@ -167,10 +194,6 @@
         .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 20px; font-family: var(--font-data); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: none; z-index: 2000; border-radius: 3px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; border-left: 1px solid var(--border-thin); }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 0;}
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
     </style>
 </head>
 <body onload="initApp()">
@@ -179,12 +202,44 @@
     <div class="toast" id="sys-toast">ACTION COMPLETED</div>
     
     <input type="file" id="hidden-file-browser" style="display:none" onchange="handleFileSelect(this)">
-    <input type="date" id="master-calendar" style="position: absolute; opacity:0; pointer-events:none;" onchange="addMasterDate(this.value)">
-    <input type="date" id="copy-target-calendar" style="position: absolute; opacity:0; pointer-events:none;" onchange="executeCopyDay(this.value)">
+    
+    <!-- Flatpickr inputs (Hidden, triggered by buttons) -->
+    <input type="text" id="master-calendar" style="display:none;">
+    <input type="text" id="copy-target-calendar" style="display:none;">
 
     <!-- LAUNCHER -->
     <div id="launcher-screen">
-        <h1 style="font-size: 32px; letter-spacing: 4px; text-align: center; color: #fff;">WORKSTATION</h1>
+        <svg class="hub-anim" viewBox="0 0 300 150">
+            <defs>
+                <clipPath id="screenClip1"><rect x="10" y="10" width="26" height="46" rx="2" /></clipPath>
+                <clipPath id="screenClip2"><rect x="10" y="94" width="26" height="46" rx="2" /></clipPath>
+                <clipPath id="screenClip3"><rect x="264" y="52" width="26" height="46" rx="2" /></clipPath>
+            </defs>
+            <path d="M150,75 L36,33" class="hub-line" />
+            <path d="M150,75 L36,117" class="hub-line" />
+            <path d="M150,75 L264,75" class="hub-line" />
+            <circle cx="150" cy="75" r="12" class="hub-core" />
+            <g clip-path="url(#screenClip1)"><g class="anim-up">
+                <image href="https://placehold.co/104x184/581c87/fff?text=DATA" x="10" y="10" width="26" height="46" />
+                <image href="https://placehold.co/104x184/1d4ed8/fff?text=POLL" x="10" y="56" width="26" height="46" />
+                <image href="https://placehold.co/104x184/581c87/fff?text=DATA" x="10" y="102" width="26" height="46" />
+            </g></g>
+            <rect x="10" y="10" width="26" height="46" rx="2" class="hub-screen" />
+            <g clip-path="url(#screenClip2)"><g class="anim-down">
+                <image href="https://placehold.co/104x184/0f172a/2dd4bf?text=MAP" x="10" y="94" width="26" height="46" />
+                <image href="https://placehold.co/104x184/3b82f6/fff?text=TALK" x="10" y="140" width="26" height="46" />
+                <image href="https://placehold.co/104x184/0f172a/2dd4bf?text=MAP" x="10" y="186" width="26" height="46" />
+            </g></g>
+            <rect x="10" y="94" width="26" height="46" rx="2" class="hub-screen" />
+            <g clip-path="url(#screenClip3)"><g class="anim-up-fast">
+                <image href="https://placehold.co/104x184/000/22c55e?text=LIVE" x="264" y="52" width="26" height="46" />
+                <image href="https://placehold.co/104x184/581c87/facc15?text=QUIZ" x="264" y="98" width="26" height="46" />
+                <image href="https://placehold.co/104x184/000/22c55e?text=LIVE" x="264" y="144" width="26" height="46" />
+            </g></g>
+            <rect x="264" y="52" width="26" height="46" rx="2" class="hub-screen" />
+        </svg>
+
+        <h1 style="font-size: 32px; letter-spacing: 4px; text-align: center; color: #fff;">VTx</h1>
         <div class="text-micro" style="margin-top: 8px; color: var(--accent);">FLEET SCHEDULER & CONTROL</div>
 
         <div class="launcher-grid">
@@ -196,7 +251,7 @@
             
             <div class="fintech-panel">
                 <h3 style="margin-bottom: 15px; font-size: 13px;">Saved Projects</h3>
-                <select id="load-proj-select" class="as-select" style="margin-bottom: 15px; padding-right:10px;">
+                <select id="load-proj-select" class="as-select" style="margin-bottom: 15px;">
                     <option value="">No saved projects...</option>
                 </select>
                 <button class="btn-fintech" style="width: 100%; padding: 10px;" onclick="loadSelectedProject()">Load Setup</button>
@@ -214,7 +269,7 @@
                 </div>
                 <div style="display:flex; align-items:center; gap: 15px; flex-wrap: wrap;">
                     <button class="btn-fintech" onclick="goToLauncher()">[ HOME ]</button>
-                    <h2 style="font-size: 18px;">WORKSTATION</h2>
+                    <h2 style="font-size: 18px;">VTx</h2>
                     <span style="color:#333; margin: 0 5px;">|</span>
                     <button class="btn-fintech" id="tab-assets" onclick="switchWorkspace('assets')">ASSET HUB</button>
                     <button class="btn-fintech active" id="tab-fleet" onclick="switchWorkspace('fleet')">TIMELINE</button>
@@ -222,7 +277,10 @@
                 <div class="text-micro data-font" style="margin-top: 8px; color:var(--accent);" id="active-proj-title">PROJECT_NAME</div>
             </div>
             <div class="text-right">
-                <div class="text-micro text-accent" style="margin-bottom: 4px;">LIVE SYNC...</div>
+                <div class="text-micro text-accent" style="margin-bottom: 4px; display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                    <span style="width:6px; height:6px; background:var(--live-green); border-radius:50%; display:inline-block; box-shadow: 0 0 8px var(--live-green); animation: pulseCore 2s infinite;"></span>
+                    LIVE SYNC...
+                </div>
                 <div class="local-clock" id="master-clock">00:00:00</div>
             </div>
         </div>
@@ -271,8 +329,9 @@
                     <div id="master-date-tabs" style="display:flex; gap:8px;"></div>
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <button class="btn-fintech" onclick="document.getElementById('master-calendar').showPicker()">+ Add Date</button>
-                    <button class="btn-fintech" onclick="document.getElementById('copy-target-calendar').showPicker()">Duplicate Day</button>
+                    <!-- Flatpickr Buttons -->
+                    <button class="btn-fintech" id="btn-add-date">+ Add Date</button>
+                    <button class="btn-fintech" id="btn-copy-date">Duplicate Day</button>
                     <button class="btn-fintech" onclick="addNewNode()">+ Add Node</button>
                 </div>
             </div>
@@ -321,6 +380,37 @@
         </div>
     </div>
 
+    <!-- NODE PREVIEW MODAL -->
+    <div class="modal-overlay" id="node-preview-modal">
+        <div class="modal-box" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><span style="color:var(--accent);">●</span> ACTIVE TIMELINE - <span id="np-node-label" class="data-font">NODE_XX</span></h3>
+                <button class="btn-icon" onclick="document.getElementById('node-preview-modal').style.display='none'">×</button>
+            </div>
+            <div class="text-micro" style="margin-bottom: 10px; text-align: left;" id="np-time-label">Current Cue: 08:00:00</div>
+            <div class="preview-box" style="aspect-ratio: 16/9;" id="np-preview-container">
+                <span class="preview-placeholder" id="np-placeholder">Calculating Timeline Status...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM RESOLUTION MODAL -->
+    <div class="modal-overlay" id="custom-res-modal">
+        <div class="modal-box" style="max-width: 300px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Custom Canvas Size</h3>
+                <button class="btn-icon" onclick="document.getElementById('custom-res-modal').style.display='none'">×</button>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <input type="number" id="res-width" class="as-input" placeholder="Width (px)" value="3328">
+                <span style="display:flex; align-items:center; color:var(--text-muted);">×</span>
+                <input type="number" id="res-height" class="as-input" placeholder="Height (px)" value="1024">
+            </div>
+            <input type="hidden" id="res-target-node">
+            <button class="btn-fintech btn-action" style="width: 100%; padding: 10px;" onclick="applyCustomResolution()">Apply Configuration</button>
+        </div>
+    </div>
+
     <!-- Universal Confirmation Modal -->
     <div class="modal-overlay" id="confirm-modal">
         <div class="modal-box" style="max-width: 400px; text-align:center;">
@@ -344,6 +434,8 @@
         let activeDate = null;
         let uploadTarget = { tvId: null, index: null };
         let confirmAction = null;
+        
+        let addDateFp, copyDateFp; // Flatpickr instances
 
         const defaultSchedule = [
             {"time": "08:00:00", "type": "image", "value": ""},
@@ -357,16 +449,36 @@
             startClock();
             loadDBFromStorage();
             refreshLauncherDropdown();
+            initFlatpickr();
+        }
+
+        function initFlatpickr() {
+            addDateFp = flatpickr("#master-calendar", {
+                theme: "dark",
+                onChange: function(selectedDates, dateStr, instance) {
+                    addMasterDate(dateStr);
+                }
+            });
+            
+            copyDateFp = flatpickr("#copy-target-calendar", {
+                theme: "dark",
+                onChange: function(selectedDates, dateStr, instance) {
+                    executeCopyDay(dateStr);
+                }
+            });
+
+            document.getElementById('btn-add-date').onclick = () => addDateFp.open();
+            document.getElementById('btn-copy-date').onclick = () => copyDateFp.open();
         }
 
         function loadDBFromStorage() {
-            const saved = localStorage.getItem('vtx_db_v8');
+            const saved = localStorage.getItem('vtx_db_v9');
             if (saved) { try { db = JSON.parse(saved); } catch(e) { db = { projects: {} }; } }
         }
 
         function saveDB() {
             if (activeProjId) saveCurrentUIToData();
-            localStorage.setItem('vtx_db_v8', JSON.stringify(db));
+            localStorage.setItem('vtx_db_v9', JSON.stringify(db));
         }
 
         function startClock() { 
@@ -394,6 +506,21 @@
             document.getElementById('confirm-modal').style.display = 'none';
         };
 
+        // UI Toggles
+        document.addEventListener('click', function(e) {
+            if (!e.target.matches('.drop-btn')) {
+                const dropdowns = document.getElementsByClassName("custom-dd-content");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].classList.remove('show-dd');
+                }
+            }
+        });
+
+        function toggleCustomDropdown(id) {
+            document.getElementById(`dd-content-${id}`).classList.toggle("show-dd");
+        }
+
+        /* --- STREAMING_CHUNK: Workspace Routing & Project Management --- */
         function switchWorkspace(mode) {
             document.getElementById('fleet-workspace').style.display = 'none';
             document.getElementById('asset-workspace').style.display = 'none';
@@ -443,7 +570,7 @@
             
             db.projects[id] = {
                 name: name, dates: [today], nodes: [1], 
-                nodeNames: { "1": "NODE_01" }, nodeAspects: { "1": "16:9" }, nodeRes: { "1": "1920x1080" },
+                nodeNames: { "1": "NODE_01" }, nodeAspects: { "1": "16:9" }, nodeRes: { "1": "1080p" },
                 data: { "1": { [today]: JSON.parse(JSON.stringify(defaultSchedule)) } },
                 notepad: "", stagedMedia: []
             };
@@ -474,20 +601,15 @@
             else { switchWorkspace('fleet'); showToast("PROJECT LOADED"); }
         }
 
-        /* --- Supabase Storage & Spreadsheet Parsing --- */
-
+        /* --- STREAMING_CHUNK: Fleet Schedule Management & UI --- */
         async function stageMediaFiles(input) {
             const files = input.files;
             if(files.length === 0) return;
-            
             const proj = db.projects[activeProjId];
             if(!proj.stagedMedia) proj.stagedMedia = [];
-            
             const list = document.getElementById('staged-media-list');
             list.innerHTML = `<span style="color:var(--accent);">Uploading to Supabase Bucket...</span>`;
-            
             if (!supabaseClient) { showToast("SUPABASE NOT CONNECTED"); return; }
-
             let uploads = 0;
             for(let i=0; i<files.length; i++) {
                 const file = files[i];
@@ -499,8 +621,7 @@
                     } catch (e) {}
                 }
             }
-            saveDB(); renderStagedMedia(); input.value = ""; 
-            showToast(`${uploads} MEDIA FILES STAGED`);
+            saveDB(); renderStagedMedia(); input.value = ""; showToast(`${uploads} MEDIA FILES STAGED`);
         }
         
         function renderStagedMedia() {
@@ -522,7 +643,6 @@
                     const workbook = XLSX.read(data, {type: 'array'});
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     const json = XLSX.utils.sheet_to_json(worksheet);
-                    
                     const proj = db.projects[activeProjId];
                     let nodesCreated = 0; let rowsAdded = 0;
 
@@ -535,51 +655,36 @@
                         if(nodeKey && timeKey && valKey) {
                             let nodeId = parseInt(row[nodeKey]);
                             if(isNaN(nodeId)) return; 
-
                             let time = row[timeKey].toString();
                             if(typeof row[timeKey] === 'number') {
                                 let totalSeconds = Math.round(row[timeKey] * 86400);
                                 time = `${Math.floor(totalSeconds / 3600).toString().padStart(2, '0')}:${Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')}:00`;
                             }
-
                             let type = row[typeKey] ? row[typeKey].toString().toLowerCase().trim() : 'image';
-                            if(type.includes('vid')) type = 'video';
-                            else if(type.includes('url') || type.includes('web') || type.includes('link')) type = 'url';
-                            else type = 'image';
-
+                            if(type.includes('vid')) type = 'video'; else if(type.includes('url') || type.includes('web') || type.includes('link')) type = 'url'; else type = 'image';
                             let val = row[valKey].toString().trim();
 
                             if(!proj.nodes.includes(nodeId)) {
                                 proj.nodes.push(nodeId);
                                 proj.nodeNames[nodeId] = `NODE_${nodeId.toString().padStart(2, '0')}`;
-                                proj.nodeAspects[nodeId] = "16:9";
-                                proj.nodeRes[nodeId] = "1920x1080";
+                                proj.nodeAspects[nodeId] = "16:9"; proj.nodeRes[nodeId] = "1080p";
                                 proj.data[nodeId] = {};
                                 proj.dates.forEach(d => proj.data[nodeId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
                                 nodesCreated++;
                             }
-
-                            if(!proj.data[nodeId]._xlsImported) {
-                                proj.data[nodeId][activeDate] = [];
-                                proj.data[nodeId]._xlsImported = true; 
-                            }
+                            if(!proj.data[nodeId]._xlsImported) { proj.data[nodeId][activeDate] = []; proj.data[nodeId]._xlsImported = true; }
                             proj.data[nodeId][activeDate].push({ time: time, type: type, value: val });
                             rowsAdded++;
                         }
                     });
 
-                    proj.nodes.forEach(n => {
-                        delete proj.data[n]._xlsImported;
-                        if(proj.data[n][activeDate]) proj.data[n][activeDate].sort((a,b) => a.time.localeCompare(b.time));
-                    });
+                    proj.nodes.forEach(n => { delete proj.data[n]._xlsImported; if(proj.data[n][activeDate]) proj.data[n][activeDate].sort((a,b) => a.time.localeCompare(b.time)); });
                     saveDB(); generateNodes(); showToast(`SYNC COMPLETE: ${rowsAdded} ROWS`);
                     switchWorkspace('fleet'); 
                 } catch (error) { showToast("ERROR PARSING SPREADSHEET"); }
             };
             reader.readAsArrayBuffer(file); input.value = "";
         }
-
-        /* --- Fleet Schedule Management --- */
 
         function renderMasterTabs() {
             const proj = db.projects[activeProjId];
@@ -615,13 +720,12 @@
             const nextId = proj.nodes.length > 0 ? Math.max(...proj.nodes) + 1 : 1;
             proj.nodes.push(nextId);
             proj.nodeNames[nextId] = `NODE_${nextId.toString().padStart(2, '0')}`;
-            proj.nodeAspects[nextId] = "16:9";
-            proj.nodeRes[nextId] = "1920x1080";
-            proj.data[nextId] = {};
-            proj.dates.forEach(d => proj.data[nextId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
+            proj.nodeAspects[nextId] = "16:9"; proj.nodeRes[nextId] = "1080p";
+            proj.data[nextId] = {}; proj.dates.forEach(d => proj.data[nextId][d] = JSON.parse(JSON.stringify(defaultSchedule)));
             generateNodes(); saveDB(); showToast(`NODE ${nextId} ADDED`);
         }
 
+        /* --- STREAMING_CHUNK: Dynamic Node Grid Rendering --- */
         function generateNodes() {
             const proj = db.projects[activeProjId];
             const container = document.getElementById('node-grid-container');
@@ -630,7 +734,7 @@
             proj.nodes.forEach(id => {
                 const name = proj.nodeNames[id] || `NODE_${id}`;
                 const aspect = proj.nodeAspects[id] || "16:9";
-                const res = proj.nodeRes[id] || "1920x1080";
+                const res = proj.nodeRes[id] || "1080p";
                 
                 let nodeHtml = `
                     <div class="node-card" id="container-${id}">
@@ -638,23 +742,24 @@
                             <div class="nh-section">
                                 <button class="btn-icon" onclick="toggleNodeBody(${id})" id="toggle-btn-${id}">▼</button>
                                 <input type="text" class="node-title-input" id="node-name-${id}" value="${name}" oninput="updateNodeMeta(${id})">
-                            </div>
-                            <div class="nh-section">
+                                
                                 <button class="btn-fintech" id="aspect-btn-${id}" onclick="toggleAspect(${id})" style="width:50px;">${aspect}</button>
-                                <select class="as-select" id="res-select-${id}" style="width:auto; padding:4px 8px; font-size:11px;" onchange="handleResChange(this, ${id})">
-                                    <option value="1920x1080" ${res==='1920x1080'?'selected':''}>1080p</option>
-                                    <option value="720x1080" ${res==='720x1080'?'selected':''}>720x1080</option>
-                                    <option value="1080x1920" ${res==='1080x1920'?'selected':''}>1080x1920</option>
-                                    <option value="3840x2160" ${res==='3840x2160'?'selected':''}>4K UHD</option>
-                                    <option value="${res}" style="display:none;" class="custom-val-opt" ${!['1920x1080','720x1080','1080x1920','3840x2160'].includes(res) ? 'selected' : ''}>${res}</option>
-                                    <option value="Custom">Custom...</option>
-                                </select>
+                                
+                                <div class="custom-dd">
+                                    <button class="btn-fintech drop-btn" onclick="toggleCustomDropdown(${id})" id="res-btn-${id}">${res} ▼</button>
+                                    <div class="custom-dd-content" id="dd-content-${id}">
+                                        <a onclick="setNodeResolution(${id}, '720p')">720p</a>
+                                        <a onclick="setNodeResolution(${id}, '1080p')">1080p</a>
+                                        <a onclick="setNodeResolution(${id}, '4K')">4K</a>
+                                        <a onclick="openCustomResModal(${id})">Custom...</a>
+                                    </div>
+                                </div>
                             </div>
                             <div class="nh-section">
                                 <button type="button" class="btn-fintech btn-override" onclick="openOverrideModal(${id})">OVERRIDE</button>
-                                <button type="button" class="btn-fintech" onclick="showToast('PREVIEW SPAWNED')">PREVIEW</button>
+                                <button type="button" class="btn-fintech" onclick="openNodePreview(${id})">PREVIEW</button>
                                 <button type="button" class="btn-fintech btn-deploy" id="btn-deploy-${id}" onclick="goLive(${id})">DEPLOY</button>
-                                <button type="button" class="btn-icon text-red" style="margin-left:10px;" onclick="requestDeleteNode(${id})" title="Delete Node">×</button>
+                                <button type="button" class="btn-icon text-red" style="margin-left:10px; font-size:18px;" onclick="requestDeleteNode(${id})" title="Delete Node">×</button>
                             </div>
                         </div>
                         <div class="node-body" id="node-body-${id}">
@@ -678,29 +783,29 @@
         function updateNodeMeta(id) {
             const proj = db.projects[activeProjId];
             proj.nodeNames[id] = document.getElementById(`node-name-${id}`).value;
-            proj.nodeRes[id] = document.getElementById(`res-select-${id}`).value;
             autoSave();
         }
 
-        function handleResChange(selectEl, id) {
-            if (selectEl.value === 'Custom') {
-                const customRes = prompt("Enter Custom Resolution (e.g. 3328x1024):", "3328x1024");
-                if (customRes) {
-                    let customOpt = selectEl.querySelector('.custom-val-opt');
-                    if (!customOpt) {
-                        customOpt = document.createElement('option');
-                        customOpt.className = 'custom-val-opt';
-                        selectEl.insertBefore(customOpt, selectEl.querySelector('option[value="Custom"]'));
-                    }
-                    customOpt.value = customRes;
-                    customOpt.text = customRes;
-                    customOpt.style.display = 'block';
-                    customOpt.selected = true;
-                } else {
-                    selectEl.value = '1920x1080'; // Fallback
-                }
+        function setNodeResolution(id, val) {
+            const proj = db.projects[activeProjId];
+            proj.nodeRes[id] = val;
+            document.getElementById(`res-btn-${id}`).innerText = val + " ▼";
+            autoSave();
+        }
+
+        function openCustomResModal(id) {
+            document.getElementById('res-target-node').value = id;
+            document.getElementById('custom-res-modal').style.display = 'flex';
+        }
+
+        function applyCustomResolution() {
+            const w = document.getElementById('res-width').value;
+            const h = document.getElementById('res-height').value;
+            const id = document.getElementById('res-target-node').value;
+            if(w && h) {
+                setNodeResolution(id, `${w}x${h}`);
             }
-            updateNodeMeta(id);
+            document.getElementById('custom-res-modal').style.display = 'none';
         }
 
         function toggleAspect(id) {
@@ -772,7 +877,7 @@
 
         function openBrowser(tvId, index) { uploadTarget = { tvId, index }; document.getElementById('hidden-file-browser').click(); }
 
-        /* --- Direct Supabase Cloud Storage Interaction --- */
+        /* --- STREAMING_CHUNK: Modals & External Interactions --- */
         async function handleFileSelect(input) {
             if(!input.files[0]) return;
             const file = input.files[0]; const filename = file.name;
@@ -821,7 +926,6 @@
             });
         }
 
-        /* --- Core Supabase DB Push (Deploying to Venues) --- */
         async function goLive(id) {
             saveDB();
             const sched = db.projects[activeProjId].data[id][activeDate];
@@ -869,7 +973,7 @@
             }
         }
 
-        /* --- Live Override Modal Logic --- */
+        /* Override Modal */
         function openOverrideModal(id) {
             const proj = db.projects[activeProjId];
             document.getElementById('override-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
@@ -944,6 +1048,43 @@
             closeOverrideModal();
         }
 
+        /* Node Preview Modal */
+        function openNodePreview(id) {
+            saveCurrentUIToData();
+            const proj = db.projects[activeProjId];
+            document.getElementById('np-node-label').innerText = proj.nodeNames[id] || `NODE_${id}`;
+            document.getElementById('node-preview-modal').style.display = 'flex';
+            
+            const container = document.getElementById('np-preview-container');
+            const timeLabel = document.getElementById('np-time-label');
+            const sched = proj.data[id][activeDate] || [];
+            
+            let d = new Date();
+            let nowStr = d.toTimeString().split(' ')[0];
+            
+            let activeSlot = null;
+            let sortedSched = [...sched].filter(s => s.time && s.value).sort((a,b) => a.time.localeCompare(b.time));
+            
+            for(let i=0; i<sortedSched.length; i++) {
+                if(nowStr >= sortedSched[i].time) activeSlot = sortedSched[i];
+            }
+            
+            if(!activeSlot) {
+                timeLabel.innerText = `Current Time: ${nowStr} | No active cues.`;
+                container.innerHTML = `<span class="preview-placeholder">Awaiting first scheduled cue...</span>`;
+                return;
+            }
+
+            timeLabel.innerText = `Active Cue: ${activeSlot.time} | File: ${activeSlot.value.split('/').pop()}`;
+            
+            if(activeSlot.type === 'url') {
+                container.innerHTML = `<iframe src="${activeSlot.value}" style="width:100%; height:100%; border:none;"></iframe>`;
+            } else if(activeSlot.type === 'video') {
+                container.innerHTML = `<video src="${activeSlot.value}" controls autoplay muted style="width:100%; height:100%; object-fit:contain;"></video>`;
+            } else {
+                container.innerHTML = `<img src="${activeSlot.value}" style="width:100%; height:100%; object-fit:contain;" alt="Preview">`;
+            }
+        }
     </script>
 </body>
 </html>
