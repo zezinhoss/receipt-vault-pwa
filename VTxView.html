@@ -163,7 +163,7 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></span> Live Sync...
                 </div>
                 <!-- Tight tracking on clock -->
-                <div class="mono text-2xl font-bold text-white tracking-tight" id="master-clock">00:00:00</div>
+                <div class="mono text-2xl font-bold text-white tracking-normal" id="master-clock">00:00:00</div>
             </div>
         </div>
 
@@ -213,7 +213,7 @@
                     <input type="text" id="flatpickr-dup" class="hidden">
                     
                     <button class="hq-btn-outline" onclick="document.getElementById('flatpickr-add')._flatpickr.open()">+ Add Date</button>
-                    <button class="hq-btn-outline" onclick="document.getElementById('flatpickr-dup')._flatpickr.open()">Duplicate Day</button>
+                    <!-- Duplicate Button removed to use hover menu -->
                     <button class="hq-btn" onclick="addNewNode()">+ Add Node</button>
                 </div>
             </div>
@@ -268,12 +268,17 @@
         <div class="modal-box max-w-sm text-center">
             <h3 class="text-sm font-bold text-yellow-400 mb-2 uppercase tracking-wide">Custom Resolution</h3>
             <p class="text-xs text-slate-400 mb-5">Enter LED processor canvas dimensions</p>
-            <div class="flex items-center justify-center gap-2 mb-6">
-                <input type="number" id="res-w" class="hq-input w-24 text-center text-lg" placeholder="1920">
-                <span class="text-slate-500 font-bold text-sm">px</span>
-                <span class="text-slate-500 font-bold text-lg mx-2">×</span>
-                <input type="number" id="res-h" class="hq-input w-24 text-center text-lg" placeholder="1080">
-                <span class="text-slate-500 font-bold text-sm">px</span>
+            <div class="flex items-center justify-center gap-8 mb-6">
+                <!-- Relative wrappers to position 'px' absolutely inside -->
+                <div class="relative w-24">
+                    <input type="number" id="res-w" class="hq-input w-full text-center text-lg pr-6" placeholder="1920">
+                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-[10px]">px</span>
+                </div>
+                <span class="text-slate-500 font-bold text-lg">×</span>
+                <div class="relative w-24">
+                    <input type="number" id="res-h" class="hq-input w-full text-center text-lg pr-6" placeholder="1080">
+                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-[10px]">px</span>
+                </div>
             </div>
             <div class="flex gap-3 justify-center">
                 <button class="hq-btn-outline" onclick="cancelCustomRes()">Cancel</button>
@@ -325,6 +330,7 @@
         let uploadTarget = { tvId: null, index: null };
         let confirmAction = null;
         let customResTargetNode = null;
+        let sourceDateForDup = null; // Track which date tab initiated the duplicate
 
         const defaultSchedule = [
             {"time": "08:00:00", "type": "image", "value": ""},
@@ -573,11 +579,34 @@
             const bar = document.getElementById('master-date-tabs');
             bar.innerHTML = "";
             proj.dates.sort().forEach(date => {
+                const wrapper = document.createElement('div');
+                wrapper.className = "relative group"; // Enable hover container
+                
                 const btn = document.createElement('button');
                 btn.className = `hq-btn-outline text-[10px] py-1.5 px-3 ${activeDate === date ? 'active' : ''}`;
                 btn.innerText = date;
                 btn.onclick = () => { activeDate = date; renderMasterTabs(); refreshAllNodes(); };
-                bar.appendChild(btn);
+                
+                // Hover Menu for Dup/Delete
+                const menu = document.createElement('div');
+                menu.className = "absolute top-full left-0 mt-1 hidden group-hover:flex flex-col bg-[#111111] border border-white/10 rounded-md shadow-2xl z-50 overflow-hidden w-24";
+                
+                const dupBtn = document.createElement('button');
+                dupBtn.className = "text-[10px] text-white px-3 py-2 hover:bg-white/5 text-left border-b border-white/5 font-bold transition";
+                dupBtn.innerText = "Duplicate";
+                dupBtn.onclick = (e) => { e.stopPropagation(); openDuplicatePicker(date); };
+
+                const delBtn = document.createElement('button');
+                delBtn.className = "text-[10px] text-red-500 hover:text-red-400 px-3 py-2 hover:bg-red-500/10 text-left font-bold transition";
+                delBtn.innerText = "Delete";
+                delBtn.onclick = (e) => { e.stopPropagation(); requestDeleteDate(date); };
+
+                menu.appendChild(dupBtn);
+                menu.appendChild(delBtn);
+                
+                wrapper.appendChild(btn);
+                wrapper.appendChild(menu);
+                bar.appendChild(wrapper);
             });
         }
 
@@ -589,12 +618,32 @@
             activeDate = date; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("NEW DATE ALLOCATED");
         }
 
+        function openDuplicatePicker(sourceDate) {
+            sourceDateForDup = sourceDate;
+            document.getElementById('flatpickr-dup')._flatpickr.open();
+        }
+
         function executeCopyDay(targetDate) {
-            if(!targetDate) return; const proj = db.projects[activeProjId];
+            if(!targetDate || !sourceDateForDup) return; const proj = db.projects[activeProjId];
             saveCurrentUIToData();
             if(!proj.dates.includes(targetDate)) proj.dates.push(targetDate);
-            proj.nodes.forEach(nodeId => { proj.data[nodeId][targetDate] = JSON.parse(JSON.stringify(proj.data[nodeId][activeDate])); });
-            activeDate = targetDate; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("DATA DUPLICATED");
+            
+            // Copy data strictly from the specific source date tab clicked
+            proj.nodes.forEach(nodeId => { 
+                proj.data[nodeId][targetDate] = JSON.parse(JSON.stringify(proj.data[nodeId][sourceDateForDup] || [])); 
+            });
+            activeDate = targetDate; sourceDateForDup = null; renderMasterTabs(); refreshAllNodes(); saveDB(); showToast("DATA DUPLICATED");
+        }
+
+        function requestDeleteDate(dateToRemove) {
+            const proj = db.projects[activeProjId];
+            if (proj.dates.length <= 1) { showToast("CANNOT DELETE LAST DATE"); return; }
+            showConfirm('Delete Schedule Date', `Are you sure you want to permanently delete all cues for ${dateToRemove}?`, () => {
+                proj.dates = proj.dates.filter(d => d !== dateToRemove);
+                proj.nodes.forEach(nodeId => { delete proj.data[nodeId][dateToRemove]; });
+                if (activeDate === dateToRemove) activeDate = proj.dates[0]; // Switch view if deleted active
+                saveDB(); renderMasterTabs(); refreshAllNodes(); showToast(`DATE DELETED`);
+            });
         }
 
         function addNewNode() {
