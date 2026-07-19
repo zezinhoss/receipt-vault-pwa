@@ -1,322 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
-    <title>Noiz View - Command Center</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noiz | Neural Marketing</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        /* Base OS Reset for Standalone Viewing */
         :root {
-            --theme-primary: #c084fc; /* Purple */
-            --theme-secondary: #2dd4bf; /* Cyan/Teal */
-            --theme-bg-gradient: radial-gradient(circle at top left, #1e1b4b 0%, #0a0a0a 60%);
+            --bg-base: #030303;
+            --bg-gradient: radial-gradient(circle at top left, #1e1b4b 0%, #030303 100%);
+            --panel-bg: rgba(20, 15, 30, 0.6);
+            --border-color: rgba(192, 132, 252, 0.15);
+            --accent: #c084fc; 
+            --accent-hover: #a855f7;
+            --text-primary: #f8fafc;
         }
 
-        body { 
-            font-family: 'Nunito', sans-serif; 
-            background: #0a0a0a; 
-            background-image: var(--theme-bg-gradient); 
-            color: #fff; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 90vh; 
-            margin: 0; 
-            overflow-x: hidden;
-        }
+        body { font-family: 'Nunito', sans-serif; background-color: var(--bg-base); background-image: var(--bg-gradient); color: var(--text-primary); min-height: 100vh; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        .glass-panel { background: var(--panel-bg); border: 1px solid var(--border-color); backdrop-filter: blur(24px); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
         
-        .main-container { 
-            width: 100%; 
-            max-width: 1200px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
-            box-sizing: border-box; 
-            animation: fadeIn 0.4s ease;
+        .hq-input { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px 16px; font-size: 13px; outline: none; width: 100%; border-radius: 8px; transition: all 0.3s ease; }
+        .hq-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.8); }
+
+        select.hq-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c084fc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
         }
 
-        @keyframes fadeIn { 
-            from { opacity: 0; } 
-            to { opacity: 1; } 
-        }
-
-        /* ========================================== */
-        /* MARKETING HUB SPECIFIC CSS                 */
-        /* ========================================== */
-        #marketing-hub { 
-            width: 100%; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
-        }
-
-        .mkt-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 20px; 
-            margin-top: 10px; 
-        }
-
-        .mkt-node { 
-            background: rgba(20, 20, 30, 0.4); 
-            border: 1px solid rgba(192, 132, 252, 0.2); 
-            border-radius: 16px; 
-            padding: 25px; 
-            text-align: left; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            position: relative; 
-            overflow: hidden; 
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .mkt-node:hover { 
-            transform: translateY(-5px); 
-            border-color: #c084fc; 
-            box-shadow: 0 10px 30px rgba(192, 132, 252, 0.15); 
-        }
-
-        .mkt-node::before { 
-            content: ''; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            height: 3px; 
-            background: linear-gradient(90deg, #c084fc, #2dd4bf); 
-            opacity: 0; 
-            transition: opacity 0.3s ease;
-        }
-
-        .mkt-node:hover::before { 
-            opacity: 1; 
-        }
+        .hq-btn { background: var(--accent); color: #000; padding: 12px 24px; font-weight: 800; cursor: pointer; border-radius: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s ease; border: none; }
+        .hq-btn:hover { background: var(--accent-hover); box-shadow: 0 4px 15px rgba(192, 132, 252, 0.4); }
         
-        .mkt-icon-wrap { 
-            width: 48px; 
-            height: 48px; 
-            background: rgba(192, 132, 252, 0.1); 
-            border-radius: 12px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            color: #c084fc; 
-            margin-bottom: 15px; 
-            transition: transform 0.3s ease;
-        }
+        /* Pulse Animation for Generation State */
+        .generation-pulse { animation: pulsePurple 2s infinite; }
+        @keyframes pulsePurple { 0% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(192, 132, 252, 0); } 100% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0); } }
 
-        .mkt-node:hover .mkt-icon-wrap { 
-            transform: scale(1.1); 
+        .output-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 13px;
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+            transition: 0.3s;
         }
+        .output-box:hover { border-color: rgba(192, 132, 252, 0.3); }
 
-        .mkt-title { 
-            color: #f8fafc; 
-            font-size: 16px; 
-            font-weight: 700; 
-            margin-bottom: 8px; 
-        }
-
-        .mkt-desc { 
-            color: #94a3b8; 
-            font-size: 13px; 
-            line-height: 1.5; 
-            margin-bottom: 20px; 
-            min-height: 40px;
-        }
-
-        .mkt-status-badge { 
-            display: inline-block; 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            font-size: 10px; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-            margin-bottom: 12px; 
-        }
-
-        .badge-active { 
-            background: rgba(45, 212, 191, 0.2); 
-            color: #2dd4bf; 
-        }
-        
-        .badge-standby { 
-            background: rgba(192, 132, 252, 0.1); 
-            color: #c084fc; 
-        }
-
-        .mkt-launch { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-top: 1px solid rgba(255,255,255,0.05); 
-            padding-top: 15px; 
-            color: #2dd4bf; 
-            font-size: 12px; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            letter-spacing: 1px;
-        }
-
-        .mkt-launch span { 
-            display: flex; 
-            align-items: center; 
-            gap: 5px; 
-            transition: transform 0.2s;
-        }
-
-        .mkt-node:hover .mkt-launch span { 
-            transform: translateX(5px); 
-        }
-
-        /* Custom Modal for Node Launch */
-        .modal-overlay { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            bottom: 0; 
-            background: rgba(0,0,0,0.8); 
-            z-index: 1000; 
-            display: none; 
-            justify-content: center; 
-            align-items: center; 
-            backdrop-filter: blur(5px); 
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-content { 
-            background: #1e1b4b; /* Deep purple background */
-            border: 1px solid rgba(192, 132, 252, 0.3); 
-            border-radius: 12px; 
-            width: 90%; 
-            max-width: 400px; 
-            padding: 25px; 
-            text-align: center; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8); 
-            position: relative;
-        }
-
-        .btn-modal { 
-            background: #c084fc; 
-            color: #000; 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 8px; 
-            font-family: 'Nunito', sans-serif; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: 0.2s; 
-            margin-top: 20px;
-        }
-
-        .btn-modal:hover { 
-            box-shadow: 0 0 15px rgba(192, 132, 252, 0.5); 
-        }
-
-        @media (max-width: 768px) {
-            .mkt-grid { grid-template-columns: 1fr; }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 8px;
         }
     </style>
 </head>
-<body>
+<body class="p-8">
 
-    <div id='app-view' class="main-container">
+    <div class="max-w-[1400px] mx-auto flex flex-col gap-6">
         
-        <!-- ========================================== -->
-        <!-- MARKETING HUB ENVIRONMENT (NOIZ)           -->
-        <!-- ========================================== -->
-        <div id="marketing-hub">
-            <div style="text-align:left; width:100%; padding: 0 20px; box-sizing: border-box; margin-bottom: 10px;">
-                <h2 style="color:#c084fc; font-weight:800; margin-top:0; margin-bottom: 5px; font-size: 24px; text-transform:uppercase; letter-spacing: 1px;">Marketing Core</h2>
-                <p style="color:#94a3b8; font-size: 13px; margin-top:0; margin-bottom: 0;">AI Outbound & Generative Execution Nodes</p>
+        <!-- Header -->
+        <div class="flex justify-between items-end border-b border-white/10 pb-5">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white tracking-wide uppercase">NOIZ CORE</h1>
+                <p class="text-[10px] text-purple-400 tracking-widest uppercase mt-2 font-bold">Neural Marketing & Copy Engine</p>
             </div>
-
-            <div class="mkt-grid">
-                
-                <!-- Node 1 -->
-                <div class="mkt-node" onclick="showMktModal('Auto-Blog & SEO', 'Initializing web article generator from stack details...')">
-                    <span class="mkt-status-badge badge-active">Live</span>
-                    <div class="mkt-icon-wrap">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    </div>
-                    <div class="mkt-title">Auto-Blog & SEO</div>
-                    <div class="mkt-desc">Generate optimized web articles from project metadata or stack details.</div>
-                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
-                </div>
-
-                <!-- Node 2 -->
-                <div class="mkt-node" onclick="showMktModal('Social Stack', 'Converting briefs into multi-platform campaigns...')">
-                    <span class="mkt-status-badge badge-active">Live</span>
-                    <div class="mkt-icon-wrap">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                    </div>
-                    <div class="mkt-title">Social Stack</div>
-                    <div class="mkt-desc">Convert briefs into multi-platform threads, carousels, and visual captions.</div>
-                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
-                </div>
-
-                <!-- Node 3 -->
-                <div class="mkt-node" onclick="showMktModal('B2B Campaigns', 'Accessing target company scraping engine...')">
-                    <span class="mkt-status-badge badge-standby">Standby</span>
-                    <div class="mkt-icon-wrap">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
-                    </div>
-                    <div class="mkt-title">B2B Campaigns</div>
-                    <div class="mkt-desc">Scrape target companies to draft hyper-personalized cold outreach sequences.</div>
-                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
-                </div>
-
-                <!-- Node 4 -->
-                <div class="mkt-node" onclick="showMktModal('Lead Nurture', 'Loading inquiry response templates...')">
-                    <span class="mkt-status-badge badge-standby">Standby</span>
-                    <div class="mkt-icon-wrap">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    </div>
-                    <div class="mkt-title">Lead Nurture</div>
-                    <div class="mkt-desc">Turn raw website inquiries into polished replies designed to book discovery calls.</div>
-                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
-                </div>
-
-                <!-- Node 5 -->
-                <div class="mkt-node" onclick="showMktModal('Brand & Gallery', 'Initializing creative direction algorithms...')">
-                    <span class="mkt-status-badge badge-standby">Standby</span>
-                    <div class="mkt-icon-wrap">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                    </div>
-                    <div class="mkt-title">Brand & Gallery Curation</div>
-                    <div class="mkt-desc">Generate creative direction, prompt engineering, and portfolio layout strategies.</div>
-                    <div class="mkt-launch"><span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Launch Node</span></div>
-                </div>
+            <div class="flex gap-3">
+                <span class="bg-purple-500/10 text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 bg-purple-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(192,132,252,0.8)]"></span> Gemini Pro API Ready
+                </span>
             </div>
         </div>
 
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Generation Input (Left) -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <div class="glass-panel p-6">
+                    <h2 class="text-sm font-bold text-white mb-6 uppercase tracking-wide">Campaign Brief</h2>
+                    
+                    <div class="flex flex-col gap-5">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Target Platforms</label>
+                            <div class="flex flex-col gap-2">
+                                <label class="flex items-center gap-3 text-xs text-slate-300 bg-black/40 px-4 py-3 rounded border border-white/5 cursor-pointer hover:border-purple-500/50 transition">
+                                    <input type="checkbox" id="plat-linkedin" checked class="accent-purple-500 w-4 h-4"> LinkedIn Post
+                                </label>
+                                <label class="flex items-center gap-3 text-xs text-slate-300 bg-black/40 px-4 py-3 rounded border border-white/5 cursor-pointer hover:border-purple-500/50 transition">
+                                    <input type="checkbox" id="plat-blog" checked class="accent-purple-500 w-4 h-4"> Technical Blog Article
+                                </label>
+                                <label class="flex items-center gap-3 text-xs text-slate-300 bg-black/40 px-4 py-3 rounded border border-white/5 cursor-pointer hover:border-purple-500/50 transition">
+                                    <input type="checkbox" id="plat-email" class="accent-purple-500 w-4 h-4"> Cold Outreach Email
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Tone Directive</label>
+                            <select id="tone-select" class="hq-input text-slate-300">
+                                <option value="Professional & Technical (B2B)">Professional & Technical (B2B)</option>
+                                <option value="Aggressive Growth">Aggressive Growth</option>
+                                <option value="Casual & Creative Agency">Casual & Creative Agency</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Raw Notes / Tech Specs</label>
+                            <textarea id="brief-input" class="hq-input h-48 resize-none" placeholder="Paste rough project notes, technical specs, or competitor links here. Gemini will analyze and synthesize..."></textarea>
+                        </div>
+
+                        <button id="generate-btn" class="hq-btn w-full mt-2" onclick="generateAssets()">Synthesize Assets</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Viewport (Right) -->
+            <div class="lg:col-span-8 flex flex-col gap-6">
+                <div class="glass-panel p-6 h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-sm font-bold text-white uppercase tracking-wide">Generated Output</h2>
+                        <div class="flex gap-4">
+                            <button class="text-[10px] text-slate-400 hover:text-purple-400 uppercase font-bold tracking-wider transition" onclick="copyAll()">Copy All</button>
+                            <button class="text-[10px] text-slate-400 hover:text-purple-400 uppercase font-bold tracking-wider transition" onclick="showToast('Saved to Supabase Vault.')">Save to DB</button>
+                        </div>
+                    </div>
+                    
+                    <div id="output-container" class="bg-black/50 border border-white/5 rounded-lg p-6 flex-1 relative overflow-y-auto min-h-[500px]">
+                        
+                        <!-- Initial Empty State -->
+                        <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-30"></div>
+                            <svg class="w-12 h-12 text-slate-600 mb-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <span class="text-xs text-slate-500 font-bold uppercase tracking-widest relative z-10">Awaiting Brief Input...</span>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="loading-state" class="hidden absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <span class="text-xs text-purple-400 font-bold uppercase tracking-widest animate-pulse">Running Neural Synthesis...</span>
+                        </div>
+
+                        <!-- Results Container -->
+                        <div id="results-state" class="hidden relative z-10">
+                            <!-- Injected via JS -->
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <!-- Custom Modal to replace alerts -->
-    <div class="modal-overlay" id="mkt-modal">
-        <div class="modal-content">
-            <h3 style="color:#c084fc; margin-top:0; font-size:20px; text-transform:uppercase; letter-spacing:1px;" id="mkt-modal-title">Node Title</h3>
-            <p style="color:#cbd5e1; font-size:14px; margin-bottom:20px;" id="mkt-modal-desc">Node description.</p>
-            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px dashed rgba(192,132,252,0.3); color:#888; font-size:12px;">
-                <span style="font-size:20px; display:block; margin-bottom:10px;">🚧</span>
-                Interface connected. Awaiting backend data binding.
-            </div>
-            <button class="btn-modal" onclick="document.getElementById('mkt-modal').style.display='none'">Acknowledge</button>
-        </div>
+    <!-- Global Feedback Toast -->
+    <div id="noiz-toast" class="fixed bottom-6 right-6 bg-purple-500 text-black px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-xs shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 z-[2000]">
+        Feedback Message
     </div>
 
     <script>
-        // Custom function to handle node clicks securely without native browser alerts
-        function showMktModal(title, desc) {
-            document.getElementById('mkt-modal-title').innerText = title;
-            document.getElementById('mkt-modal-desc').innerText = desc;
-            document.getElementById('mkt-modal').style.display = 'flex';
+        function showToast(msg) {
+            const toast = document.getElementById('noiz-toast');
+            toast.innerText = msg;
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.transform = 'translateY(20px)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        function generateAssets() {
+            const brief = document.getElementById('brief-input').value;
+            const btn = document.getElementById('generate-btn');
+            
+            if(!brief.trim()) {
+                showToast("Please provide a campaign brief or notes.");
+                return;
+            }
+
+            // UI Updates: Loading state
+            btn.innerText = "SYNTHESIZING...";
+            btn.classList.add('opacity-50', 'pointer-events-none', 'generation-pulse');
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('results-state').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+
+            // Simulate AI Delay (In Phase 2, this hits FastAPI / Gemini)
+            setTimeout(() => {
+                renderMocks();
+                
+                // Reset UI
+                btn.innerText = "Synthesize Assets";
+                btn.classList.remove('opacity-50', 'pointer-events-none', 'generation-pulse');
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('results-state').classList.remove('hidden');
+                showToast("Synthesis Complete");
+            }, 2500);
+        }
+
+        function renderMocks() {
+            const tone = document.getElementById('tone-select').value;
+            const wantsLI = document.getElementById('plat-linkedin').checked;
+            const wantsBlog = document.getElementById('plat-blog').checked;
+            const wantsEmail = document.getElementById('plat-email').checked;
+            const container = document.getElementById('results-state');
+            
+            let html = '';
+
+            if (wantsLI) {
+                html += `
+                    <div class="output-box">
+                        <div class="output-header">
+                            <span class="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Platform: LinkedIn</span>
+                            <span class="text-[10px] text-slate-500 font-mono">Tone: ${tone}</span>
+                        </div>
+                        <p>🚀 Thrilled to announce our latest milestone in event technology integration.</p>
+                        <br>
+                        <p>We've successfully deployed a zero-latency, 10-node LED wall scheduling system using our proprietary RCI_OS architecture. By shifting from cloud-dependent loops to localized Electron.js nodes, we've eliminated network dropout risks for live shows.</p>
+                        <br>
+                        <p>Check out the technical breakdown below. 👇</p>
+                        <p class="text-purple-400 mt-2">#EventTech #LEDWalls #LiveProduction #Engineering</p>
+                    </div>
+                `;
+            }
+
+            if (wantsBlog) {
+                html += `
+                    <div class="output-box">
+                        <div class="output-header">
+                            <span class="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Platform: Tech Blog (SEO)</span>
+                            <span class="text-[10px] text-slate-500 font-mono">Tone: ${tone}</span>
+                        </div>
+                        <h1 class="text-lg font-bold text-white mb-2">Architecting Zero-Latency LED Arrays for Live Events</h1>
+                        <p>In the high-stakes environment of live event production, a two-second internet dropout isn't an inconvenience—it's a critical failure. This article explores how RCI shifted from standard web architectures to localized, hardware-accelerated nodes...</p>
+                        <br>
+                        <h2 class="text-md font-bold text-white mb-1">The Problem with WebSockets at Scale</h2>
+                        <p>While WebSockets provide excellent real-time communication, relying on venue Wi-Fi for 4K video cueing introduces unacceptable risk variables. Our shift to local Electron binaries guarantees that once an asset is cached, it executes precisely on the scheduled frame.</p>
+                    </div>
+                `;
+            }
+
+            if (wantsEmail) {
+                html += `
+                    <div class="output-box">
+                        <div class="output-header">
+                            <span class="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Platform: Cold Outreach</span>
+                            <span class="text-[10px] text-slate-500 font-mono">Tone: ${tone}</span>
+                        </div>
+                        <p><strong>Subject:</strong> Upgrading your event infrastructure for Q4</p>
+                        <br>
+                        <p>Hi [Name],</p>
+                        <br>
+                        <p>I noticed [Company] is scaling up its live event presence this year. We recently helped a similar production team eliminate screen sync delays by implementing our offline-first VTx scheduling software.</p>
+                        <p>Would you be open to a brief technical chat next week to see how this architecture fits your upcoming shows?</p>
+                        <br>
+                        <p>Best regards,<br>RCI Team</p>
+                    </div>
+                `;
+            }
+
+            if(!html) {
+                html = `<div class="text-center text-slate-500 py-10 font-bold tracking-widest uppercase text-xs">No platforms selected.<br><br>Please check at least one target platform.</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function copyAll() {
+            const results = document.getElementById('results-state').innerText;
+            if(!results.trim()) return;
+            
+            // Clipboard API (May require HTTPS or fallback)
+            try {
+                navigator.clipboard.writeText(results).then(() => {
+                    showToast('All output copied to clipboard.');
+                });
+            } catch (err) {
+                // Fallback
+                const textArea = document.createElement("textarea");
+                textArea.value = results;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                textArea.remove();
+                showToast('All output copied to clipboard.');
+            }
         }
     </script>
 </body>
