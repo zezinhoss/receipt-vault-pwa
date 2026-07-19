@@ -2,271 +2,307 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>VTz | LIVE SWITCHER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTz | Live Switcher</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        :root { 
-            --accent: #facc15; 
-            --accent-dim: rgba(250, 204, 21, 0.05); 
-            --bg-deep: #0a0a0a; 
-            --bg-panel: #1a1a1a; 
-            --bg-header: #222222;
-            --border-thin: rgba(255, 255, 255, 0.08);
-            --border-accent: rgba(250, 204, 21, 0.3); 
-            --text-primary: #F9F9FB;
-            --text-muted: #888888;
-            --alert-red: #ef4444;
-            --live-green: #22c55e;
-            --font-main: 'Nunito', sans-serif;
+        :root {
+            --bg-base: #030303;
+            --bg-gradient: radial-gradient(circle at top center, #1e3a8a 0%, #030303 100%);
+            --panel-bg: rgba(15, 20, 30, 0.6);
+            --border-color: rgba(59, 130, 246, 0.15);
+            --accent: #3b82f6; 
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #facc15;
         }
 
-        body { 
-            font-family: var(--font-main); 
-            background-color: var(--bg-deep); 
-            color: var(--text-primary); 
-            margin: 0; padding: 0; overflow-x: hidden; height: 100vh;
-        }
+        body { font-family: 'Nunito', sans-serif; background-color: var(--bg-base); background-image: var(--bg-gradient); color: #f8fafc; min-height: 100vh; user-select: none;}
+        .glass-panel { background: var(--panel-bg); border: 1px solid var(--border-color); backdrop-filter: blur(24px); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .monitor { background: #000; border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; transition: 0.2s;}
+        .monitor.prv { border-color: var(--success); box-shadow: 0 0 20px rgba(34, 197, 94, 0.15); }
+        .monitor.pgm { border-color: var(--danger); box-shadow: 0 0 30px rgba(239, 68, 68, 0.25); }
+        
+        .mon-label { position: absolute; top: 0; left: 0; padding: 4px 10px; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; z-index: 10; border-bottom-right-radius: 6px;}
+        .prv .mon-label { background: var(--success); color: #000; }
+        .pgm .mon-label { background: var(--danger); color: #fff; }
 
-        h1, h2, h3, h4 { font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.05em; }
-        
-        .btn-obs { background: #333; color: var(--text-primary); border: 1px solid var(--border-thin); padding: 6px 12px; cursor: pointer; font-size: 11px; font-weight: 700; transition: 0.2s; border-radius: 4px; font-family: var(--font-main); display: flex; justify-content: center; align-items: center; width: 100%;}
-        .btn-obs:hover { background: #444; border-color: rgba(255,255,255,0.2); }
-        .btn-obs-blue { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #3b82f6;}
-        .btn-obs-blue:hover { background: #3b82f6; color: #000;}
+        .t-bar-container { height: 200px; display: flex; align-items: center; justify-content: center; position: relative; margin: 20px 0;}
+        .t-bar-track { width: 8px; height: 100%; background: rgba(255,255,255,0.1); border-radius: 4px; position: relative;}
+        .t-bar-handle { width: 60px; height: 24px; background: linear-gradient(to bottom, #f8fafc, #cbd5e1); border-radius: 4px; position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.8); border: 1px solid #94a3b8;}
 
-        #vtz-app { display: flex; flex-direction: column; height: 100vh; padding: 10px; box-sizing: border-box; gap: 10px; }
+        .cut-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-weight: 800; font-size: 24px; padding: 20px; border-radius: 8px; cursor: pointer; transition: 0.1s; text-transform: uppercase; letter-spacing: 2px;}
+        .cut-btn:hover { background: rgba(255,255,255,0.1); }
+        .cut-btn:active { transform: scale(0.95); }
         
-        /* TOP SECTION: Monitors */
-        .vtz-top { display: flex; flex: 1.2; gap: 10px; min-height: 40vh; }
-        .vtz-monitor-container { flex: 1; display: flex; flex-direction: column; background: var(--bg-panel); border: 1px solid var(--border-thin); border-radius: 6px; overflow: hidden; }
-        .vtz-monitor-label { padding: 6px 12px; background: var(--bg-header); font-size: 11px; font-weight: 700; border-bottom: 1px solid var(--border-thin); display: flex; justify-content: space-between; align-items: center; }
-        .vtz-monitor { flex: 1; background: #000; margin: 10px; border: 1px solid var(--border-thin); display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden;}
-        
-        /* Active Monitor Outlines */
-        #preview-container { border-color: rgba(59, 130, 246, 0.3); }
-        #preview-monitor { border-color: #3b82f6; box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1); }
-        #program-container { border-color: rgba(239, 68, 68, 0.3); }
-        #program-monitor { border-color: var(--alert-red); box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.1); }
+        .cut-btn.red { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: var(--danger); }
+        .cut-btn.red:hover { background: var(--danger); color: #fff; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
 
-        .vtz-transitions { width: 140px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; padding: 0 10px; }
+        .src-btn { background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 20px 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden;}
+        .src-btn:hover { border-color: rgba(255,255,255,0.2); color: #fff; }
+        .src-btn::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: transparent; }
         
-        /* BOTTOM SECTION: 4 Panels */
-        .vtz-bottom { display: flex; flex: 1; gap: 10px; min-height: 30vh; }
-        .vtz-panel { flex: 1; background: var(--bg-panel); border: 1px solid var(--border-thin); border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; }
-        .vtz-panel-header { padding: 6px 12px; background: var(--bg-header); font-size: 11px; font-weight: 700; border-bottom: 1px solid var(--border-thin); display: flex; justify-content: space-between; align-items: center; }
-        .vtz-panel-content { flex: 1; overflow-y: auto; padding: 8px; }
+        .src-btn.prv-active { background: rgba(34, 197, 94, 0.1); border-color: var(--success); color: var(--success); }
+        .src-btn.prv-active::after { background: var(--success); }
         
-        /* Media Sources List */
-        .source-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; font-size: 11px; color: var(--text-primary); border-bottom: 1px solid var(--border-thin); cursor: pointer; transition: 0.2s;}
-        .source-item:hover { background: rgba(255,255,255,0.05); }
-        .source-item.active { background: rgba(59, 130, 246, 0.2); border-left: 2px solid #3b82f6; }
-        .source-icons { color: var(--text-muted); font-size: 12px; display: flex; gap: 6px;}
+        .src-btn.pgm-active { background: rgba(239, 68, 68, 0.1); border-color: var(--danger); color: var(--danger); }
+        .src-btn.pgm-active::after { background: var(--danger); }
 
-        /* Audio Mixer Mockup */
-        .audio-track { margin-bottom: 10px; }
-        .audio-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
-        .audio-meter { height: 8px; background: #222; border-radius: 4px; overflow: hidden; display: flex; }
-        .meter-fill-g { background: var(--live-green); width: 60%; }
-        .meter-fill-y { background: var(--accent); width: 20%; }
-        .meter-fill-r { background: var(--alert-red); width: 0%; }
-        
-        .as-select { background: #000; border: 1px solid var(--border-thin); color: var(--text-primary); padding: 6px; font-family: var(--font-main); font-size: 11px; width: 100%; border-radius: 4px; outline: none; margin-bottom: 8px;}
-        
-        /* Launcher Overlay */
-        #launcher-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-deep); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .launcher-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 800px; margin-top: 40px; }
-        .glass-box { background: rgba(30, 30, 30, 0.5); border: 1px solid var(--border-thin); padding: 24px; border-radius: 12px; text-align: center;}
-        
-        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--bg-deep); padding: 12px 24px; font-size: 12px; font-weight: 800; text-transform: uppercase; display: none; z-index: 2000; border-radius: 4px; }
+        .bus-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; font-weight: 800; margin-bottom: 8px; margin-top: 16px; display: flex; align-items: center; gap: 8px;}
+        .bus-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
     </style>
 </head>
-<body>
+<body class="p-6">
 
-    <div class="toast" id="sys-toast">ACTION COMPLETED</div>
-    <input type="file" id="hidden-media-browser" style="display:none" onchange="handleMediaUpload(this)">
-
-    <div id="launcher-overlay">
-        <h1 style="font-size: 32px; letter-spacing: 0.2em; color: var(--accent);">VTz</h1>
-        <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 8px;">LIVE SWITCHER (OBS ENGINE)</div>
-
-        <div class="launcher-grid">
-            <div class="glass-box">
-                <h3 style="margin-bottom: 15px;">New Live Session</h3>
-                <input type="text" id="new-sess-name" class="as-select" placeholder="e.g. Summit Live" style="padding: 10px; margin-bottom: 15px;">
-                <button class="btn-obs btn-obs-blue" style="padding: 10px;" onclick="openVTz()">Initialize Switcher</button>
+    <div class="max-w-[1600px] mx-auto flex flex-col gap-6">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center glass-panel p-5 border-blue-500/30">
+            <div>
+                <h1 class="text-2xl font-extrabold text-white tracking-wide uppercase">VTz SWITCHER</h1>
+                <div class="text-[10px] text-blue-400 tracking-widest uppercase mt-1 font-bold flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> 
+                    LAN Socket Connected (1ms)
+                </div>
             </div>
-            <div class="glass-box">
-                <h3 style="margin-bottom: 15px;">Load Session</h3>
-                <select class="as-select" style="padding: 10px; margin-bottom: 15px;">
-                    <option>No saved sessions...</option>
-                </select>
-                <button class="btn-obs" style="padding: 10px;">Connect Engine</button>
+            <div class="flex gap-4 items-center">
+                <div class="flex flex-col items-end mr-4">
+                    <span class="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Node Target</span>
+                    <select class="bg-transparent text-white border border-white/10 rounded px-2 py-1 text-xs outline-none font-bold mono">
+                        <option>ALL NODES</option>
+                        <option>NODE_01</option>
+                        <option>NODE_02</option>
+                    </select>
+                </div>
+                <button class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 px-5 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider hover:bg-yellow-500 hover:text-black transition" onclick="releaseToAuto()">Release to VTx Auto</button>
             </div>
         </div>
+
+        <!-- Main Switcher View -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Monitors & Buses -->
+            <div class="lg:col-span-9 flex flex-col gap-6">
+                <!-- Multi-Viewer -->
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="monitor prv" id="mon-prv">
+                        <div class="mon-label">PREVIEW</div>
+                        <span class="mono text-success text-opacity-50 text-2xl font-bold tracking-widest" id="lbl-prv">CAM 1</span>
+                    </div>
+                    <div class="monitor pgm" id="mon-pgm">
+                        <div class="mon-label">PROGRAM</div>
+                        <span class="mono text-danger text-opacity-50 text-2xl font-bold tracking-widest" id="lbl-pgm">VT A</span>
+                        <div class="absolute top-4 right-4 flex gap-2">
+                            <span class="bg-red-500 text-white text-[9px] font-bold px-2 py-1 rounded uppercase tracking-wider animate-pulse">LIVE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Source Buses -->
+                <div class="glass-panel p-6 border-t-2 border-t-slate-700">
+                    
+                    <div class="bus-label">Program Bus (PGM)</div>
+                    <div class="grid grid-cols-8 gap-3" id="bus-pgm">
+                        <button class="src-btn pgm-active" onclick="setBus('pgm', 'VT A', this)">VT A</button>
+                        <button class="src-btn" onclick="setBus('pgm', 'VT B', this)">VT B</button>
+                        <button class="src-btn" onclick="setBus('pgm', 'CAM 1', this)">CAM 1</button>
+                        <button class="src-btn" onclick="setBus('pgm', 'CAM 2', this)">CAM 2</button>
+                        <button class="src-btn" onclick="setBus('pgm', 'GFX 1', this)">GFX 1</button>
+                        <button class="src-btn" onclick="setBus('pgm', 'GFX 2', this)">GFX 2</button>
+                        <button class="src-btn" onclick="setBus('pgm', 'BLACK', this)">BLACK</button>
+                        <button class="src-btn" onclick="setBus('pgm', 'LOGO', this)">LOGO</button>
+                    </div>
+                    
+                    <div class="bus-label">Preview Bus (PRV)</div>
+                    <div class="grid grid-cols-8 gap-3" id="bus-prv">
+                        <button class="src-btn" onclick="setBus('prv', 'VT A', this)">VT A</button>
+                        <button class="src-btn" onclick="setBus('prv', 'VT B', this)">VT B</button>
+                        <button class="src-btn prv-active" onclick="setBus('prv', 'CAM 1', this)">CAM 1</button>
+                        <button class="src-btn" onclick="setBus('prv', 'CAM 2', this)">CAM 2</button>
+                        <button class="src-btn" onclick="setBus('prv', 'GFX 1', this)">GFX 1</button>
+                        <button class="src-btn" onclick="setBus('prv', 'GFX 2', this)">GFX 2</button>
+                        <button class="src-btn" onclick="setBus('prv', 'BLACK', this)">BLACK</button>
+                        <button class="src-btn" onclick="setBus('prv', 'LOGO', this)">LOGO</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transition Control -->
+            <div class="lg:col-span-3 glass-panel p-6 flex flex-col justify-between border-t-2 border-t-slate-700">
+                
+                <div>
+                    <div class="bus-label mt-0 justify-center">Transition Type</div>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <button class="bg-white/10 text-white py-3 rounded-lg text-xs font-bold uppercase border border-white/20">MIX</button>
+                        <button class="bg-transparent text-slate-500 py-3 rounded-lg text-xs font-bold uppercase border border-white/5 hover:text-white transition">WIPE</button>
+                        <button class="bg-transparent text-slate-500 py-3 rounded-lg text-xs font-bold uppercase border border-white/5 hover:text-white transition">DIP</button>
+                        <button class="bg-transparent text-slate-500 py-3 rounded-lg text-xs font-bold uppercase border border-white/5 hover:text-white transition">DVE</button>
+                    </div>
+                    <div class="flex justify-between items-center bg-black/40 px-3 py-2 rounded border border-white/5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Rate (Frames)</span>
+                        <input type="number" value="30" class="bg-transparent text-white w-12 text-right outline-none font-bold mono" min="1" max="120">
+                    </div>
+                </div>
+
+                <div class="t-bar-container" id="t-bar-area">
+                    <div class="t-bar-track">
+                        <div class="t-bar-handle" id="t-bar" onmousedown="startTBar(event)" ontouchstart="startTBar(event)"></div>
+                    </div>
+                </div>
+
+                <div class="w-full flex flex-col gap-3">
+                    <button class="cut-btn text-blue-400 border-blue-500/30 hover:bg-blue-500/10" onclick="autoTransition()">AUTO</button>
+                    <button class="cut-btn red" onclick="hardCut()">CUT</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div id="vtz-app" style="display: none;">
-        
-        <!-- Header Strip -->
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 5px;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <h3 style="color: var(--accent); font-size: 14px;">VTz <span style="color:var(--text-muted); font-weight:400;">| STUDIO MODE</span></h3>
-            </div>
-            <div style="font-size: 11px; font-family: monospace; color: var(--text-muted);">
-                CPU: 2.1% | 60.00 FPS
-            </div>
-        </div>
-
-        <!-- TOP: Monitors & Transitions -->
-        <div class="vtz-top">
-            <!-- Preview Monitor -->
-            <div class="vtz-monitor-container" id="preview-container">
-                <div class="vtz-monitor-label">Preview: Scene <span>[STANDBY]</span></div>
-                <div class="vtz-monitor" id="preview-monitor">
-                    <span style="color:#3b82f6; font-weight:800; font-size:20px;" id="preview-text">NO MEDIA</span>
-                </div>
-            </div>
-
-            <!-- Transition Actions -->
-            <div class="vtz-transitions">
-                <button class="btn-obs" style="height: 40px; font-size: 14px; border-color: rgba(59, 130, 246, 0.5); color: #3b82f6;" onclick="executeCut()">Cut</button>
-                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin: 5px 0;">Quick Transitions</div>
-                <button class="btn-obs">Fade to Black</button>
-                <button class="btn-obs">Fade (300ms)</button>
-                <div style="width: 100%; height: 1px; background: var(--border-thin); margin: 5px 0;"></div>
-                <input type="range" style="width: 100%;" min="0" max="100" value="0">
-            </div>
-
-            <!-- Program Monitor -->
-            <div class="vtz-monitor-container" id="program-container">
-                <div class="vtz-monitor-label">Program <span style="color:var(--alert-red);">[LIVE]</span></div>
-                <div class="vtz-monitor" id="program-monitor">
-                    <span style="color:#333; font-weight:800; font-size:20px;" id="program-text">OFF AIR</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- BOTTOM: 4 Panels -->
-        <div class="vtz-bottom">
-            
-            <!-- Sources (Media Bin) -->
-            <div class="vtz-panel">
-                <div class="vtz-panel-header">Sources <div style="display:flex; gap:5px;"><button class="btn-obs" style="padding:2px 6px;" onclick="document.getElementById('hidden-media-browser').click()">+</button></div></div>
-                <div class="vtz-panel-content" id="sources-list">
-                    <div class="source-item active" onclick="setPreview(this, 'Main Camera Feed')">
-                        <span>📸 Video Capture Device</span><div class="source-icons"><span>👁</span><span>🔓</span></div>
-                    </div>
-                    <div class="source-item" onclick="setPreview(this, 'Promo_Video.mp4')">
-                        <span>▶️ Media Source (Promo)</span><div class="source-icons"><span>👁</span><span>🔓</span></div>
-                    </div>
-                    <div class="source-item" onclick="setPreview(this, 'Sponsor_Logo.jpg')">
-                        <span>🖼️ Image Overlay</span><div class="source-icons"><span>👁</span><span>🔒</span></div>
-                    </div>
-                    <div class="source-item" onclick="setPreview(this, 'https://live-poll.com/x')">
-                        <span>🌐 Web Browser (Poll)</span><div class="source-icons"><span>👁</span><span>🔓</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Audio Mixer -->
-            <div class="vtz-panel">
-                <div class="vtz-panel-header">Audio Mixer <span>⚙️</span></div>
-                <div class="vtz-panel-content">
-                    <div class="audio-track">
-                        <div class="audio-label"><span>Media Source</span><span>0.0 dB</span></div>
-                        <div class="audio-meter"><div class="meter-fill-g"></div><div class="meter-fill-y"></div><div class="meter-fill-r"></div></div>
-                        <input type="range" style="width: 100%; margin-top: 5px;" min="0" max="100" value="80">
-                    </div>
-                    <div class="audio-track">
-                        <div class="audio-label"><span>Mic/Aux</span><span>-15.0 dB</span></div>
-                        <div class="audio-meter"><div class="meter-fill-g" style="width:40%;"></div><div class="meter-fill-y" style="width:0%;"></div><div class="meter-fill-r"></div></div>
-                        <input type="range" style="width: 100%; margin-top: 5px;" min="0" max="100" value="40">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Scene Transitions -->
-            <div class="vtz-panel" style="flex: 0.8;">
-                <div class="vtz-panel-header">Scene Transitions</div>
-                <div class="vtz-panel-content">
-                    <select class="as-select"><option>Fade</option><option>Cut</option><option>Swipe</option></select>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:5px; align-items:center;">
-                        Duration <input type="number" class="as-select" value="300" style="width:60px; margin:0;"> ms
-                    </div>
-                </div>
-            </div>
-
-            <!-- Controls -->
-            <div class="vtz-panel" style="flex: 0.8;">
-                <div class="vtz-panel-header">Controls</div>
-                <div class="vtz-panel-content" style="display:flex; flex-direction:column; gap:5px;">
-                    <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">Target Network Node</div>
-                    <select class="as-select" id="target-node"><option value="1">NODE_01</option><option value="2">NODE_02</option><option value="ALL">ALL NODES</option></select>
-                    <button class="btn-obs btn-obs-blue" style="padding: 8px;" onclick="executeCut()">GO LIVE OVERRIDE</button>
-                    <button class="btn-obs" style="padding: 8px; color: var(--live-green); border-color: rgba(34, 197, 94, 0.3);" onclick="releaseToXkeduler()">Release to VTx Scheduler</button>
-                    <div style="height: 1px; background: var(--border-thin); margin: 5px 0;"></div>
-                    <button class="btn-obs">Settings</button>
-                </div>
-            </div>
-
-        </div>
+    <!-- Global Feedback Toast -->
+    <div id="vtz-toast" class="fixed bottom-6 right-6 bg-blue-500 text-white px-6 py-3 rounded-lg font-bold uppercase tracking-wider text-xs shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 z-[2000]">
+        Feedback Message
     </div>
 
     <script>
-        let previewMedia = "Main Camera Feed";
-        let programMedia = null;
-
-        function openVTz() {
-            document.getElementById('launcher-overlay').style.display = 'none';
-            document.getElementById('vtz-app').style.display = 'flex';
-        }
+        let currentPgm = 'VT A';
+        let currentPrv = 'CAM 1';
 
         function showToast(msg) {
-            const t = document.getElementById('sys-toast');
-            t.innerText = msg; t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 2000);
+            const toast = document.getElementById('vtz-toast');
+            toast.innerText = msg;
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.transform = 'translateY(20px)';
+                toast.style.opacity = '0';
+            }, 2000);
         }
 
-        function handleMediaUpload(input) {
-            if(!input.files[0]) return;
-            const filename = input.files[0].name;
-            const list = document.getElementById('sources-list');
-            list.innerHTML += `
-                <div class="source-item" onclick="setPreview(this, '${filename}')">
-                    <span>📄 ${filename}</span><div class="source-icons"><span>👁</span><span>🔓</span></div>
-                </div>
-            `;
-            showToast("MEDIA ADDED TO BIN");
-        }
-
-        function setPreview(el, mediaName) {
-            document.querySelectorAll('.source-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-            previewMedia = mediaName;
-            document.getElementById('preview-text').innerText = mediaName;
-            document.getElementById('preview-text').style.color = '#3b82f6';
-        }
-
-        function executeCut() {
-            if(!previewMedia) return;
-            programMedia = previewMedia;
-            document.getElementById('program-text').innerText = programMedia;
-            document.getElementById('program-text').style.color = '#fff';
+        function setBus(bus, source, btnEl) {
+            // Update UI buttons
+            const container = document.getElementById(`bus-${bus}`);
+            const activeClass = bus === 'pgm' ? 'pgm-active' : 'prv-active';
             
-            const node = document.getElementById('target-node').value;
-            console.log(`[VTz ENGINE] Cutting ${programMedia} to Node ${node}`);
-            showToast(`OVERRIDE LIVE ON NODE ${node}`);
+            container.querySelectorAll('.src-btn').forEach(btn => btn.classList.remove(activeClass));
+            btnEl.classList.add(activeClass);
+
+            // Update Monitors
+            if (bus === 'pgm') {
+                currentPgm = source;
+                document.getElementById('lbl-pgm').innerText = source;
+                // In a real app, send socket command here
+                console.log(`[SOCKET] PGM SET: ${source}`);
+            } else {
+                currentPrv = source;
+                document.getElementById('lbl-prv').innerText = source;
+            }
         }
 
-        function releaseToXkeduler() {
-            programMedia = null;
-            document.getElementById('program-text').innerText = "VTx SCHEDULE";
-            document.getElementById('program-text').style.color = '#22c55e';
-            const node = document.getElementById('target-node').value;
-            showToast(`NODE ${node} RELEASED TO SCHEDULE`);
+        function hardCut() {
+            // Swap logic
+            const temp = currentPgm;
+            currentPgm = currentPrv;
+            currentPrv = temp;
+
+            // Update Monitors
+            document.getElementById('lbl-pgm').innerText = currentPgm;
+            document.getElementById('lbl-prv').innerText = currentPrv;
+
+            // Update Bus Buttons
+            syncBusButtons();
+
+            // Notify
+            console.log(`[SOCKET] CUT EXECUTED. NEW PGM: ${currentPgm}`);
+            // Flash screen border to simulate cut
+            document.body.style.boxShadow = "inset 0 0 50px rgba(239, 68, 68, 0.2)";
+            setTimeout(() => document.body.style.boxShadow = "none", 100);
+        }
+
+        function autoTransition() {
+            // Simulate a 1 second mix (30 frames)
+            console.log(`[SOCKET] AUTO TRANSITION STARTED...`);
+            const handle = document.getElementById('t-bar');
+            handle.style.transition = 'bottom 1s linear';
+            handle.style.bottom = handle.style.bottom === '100%' ? '0%' : '100%';
+            
+            setTimeout(() => {
+                hardCut();
+                handle.style.transition = 'none'; // reset
+            }, 1000);
+        }
+
+        function syncBusButtons() {
+            // Program Bus
+            const pgmBtns = document.getElementById('bus-pgm').querySelectorAll('.src-btn');
+            pgmBtns.forEach(btn => {
+                btn.classList.remove('pgm-active');
+                if (btn.innerText === currentPgm) btn.classList.add('pgm-active');
+            });
+
+            // Preview Bus
+            const prvBtns = document.getElementById('bus-prv').querySelectorAll('.src-btn');
+            prvBtns.forEach(btn => {
+                btn.classList.remove('prv-active');
+                if (btn.innerText === currentPrv) btn.classList.add('prv-active');
+            });
+        }
+
+        function releaseToAuto() {
+            showToast("Control released back to VTx Automation Scheduler.");
+            console.log("[SOCKET] OVERRIDE RELEASED.");
+        }
+
+        // Basic T-Bar Drag Simulation
+        let isDragging = false;
+        let startY = 0;
+        let startBottom = 0;
+
+        function startTBar(e) {
+            isDragging = true;
+            // Support both mouse and touch
+            startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            const handle = document.getElementById('t-bar');
+            startBottom = parseInt(handle.style.bottom || '0');
+            
+            document.addEventListener('mousemove', dragTBar);
+            document.addEventListener('mouseup', stopTBar);
+            document.addEventListener('touchmove', dragTBar, {passive: false});
+            document.addEventListener('touchend', stopTBar);
+        }
+
+        function dragTBar(e) {
+            if (!isDragging) return;
+            e.preventDefault(); // prevent scrolling while dragging
+            
+            const currentY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            const deltaY = startY - currentY;
+            const containerHeight = 200; // approx track height
+            let newBottom = startBottom + (deltaY / containerHeight * 100);
+            
+            if (newBottom < 0) newBottom = 0;
+            if (newBottom > 100) newBottom = 100;
+            
+            document.getElementById('t-bar').style.bottom = `${newBottom}%`;
+
+            // If it hits the end, execute cut and reset bounds
+            if (newBottom === 0 || newBottom === 100) {
+                stopTBar();
+                hardCut();
+            }
+        }
+
+        function stopTBar() {
+            isDragging = false;
+            document.removeEventListener('mousemove', dragTBar);
+            document.removeEventListener('mouseup', stopTBar);
+            document.removeEventListener('touchmove', dragTBar);
+            document.removeEventListener('touchend', stopTBar);
         }
     </script>
 </body>
