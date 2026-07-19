@@ -29,11 +29,11 @@
     </script>
     <style type="text/tailwindcss">
         :root {
-            --grid-color: rgba(254, 216, 45, 0.05);
+            --grid-color: rgba(254, 216, 45, 0.04);
             --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
         body {
-            background-color: #0c0c0c;
+            background-color: #050505;
             background-image: 
                 linear-gradient(var(--grid-color) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
@@ -43,88 +43,129 @@
             position: absolute;
             inset: 0;
             background-image: var(--noise-texture);
-            opacity: 0.03;
+            opacity: 0.02;
             pointer-events: none;
             z-index: 10;
         }
+        
+        /* High-End Glassmorphism Card Override */
         .blade-slot {
-            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.03);
-            background: #0a0a0a;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.8), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                0 0 40px rgba(254, 216, 45, 0.02);
+            background: rgba(10, 10, 10, 0.45);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(254, 216, 45, 0.12);
+            border-radius: 12px;
         }
+        
         .manifest-row {
-            border-bottom: 1px solid rgba(254, 216, 45, 0.1);
+            border-bottom: 1px solid rgba(254, 216, 45, 0.08);
             display: flex;
             align-items: center;
             padding: 10px 14px;
+            transition: all 0.3s ease;
         }
+        .manifest-row:hover {
+            background: rgba(254, 216, 45, 0.03);
+            border-bottom-color: rgba(254, 216, 45, 0.2);
+        }
+        
         .glass-btn {
-            background: rgba(254, 216, 45, 0.02);
-            border: 1px solid rgba(254, 216, 45, 0.2);
-            transition: all 0.2s ease;
+            background: rgba(254, 216, 45, 0.03);
+            border: 1px solid rgba(254, 216, 45, 0.15);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 6px;
         }
         .glass-btn:hover {
-            background: rgba(254, 216, 45, 0.08);
+            background: rgba(254, 216, 45, 0.09);
             border-color: #fed82d;
+            box-shadow: 0 0 15px rgba(254, 216, 45, 0.15);
         }
+        
         .input-industrial {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(254, 216, 45, 0.15);
             color: white;
+            border-radius: 6px;
+            transition: all 0.3s ease;
         }
         .input-industrial:focus {
             border-color: #fed82d;
             outline: none;
-            box-shadow: none;
+            box-shadow: 0 0 12px rgba(254, 216, 45, 0.2);
+            background: rgba(0, 0, 0, 0.8);
         }
         .input-admin {
-            background: rgba(254, 216, 45, 0.05);
-            border: 1px solid #fed82d;
+            background: rgba(254, 216, 45, 0.02);
+            border: 1px solid rgba(254, 216, 45, 0.2);
             color: #fed82d;
         }
         .input-admin::placeholder {
-            color: rgba(254, 216, 45, 0.3);
+            color: rgba(254, 216, 45, 0.25);
         }
+        
         .feature-image-matte {
             background-size: cover;
             background-position: center;
-            filter: grayscale(1) brightness(0.12) contrast(1.1);
+            filter: grayscale(1) brightness(0.12) contrast(1.15);
             mix-blend-mode: soft-light;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .matte-node:hover .feature-image-matte {
+            filter: grayscale(0.5) brightness(0.2) contrast(1.1);
+            transform: scale(1.03);
         }
         .image-node-border {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
         }
         .image-node-border:last-child {
             border-bottom: none;
         }
         .matte-node {
-            background-color: #0e0e0e;
+            background-color: #08080a;
             position: relative;
             overflow: hidden;
+            transition: background 0.3s ease;
         }
+        .matte-node:hover {
+            background-color: #0c0c0e;
+        }
+        
         * {
-            letter-spacing: 0.1em;
+            letter-spacing: 0.12em;
         }
+        
         @keyframes row-flicker {
             0%, 100% { background: rgba(254, 216, 45, 0); color: rgba(255, 255, 255, 0.7); }
-            50% { background: rgba(254, 216, 45, 0.08); color: rgba(255, 255, 255, 1); text-shadow: 0 0 8px rgba(254, 216, 45, 0.4); }
+            50% { background: rgba(254, 216, 45, 0.05); color: rgba(255, 255, 255, 1); text-shadow: 0 0 8px rgba(254, 216, 45, 0.3); }
         }
         .manifest-row-active {
-            animation: row-flicker 6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            animation: row-flicker 5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
         }
     </style>
 </head>
 <body class="font-geist text-white min-h-screen selection:bg-corporate-yellow selection:text-black overflow-hidden font-light">
-    
-    <div id="system-transition" style="position: fixed; inset: 0; background: #0c0c0c; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div class="noise-overlay"></div>
+
+    <!-- Background Radial Ambient Hues -->
+    <div class="absolute -top-40 left-1/4 w-[600px] h-[600px] bg-corporate-yellow/5 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="absolute -bottom-40 right-1/4 w-[500px] h-[500px] bg-corporate-yellow/[0.03] rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div id="system-transition" style="position: fixed; inset: 0; background: #050505; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div id="scan-line" style="position:absolute; top:0; left:0; width:100%; height:2px; background:#fed82d; box-shadow:0 0 20px #fed82d; opacity:0;"></div>
         <div class="sync-text" style="color:#fed82d; font-family:monospace; font-size:10px; letter-spacing:0.8em; text-transform:uppercase;">[ NEURAL_SYNC_ACTIVE ]</div>
     </div>
 
+    <!-- Header Block -->
     <header class="fixed top-8 left-8 z-50">
         <div class="flex items-center gap-4">
-            <div class="w-8 h-8 border border-corporate-yellow/40 flex items-center justify-center">
-                <div class="w-4 h-4 bg-corporate-yellow"></div>
+            <!-- Brand Logo Layer -->
+            <div class="w-10 h-10 border border-corporate-yellow/30 flex items-center justify-center rounded overflow-hidden bg-black/40">
+                <img src="icon.png" alt="RCI Logo" class="w-7 h-7 object-contain" onerror="showLogoFallback(this)"/>
+                <div id="logo-fallback" class="hidden w-4 h-4 bg-corporate-yellow"></div>
             </div>
             <div class="flex flex-col">
                 <h1 class="text-sm font-normal tracking-[0.4em] uppercase text-white/90">RCI_OS CORE</h1>
@@ -134,11 +175,13 @@
     </header>
 
     <main class="h-screen flex w-full">
-        <aside class="w-1/4 flex-shrink-0 flex items-center px-12 border-r border-white/5 bg-black/10">
+        
+        <!-- Left Side: RCI Motto & Core Specifications -->
+        <aside class="w-1/4 flex-shrink-0 flex items-center px-12 border-r border-white/5 bg-black/15 relative z-20">
             <div class="max-w-xs">
                 <h2 class="text-xl tracking-[0.4em] text-white/40 uppercase leading-relaxed font-light">
                     The Neural Network <br/>
-                    <span class="text-white/60">For Live Production</span>
+                    <span class="text-white/70">For Live Production</span>
                 </h2>
                 <div class="mt-8 w-12 h-[1px] bg-corporate-yellow/40"></div>
                 <p class="mt-8 text-[9px] tracking-[0.3em] text-white/20 uppercase leading-loose font-light">
@@ -146,61 +189,69 @@
                     Global State Synchronization<br/>
                     Automated Logistics Core
                 </p>
-                <p class="mt-16 text-[18px] tracking-[0.05em] text-[#FFFFFF] font-light leading-[2.2]">
-                    The future of live event execution isn't just managed—<span class="text-[#fed82d]">it's engineered.</span> RCI_OS introduces absolute zero-latency control and unified logistics.
+                
+                <!-- Motto, Tech Breathing Copy -->
+                <p class="mt-14 text-[15px] tracking-[0.05em] text-white/80 font-light leading-[2.1]">
+                    The future of live execution isn't just managed—<span class="text-corporate-yellow font-normal">it is engineered.</span> RCI_OS introduces multi-threaded logistics, absolute zero-latency screen controls, and real-time canvas integration. 
                 </p>
+                <div class="mt-8 text-[9px] tracking-[0.2em] text-corporate-yellow/60 uppercase font-mono">
+                    [ STATUS: SHIELD_READY ]
+                </div>
             </div>
         </aside>
 
+        <!-- Center Section: Interactive Gateway Card -->
         <section class="flex-grow flex items-center justify-center relative px-12 z-20">
             <div class="relative w-full max-w-[560px]">
                 <div class="absolute -top-4 -left-4 w-12 h-12 border-t border-l border-corporate-yellow/20"></div>
                 <div class="absolute -bottom-4 -right-4 w-12 h-12 border-b border-r border-corporate-yellow/20"></div>
                 
                 <div class="blade-slot relative overflow-hidden">
-                    <div class="bg-black/60 p-12 flex flex-col gap-10">
-                        <div class="space-y-5">
+                    <div class="bg-black/40 p-12 flex flex-col gap-10">
+                        <div class="space-y-4">
                             <h2 class="text-lg font-normal tracking-[0.25em] text-white leading-tight">
                                 WHERE PHYSICAL EXECUTION <br/>
                                 <span class="text-corporate-yellow">MEETS NEURAL CONTROL.</span>
                             </h2>
-                            <p class="text-[14px] text-white/40 leading-relaxed max-w-md font-light tracking-[0.12em]">
+                            <p class="text-[12px] text-white/40 leading-relaxed max-w-md font-light tracking-[0.1em]">
                                 A unified production hub for high-fidelity event execution. Authentication required for protocol access.
                             </p>
                         </div>
 
-                        <div class="text-[9px] tracking-[0.2em] uppercase border-t border-white/10 font-light">
-                            <div class="manifest-row bg-white/[0.02] manifest-row-active" style="animation-delay: 0s;">
-                                <span class="w-32 text-corporate-yellow/60">COMMAND HQ:</span>
-                                <span class="text-white/70">Master Fleet & Access Provisioning</span>
+                        <!-- Core Application Nodes Matrix -->
+                        <div class="text-[9px] tracking-[0.2em] uppercase border-t border-white/10 font-light pt-2">
+                            <div class="manifest-row bg-white/[0.01] manifest-row-active" style="animation-delay: 0s;">
+                                <span class="w-32 text-corporate-yellow/70">COMMAND HQ:</span>
+                                <span class="text-white/60">Master Fleet & Access Provisioning</span>
                             </div>
-                            <div class="manifest-row manifest-row-active bg-white/[0.02]" style="animation-delay: 0.3s;">
-                                <span class="w-32 text-corporate-yellow/60">OPS CORE:</span>
-                                <span class="text-white/70">Project Logistics & Roster Matrix</span>
+                            <div class="manifest-row manifest-row-active bg-white/[0.01]" style="animation-delay: 0.3s;">
+                                <span class="w-32 text-corporate-yellow/70">OPS CORE:</span>
+                                <span class="text-white/60">Project Logistics & Roster Matrix</span>
                             </div>
-                            <div class="manifest-row bg-white/[0.02] manifest-row-active" style="animation-delay: 0.9s;">
-                                <span class="w-32 text-corporate-yellow/60">VTX ENGINE:</span>
-                                <span class="text-white/70">Automated Screen Timeline Scheduler</span>
+                            <div class="manifest-row bg-white/[0.01] manifest-row-active" style="animation-delay: 0.9s;">
+                                <span class="w-32 text-corporate-yellow/70">VTx ENGINE:</span>
+                                <span class="text-white/60">Automated Screen Timeline Scheduler</span>
                             </div>
-                            <div class="manifest-row manifest-row-active bg-white/[0.02]" style="animation-delay: 1.5s;">
-                                <span class="w-32 text-corporate-yellow/60">VTZ SWITCHER:</span>
-                                <span class="text-white/70">Zero-Latency Live Routing Override</span>
+                            <div class="manifest-row manifest-row-active bg-white/[0.01]" style="animation-delay: 1.5s;">
+                                <span class="w-32 text-corporate-yellow/70">VTz SWITCHER:</span>
+                                <span class="text-white/60">Zero-Latency Live Routing Override</span>
                             </div>
-                            <div class="manifest-row bg-white/[0.02] manifest-row-active" style="animation-delay: 2.1s;">
-                                <span class="w-32 text-corporate-yellow/60">NOIZ CORE:</span>
-                                <span class="text-white/70">Neural Marketing Synthesis</span>
+                            <div class="manifest-row bg-white/[0.01] manifest-row-active" style="animation-delay: 2.1s;">
+                                <span class="w-32 text-corporate-yellow/70">NOIZ CORE:</span>
+                                <span class="text-white/60">Neural Marketing Synthesis</span>
                             </div>
-                            <div class="manifest-row manifest-row-active bg-white/[0.02]" style="animation-delay: 2.7s;">
-                                <span class="w-32 text-corporate-yellow/60">VAULT:</span>
-                                <span class="text-white/70">Enterprise Financial Engine</span>
+                            <div class="manifest-row manifest-row-active bg-white/[0.01]" style="animation-delay: 2.7s;">
+                                <span class="w-32 text-corporate-yellow/70">VAULT:</span>
+                                <span class="text-white/60">Enterprise Financial Engine</span>
                             </div>
                         </div>
                         
+                        <!-- Gateway Authentication Targets -->
                         <div class="space-y-6">
                             <div class="flex flex-col gap-3">
                                 <label class="text-[9px] text-white/40 tracking-[0.3em] uppercase font-light">CLIENT / VENUE PORTAL</label>
-                                <!-- Transitions to the Client SignOff View -->
-                                <input onkeydown="if(event.key === 'Enter') startTransition('SignOffView.html')" class="input-industrial w-full py-4 px-5 text-[10px] tracking-[0.4em] font-light" placeholder="ENTER 4-DIGIT PIN" type="text"/>
+                                <!-- Transitions directly to the Client SignOff View -->
+                                <input onkeydown="if(event.key === 'Enter') startTransition('SignOffView.html')" class="input-industrial w-full py-4 px-5 text-[10px] tracking-[0.4em] font-light" placeholder="ENTER 4-DIGIT PIN" type="text" maxlength="4"/>
                             </div>
 
                             <div id="login-area">
@@ -216,22 +267,24 @@
                             </div>
                         </div>
 
+                        <!-- System Status Footer -->
                         <div class="pt-6 border-t border-white/5 flex justify-between items-center text-[8px] uppercase tracking-[0.3em] text-white/20 font-light">
                             <div class="flex items-center gap-3">
-                                <span class="w-1.5 h-1.5 bg-corporate-yellow rounded-full"></span>
+                                <span class="w-1.5 h-1.5 bg-corporate-yellow rounded-full shadow-[0_0_8px_#fed82d]"></span>
                                 <span>System Status: Optimal</span>
                             </div>
-                            <span>Rack_ID: HQ-CORE</span>
+                            <span>Rack_ID: HQ-CORE-01</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- Right Side: Vertical Node Monitoring Deck -->
         <aside class="w-1/3 flex-shrink-0 flex flex-col relative overflow-hidden border-l border-white/5 bg-industrial-charcoal">
             <div class="flex-1 matte-node image-node-border">
                 <div class="noise-overlay"></div>
-                <div class="absolute inset-0 feature-image-matte opacity-60" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCsRpvBfBPqd9NXYDIGsN_yjvlwzeflEyQDdIwAOR4pUjumLn1QF-0OuATYqOCevVxf-IQMD7N5AqraaQQoDita4p7zhzhyFfU5pID2dBWEyxiwtil-_I6qzUAc2s5MABf9zCuIT4PSkNoEj7_3P1rd1HdGYQCMQoOyCm4DJAg70RC4zl7Vygq_clHfiCwEIGKgC0smQeCecmUb8ObpKXMRwaZ2pn0GL0V1kdqFzQQbPXqJwXwSPLN_KuVou2iVhueftvLlvTs5AeE');"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-40" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCsRpvBfBPqd9NXYDIGsN_yjvlwzeflEyQDdIwAOR4pUjumLn1QF-0OuATYqOCevVxf-IQMD7N5AqraaQQoDita4p7zhzhyFfU5pID2dBWEyxiwtil-_I6qzUAc2s5MABf9zCuIT4PSkNoEj7_3P1rd1HdGYQCMQoOyCm4DJAg70RC4zl7Vygq_clHfiCwEIGKgC0smQeCecmUb8ObpKXMRwaZ2pn0GL0V1kdqFzQQbPXqJwXwSPLN_KuVou2iVhueftvLlvTs5AeE');"></div>
                 <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
                     <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_01</span>
                     <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">Command HQ Terminal</span>
@@ -239,7 +292,7 @@
             </div>
             <div class="flex-1 matte-node image-node-border">
                 <div class="noise-overlay"></div>
-                <div class="absolute inset-0 feature-image-matte opacity-50" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD-V3_5vQsZNdE0tey8B3UHxcq_EMoD0D5hp92iyz9mRox01KazNqO9ZrHyXzZasJaStsZpzqOGTRDKIj-p6ZiDLXsMzzIt5nczfqmVNxgd7HIo0HbGiE1ezfoAgzcUCgmAYEvIVJCJySQTxcmQBbkCi1uahg5Sr6MWrzOBevgb_mA4S5NLSPPzpb7G0G1YqURMCazwjscaYeP1ge4ugjydrCC8cJki06DLV7LsaY83c2zo7F812aHo7Tm4nMkj7yk5IFM35lWUw30');"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-35" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD-V3_5vQsZNdE0tey8B3UHxcq_EMoD0D5hp92iyz9mRox01KazNqO9ZrHyXzZasJaStsZpzqOGTRDKIj-p6ZiDLXsMzzIt5nczfqmVNxgd7HIo0HbGiE1ezfoAgzcUCgmAYEvIVJCJySQTxcmQBbkCi1uahg5Sr6MWrzOBevgb_mA4S5NLSPPzpb7G0G1YqURMCazwjscaYeP1ge4ugjydrCC8cJki06DLV7LsaY83c2zo7F812aHo7Tm4nMkj7yk5IFM35lWUw30');"></div>
                 <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
                     <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_02</span>
                     <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">VTx / VTz Execution</span>
@@ -247,7 +300,7 @@
             </div>
             <div class="flex-1 matte-node image-node-border">
                 <div class="noise-overlay"></div>
-                <div class="absolute inset-0 feature-image-matte opacity-45" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBbE-Rv1azKZnb4DqdoYOg0ZoidyLe1aAtjjCz72Jcb-PnnwzahY6SE5KrQv7G-TRbrni-q0DftaTLDPiOPrPoXraV30_XJEJwSfiOn4f76S95h1l7sIfTDxRhoEyZ_GyVW5VrKujnzK3nZzjeN3EZ-3yEkaDUYhJB1BVphRWGbvPkY9hK4Kk7sRxd5-ycOsp7xxVzv68emabsxESlv5sMs78r3k8kbOrlpvXOlXdubUR91VaxQQSUhLZZ8NkIDW_0_qt02d57O7WA');"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-30" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBbE-Rv1azKZnb4DqdoYOg0ZoidyLe1aAtjjCz72Jcb-PnnwzahY6SE5KrQv7G-TRbrni-q0DftaTLDPiOPrPoXraV30_XJEJwSfiOn4f76S95h1l7sIfTDxRhoEyZ_GyVW5VrKujnzK3nZzjeN3EZ-3yEkaDUYhJB1BVphRWGbvPkY9hK4Kk7sRxd5-ycOsp7xxVzv68emabsxESlv5sMs78r3k8kbOrlpvXOlXdubUR91VaxQQSUhLZZ8NkIDW_0_qt02d57O7WA');"></div>
                 <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
                     <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_03</span>
                     <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">Ops Core Logistics</span>
@@ -255,7 +308,7 @@
             </div>
             <div class="flex-1 matte-node image-node-border">
                 <div class="noise-overlay"></div>
-                <div class="absolute inset-0 feature-image-matte opacity-40" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYMDjv6PHW6M50hlqNRv0io-vyM7R-JKWkooSo0qvIfMUZuLxRoLFQZEqcF5sc0SGcOjicgYXiUdNPq_OaYhNKQlXrSQ771SK1yR-cae94TqYtAmGxZSDV5KUOie8zDKdKw-tRReYfJ2pCv9SlU8Hk-GAXWeiDj7buMouxlJv-CiGgLf-gnxiWuJGY3PWeceF9E895xrbYPDI0mdVo630zO_wiXYSvzqRpXty0p5rMMifVdz8UyBtkr_PiYLzMDw2b8Z6BnUz1YNo');"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-25" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYMDjv6PHW6M50hlqNRv0io-vyM7R-JKWkooSo0qvIfMUZuLxRoLFQZEqcF5sc0SGcOjicgYXiUdNPq_OaYhNKQlXrSQ771SK1yR-cae94TqYtAmGxZSDV5KUOie8zDKdKw-tRReYfJ2pCv9SlU8Hk-GAXWeiDj7buMouxlJv-CiGgLf-gnxiWuJGY3PWeceF9E895xrbYPDI0mdVo630zO_wiXYSvzqRpXty0p5rMMifVdz8UyBtkr_PiYLzMDw2b8Z6BnUz1YNo');"></div>
                 <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
                     <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_04</span>
                     <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">Financial Ledger Vault</span>
@@ -263,19 +316,20 @@
             </div>
             <div class="flex-1 matte-node image-node-border">
                 <div class="noise-overlay"></div>
-                <div class="absolute inset-0 feature-image-matte opacity-35" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBiS-wf8-H6LglXzEh0QcPg8-DgvLCiibUOtC9NJ2iCqYh3drNoYfvmBH8G43pZhA4s4pZnmNX0oQHefWlHuxZjrSCillL4akGkTjmHLFY2ea32BpMezCuKLkMOXZZ7cDYu8qpIX0kIafSWvgVnpzjkI42UDVHR5HgJ15p5AhtiOHJjiIpGWSIMjDbb0pTFWW8kRG1N0YNvnVvmtZ-rDBFmN8j-7upZPioAwOwcXRVnB0ThwC8rt989kvfGj8bJBBrNn2zj2VsEgNI');"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-20" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBiS-wf8-H6LglXzEh0QcPg8-DgvLCiibUOtC9NJ2iCqYh3drNoYfvmBH8G43pZhA4s4pZnmNX0oQHefWlHuxZjrSCillL4akGkTjmHLFY2ea32BpMezCuKLkMOXZZ7cDYu8qpIX0kIafSWvgVnpzjkI42UDVHR5HgJ15p5AhtiOHJjiIpGWSIMjDbb0pTFWW8kRG1N0YNvnVvmtZ-rDBFmN8j-7upZPioAwOwcXRVnB0ThwC8rt989kvfGj8bJBBrNn2zj2VsEgNI');"></div>
                 <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
                     <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_05</span>
                     <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">Noiz Neural Engine</span>
                 </div>
                 <div class="absolute bottom-6 right-6 z-20 text-right space-y-1">
-                    <p class="text-[7px] tracking-[0.3em] text-white/30 font-light">MATTE_ENVIRONMENT: ACTIVE</p>
-                    <p class="text-[7px] tracking-[0.3em] text-white/30 font-light uppercase">Atmospheric Grid Mapping</p>
+                    <p class="text-[7px] tracking-[0.3em] text-white/20 font-light">MATTE_ENVIRONMENT: ACTIVE</p>
+                    <p class="text-[7px] tracking-[0.3em] text-white/20 font-light uppercase">Atmospheric Grid Mapping</p>
                 </div>
             </div>
         </aside>
     </main>
 
+    <!-- Master Footers -->
     <footer class="fixed bottom-8 left-8 flex justify-between items-end opacity-20 pointer-events-none z-50">
         <div class="text-left font-light">
             <p class="text-[8px] tracking-[0.3em] mb-1">RCI_OS v2.0.0</p>
@@ -289,7 +343,13 @@
         </div>
     </footer>
 
+    <!-- Interactive Navigation Scripts -->
     <script>
+        function showLogoFallback(imgEl) {
+            imgEl.style.display = 'none';
+            document.getElementById('logo-fallback').classList.remove('hidden');
+        }
+
         function revealEmailInput() {
             document.getElementById('signin-btn').classList.add('hidden');
             const container = document.getElementById('email-container');
@@ -299,8 +359,7 @@
         }
 
         function handleAdminLogin(event) {
-            // In Phase 2, this will hit Supabase Auth. 
-            // For now, it transitions to the CommandHQ file visually.
+            // Transitions to the CommandHQ file visually.
             if (event.key === 'Enter') {
                 const email = event.target.value.trim();
                 if (email.length > 0) {
@@ -313,7 +372,7 @@
             const overlay = document.getElementById('system-transition');
             const scanLine = document.getElementById('scan-line');
             
-            // Dramatic contrast shift on load
+            // Contrast visual shift
             document.body.style.filter = "contrast(1.5) brightness(2) saturate(0)";
             document.body.style.transition = "filter 0.2s ease";
             
@@ -325,7 +384,7 @@
             
             setTimeout(() => { scanLine.style.top = "100%"; }, 50);
             
-            // Route to the appropriate app
+            // Route to target app
             setTimeout(() => { window.location.href = url; }, 650);
         }
     </script>
