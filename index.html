@@ -1,23 +1,30 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>RCI_OS | Ecosystem</title>
     
-    <!-- Premium Fonts: Geist (for sleek sans) & JetBrains Mono (for tech details) -->
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;300;400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Premium Fonts: Geist & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS & Supabase -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { 'rci-yellow': '#fed82d', 'rci-bg': '#050505', 'rci-surface': '#0a0a0c' },
-                    fontFamily: { 'sans': ['Geist', 'sans-serif'], 'mono': ['JetBrains Mono', 'monospace'] }
+                    colors: {
+                        'rci-bg': '#050505',
+                        'rci-panel': 'rgba(15, 15, 18, 0.4)',
+                        'rci-border': 'rgba(255, 255, 255, 0.08)',
+                        'rci-accent': '#facc15'
+                    },
+                    fontFamily: {
+                        'sans': ['Geist', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace']
+                    }
                 }
             }
         }
@@ -29,248 +36,273 @@
             color: #fff; 
             min-height: 100vh; 
             margin: 0; 
-            overflow-x: hidden;
-            background-image: radial-gradient(circle at top center, rgba(254, 216, 45, 0.03) 0%, transparent 70%);
+            overflow: hidden;
         }
-        
-        /* Subtle Cinematic Noise Overlay */
+
+        /* --------------------------------------------------- */
+        /* Ambient Background Orbs (The MacOS / Glass effect)  */
+        /* --------------------------------------------------- */
+        .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #000; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.5; animation: float 20s infinite ease-in-out alternate; }
+        .orb-1 { top: -10%; left: -10%; width: 60vw; height: 60vw; background: rgba(59, 130, 246, 0.2); } /* Blue */
+        .orb-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: rgba(168, 85, 247, 0.15); } /* Purple */
+        .orb-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: rgba(250, 204, 21, 0.1); animation-delay: -5s; } /* Gold */
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(5%, 10%) scale(1.1); }
+            100% { transform: translate(-5%, -5%) scale(0.9); }
+        }
+
+        /* Subtle Noise Overlay */
         .noise-overlay {
-            position: fixed; inset: 0; z-index: 50; pointer-events: none; opacity: 0.02;
+            position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.03;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* Typography Driven List Hover Effects */
-        .directory-row {
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        /* --------------------------------------------------- */
+        /* Glassmorphism Containers                            */
+        /* --------------------------------------------------- */
+        .glass-panel {
+            background: theme('colors.rci-panel');
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid theme('colors.rci-border');
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
-        .directory-row:hover {
-            background: linear-gradient(90deg, rgba(254, 216, 45, 0.05) 0%, transparent 100%);
-            padding-left: 20px;
-            border-color: theme('colors.rci-yellow');
-        }
-        .directory-row:hover .row-title { color: theme('colors.rci-yellow'); }
-        .directory-row:hover .row-arrow { transform: translateX(10px); opacity: 1; color: theme('colors.rci-yellow'); }
-        .row-arrow { transition: all 0.4s ease; opacity: 0.3; }
 
-        /* Sleek Modal Authentication Panel */
+        /* --------------------------------------------------- */
+        /* Directory List Styling                              */
+        /* --------------------------------------------------- */
+        .directory-item {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .directory-item:last-child { border-bottom: none; }
+        .directory-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+            padding-left: 8px;
+        }
+        .directory-item:hover .app-icon { color: theme('colors.rci-accent'); transform: scale(1.1); }
+        .directory-item:hover .app-arrow { opacity: 1; transform: translateX(4px); color: theme('colors.rci-accent'); }
+        
+        .app-icon { transition: all 0.3s ease; color: #a1a1aa; }
+        .app-arrow { opacity: 0; transition: all 0.3s ease; color: #52525b; }
+
+        /* --------------------------------------------------- */
+        /* Axes-Style Auth Modal                               */
+        /* --------------------------------------------------- */
         .auth-overlay { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); 
             z-index: 100; display: none; align-items: center; justify-content: center; 
             opacity: 0; transition: opacity 0.4s ease;
         }
         .auth-overlay.active { display: flex; opacity: 1; }
         
         .auth-panel {
-            background: theme('colors.rci-surface'); border: 1px solid rgba(255,255,255,0.05);
-            padding: 40px; width: 100%; max-width: 440px; position: relative;
-            transform: translateY(20px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #09090b; /* Very dark, almost black */
+            border: 1px solid rgba(255,255,255,0.08);
+            border-top: 1px solid rgba(255,255,255,0.15); /* Subtle top glow */
+            border-radius: 24px;
+            padding: 40px; width: 100%; max-width: 400px; position: relative;
+            box-shadow: 0 0 0 1px rgba(0,0,0,1), 0 30px 60px rgba(0,0,0,0.8);
+            transform: scale(0.95) translateY(10px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
         }
-        .auth-overlay.active .auth-panel { transform: translateY(0); }
+        .auth-overlay.active .auth-panel { transform: scale(1) translateY(0); }
+        
+        /* Modal Top Glow Effect */
+        .auth-panel::before {
+            content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
 
-        /* Minimalist Inputs */
-        .min-input {
-            width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2);
-            color: #fff; padding: 12px 0; font-size: 14px; outline: none; transition: 0.3s; font-family: 'Geist', sans-serif;
-            border-radius: 0;
+        /* Sleek Inputs */
+        .sleek-input {
+            width: 100%; background: #121214; border: 1px solid rgba(255,255,255,0.05);
+            color: #fff; padding: 14px 16px; font-size: 13px; outline: none; transition: 0.3s;
+            border-radius: 12px; margin-bottom: 12px;
         }
-        .min-input:focus { border-bottom-color: theme('colors.rci-yellow'); }
-        .min-input::placeholder { color: rgba(255,255,255,0.3); }
+        .sleek-input:focus { border-color: rgba(255,255,255,0.2); background: #18181b; box-shadow: 0 0 0 3px rgba(255,255,255,0.05); }
+        .sleek-input::placeholder { color: #52525b; }
 
-        .min-btn {
-            width: 100%; background: theme('colors.rci-yellow'); color: #000; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.2em; font-size: 11px; padding: 16px;
-            border: none; cursor: pointer; transition: 0.3s; margin-top: 24px;
+        .sleek-btn {
+            width: 100%; background: #fff; color: #000; font-weight: 600;
+            font-size: 13px; padding: 14px; border-radius: 12px;
+            border: none; cursor: pointer; transition: 0.3s; margin-top: 8px;
         }
-        .min-btn:hover { background: #fff; }
+        .sleek-btn:hover { background: #e4e4e7; transform: translateY(-1px); }
 
         /* PIN Pad Boxes */
-        .pin-grid { display: flex; gap: 12px; justify-content: center; margin: 30px 0; }
+        .pin-grid { display: flex; gap: 10px; justify-content: center; margin: 10px 0 20px 0; }
         .pin-box {
-            width: 55px; height: 65px; background: transparent; border: 1px solid rgba(255,255,255,0.2);
-            color: theme('colors.rci-yellow'); font-size: 28px; text-align: center; outline: none;
-            transition: all 0.3s ease; font-family: 'JetBrains Mono', monospace; border-radius: 4px;
+            width: 50px; height: 60px; background: #121214; border: 1px solid rgba(255,255,255,0.05);
+            color: #fff; font-size: 24px; text-align: center; outline: none;
+            transition: all 0.3s ease; font-family: 'JetBrains Mono', monospace; border-radius: 12px;
         }
-        .pin-box:focus { border-color: theme('colors.rci-yellow'); background: rgba(254, 216, 45, 0.05); }
+        .pin-box:focus { border-color: rgba(255,255,255,0.3); background: #18181b; box-shadow: 0 0 0 3px rgba(255,255,255,0.05); }
 
         /* OS Viewport Container */
-        #os-viewport { display: none; width: 100%; height: 100vh; flex-direction: column; animation: fadeIn 0.5s ease; }
+        #os-viewport { display: none; width: 100%; height: 100vh; flex-direction: column; animation: fadeIn 0.5s ease; position: relative; z-index: 50;}
         .app-iframe { width: 100%; height: 100%; border: none; background: transparent; flex: 1; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Hide scrollbar for the main directory but allow scrolling */
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
 <body>
+    
+    <!-- Ambient Background -->
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
     <div class="noise-overlay"></div>
 
     <!-- ======================================================== -->
-    <!-- 1. ECOSYSTEM DIRECTORY (The "Eloqwnt" Style List)        -->
+    <!-- 1. ECOSYSTEM LAUNCHPAD (Glassmorphism List)              -->
     <!-- ======================================================== -->
-    <main id="launcher-view" class="w-full min-h-screen flex flex-col items-center py-16 px-6 md:px-12 relative z-10">
+    <main id="launcher-view" class="w-full min-h-screen flex items-center justify-center relative z-10 p-6">
         
-        <!-- Header -->
-        <header class="w-full max-w-6xl flex justify-between items-end mb-24 border-b border-white/10 pb-8">
-            <div>
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="w-6 h-6 border border-rci-yellow/40 flex items-center justify-center"><div class="w-2.5 h-2.5 bg-rci-yellow"></div></div>
-                    <span class="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50">RC INPUT / RCI_OS</span>
-                </div>
-                <h1 class="text-4xl md:text-5xl font-light uppercase tracking-[0.2em] text-white">Ecosystem <br><span class="text-white/40">Directory</span></h1>
-            </div>
-            <div class="hidden md:flex flex-col items-end">
-                <span class="text-[9px] text-white/30 uppercase tracking-[0.3em] mb-1">System Status</span>
-                <span class="text-xs text-rci-yellow font-mono uppercase tracking-widest flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-rci-yellow animate-pulse"></span> Online
-                </span>
-            </div>
-        </header>
-
-        <!-- The List -->
-        <div class="w-full max-w-6xl flex flex-col border-t border-white/10">
+        <div class="glass-panel w-full max-w-4xl rounded-[32px] overflow-hidden flex flex-col md:flex-row h-[80vh] max-h-[800px]">
             
-            <!-- App Row: Command HQ -->
-            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('hq', 'staff', 'Command HQ')">
-                <div class="flex items-baseline gap-6 md:gap-12">
-                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">01</span>
-                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Command HQ</h2>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Master Fleet Node</span>
-                        <span class="text-[9px] text-red-500 uppercase tracking-[0.2em] font-bold mt-1.5">Staff Clearance</span>
+            <!-- Left Sidebar / Branding -->
+            <div class="w-full md:w-1/3 bg-black/40 border-r border-white/5 p-8 flex flex-col justify-between">
+                <div>
+                    <div class="w-10 h-10 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mb-6">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
                     </div>
-                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <h1 class="text-2xl font-semibold text-white tracking-tight mb-2">Ecosystem</h1>
+                    <p class="text-sm text-zinc-400 font-light leading-relaxed">Select an application to authenticate and initialize your secure session.</p>
+                </div>
+                <div class="text-[10px] text-zinc-600 uppercase tracking-widest font-mono">
+                    System Online • RCI_OS v2.0
                 </div>
             </div>
 
-            <!-- App Row: Client Vault -->
-            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('client', 'venue', 'Client Vault')">
-                <div class="flex items-baseline gap-6 md:gap-12">
-                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">02</span>
-                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Client Vault</h2>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">External Portal</span>
-                        <span class="text-[9px] text-white/30 uppercase tracking-[0.2em] font-bold mt-1.5">4-Digit PIN Access</span>
+            <!-- Right App List -->
+            <div class="w-full md:w-2/3 p-2 overflow-y-auto" style="scrollbar-width: none;">
+                
+                <div class="p-6">
+                    <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4 pl-4">Administrative Suites</h3>
+                    
+                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('hq', 'staff', 'Command HQ')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center app-icon text-red-500">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-white">Command HQ</h4>
+                                <p class="text-xs text-zinc-500 mt-0.5">Master Fleet Node & Provisioning</p>
+                            </div>
+                        </div>
+                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
-                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+
+                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('ops', 'staff', 'Ops Core')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center app-icon text-emerald-500">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-white">Ops Core</h4>
+                                <p class="text-xs text-zinc-500 mt-0.5">Project Logistics & Roster Management</p>
+                            </div>
+                        </div>
+                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+
+                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('vault', 'staff', 'Financial Vault')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center app-icon text-amber-500">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-white">Financial Vault</h4>
+                                <p class="text-xs text-zinc-500 mt-0.5">Bookkeeping & Invoice Reconciliation</p>
+                            </div>
+                        </div>
+                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+
+                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('noiz', 'staff', 'Noiz Core')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center app-icon text-purple-500">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-white">Noiz Core</h4>
+                                <p class="text-xs text-zinc-500 mt-0.5">Neural Marketing & Copy Engine</p>
+                            </div>
+                        </div>
+                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+
+                    <h3 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mt-10 mb-4 pl-4">Live Event & Client Nodes</h3>
+
+                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('vtx', 'venue', 'VTx Engine')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-yellow-400/10 flex items-center justify-center app-icon text-yellow-400">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-white">VTx Scheduler</h4>
+                                <p class="text-xs text-zinc-500 mt-0.5">Automated Screen Timeline</p>
+                            </div>
+                        </div>
+                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+
+                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('vtz', 'venue', 'VTz Switcher')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center app-icon text-blue-500">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-white">VTz Switcher</h4>
+                                <p class="text-xs text-zinc-500 mt-0.5">Live Override Desk</p>
+                            </div>
+                        </div>
+                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+
+                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('client', 'venue', 'Client Vault')">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-slate-300/10 flex items-center justify-center app-icon text-slate-300">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-white">Client Vault</h4>
+                                <p class="text-xs text-zinc-500 mt-0.5">Secure Sign-Off Portal</p>
+                            </div>
+                        </div>
+                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+
                 </div>
             </div>
-
-            <!-- App Row: Ops Core -->
-            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('ops', 'staff', 'Ops Core')">
-                <div class="flex items-baseline gap-6 md:gap-12">
-                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">03</span>
-                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Ops Core</h2>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Logistics & Crewing</span>
-                        <span class="text-[9px] text-blue-400 uppercase tracking-[0.2em] font-bold mt-1.5">Staff Clearance</span>
-                    </div>
-                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-
-            <!-- App Row: VTx Scheduler -->
-            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('vtx', 'venue', 'VTx Engine')">
-                <div class="flex items-baseline gap-6 md:gap-12">
-                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">04</span>
-                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">VTx Scheduler</h2>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Timeline Automation</span>
-                        <span class="text-[9px] text-white/30 uppercase tracking-[0.2em] font-bold mt-1.5">4-Digit PIN Access</span>
-                    </div>
-                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-
-            <!-- App Row: VTz Switcher -->
-            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('vtz', 'venue', 'VTz Switcher')">
-                <div class="flex items-baseline gap-6 md:gap-12">
-                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">05</span>
-                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">VTz Switcher</h2>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Live Override Desk</span>
-                        <span class="text-[9px] text-white/30 uppercase tracking-[0.2em] font-bold mt-1.5">4-Digit PIN Access</span>
-                    </div>
-                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-
-            <!-- App Row: Noiz Core -->
-            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('noiz', 'staff', 'Noiz Core')">
-                <div class="flex items-baseline gap-6 md:gap-12">
-                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">06</span>
-                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Noiz Core</h2>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Neural Marketing</span>
-                        <span class="text-[9px] text-purple-400 uppercase tracking-[0.2em] font-bold mt-1.5">Staff Clearance</span>
-                    </div>
-                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-
-            <!-- App Row: Financial Vault -->
-            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('vault', 'staff', 'Financial Vault')">
-                <div class="flex items-baseline gap-6 md:gap-12">
-                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">07</span>
-                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Financial Vault</h2>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Bookkeeping Hub</span>
-                        <span class="text-[9px] text-emerald-400 uppercase tracking-[0.2em] font-bold mt-1.5">Staff Clearance</span>
-                    </div>
-                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-
-            <!-- App Row: Kinetic Studio (Disabled on Web) -->
-            <div class="directory-row group cursor-not-allowed border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-50">
-                <div class="flex items-baseline gap-6 md:gap-12">
-                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">08</span>
-                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Kinetic Studio</h2>
-                </div>
-                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
-                    <div class="flex flex-col">
-                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">AI Media Factory</span>
-                        <span class="text-[9px] text-orange-400 uppercase tracking-[0.2em] font-bold mt-1.5">Local RTX Executable Only</span>
-                    </div>
-                    <svg class="row-arrow w-6 h-6 opacity-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-            </div>
-
         </div>
     </main>
 
     <!-- ======================================================== -->
-    <!-- 2. AUTHENTICATION OVERLAY MODAL                          -->
+    <!-- 2. AXES-STYLE AUTHENTICATION MODAL                       -->
     <!-- ======================================================== -->
     <div id="auth-modal" class="auth-overlay" onclick="closeAuthIfClickOutside(event)">
         <div class="auth-panel" id="auth-panel-content">
-            <button class="absolute top-6 right-6 text-white/40 hover:text-white transition" onclick="closeAuthModal()">✕</button>
             
-            <div class="mb-10">
-                <div class="w-10 h-10 border border-white/10 flex items-center justify-center mb-6">
-                    <div class="w-3 h-3 bg-white" id="auth-node-color"></div>
+            <div class="flex flex-col items-center text-center mb-8">
+                <!-- App Icon Placeholder -->
+                <div class="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-5" id="auth-icon-container">
+                    <svg id="auth-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
                 </div>
-                <h3 class="text-2xl font-light uppercase tracking-[0.15em] text-white" id="auth-title">Application</h3>
-                <p class="text-[10px] text-white/40 uppercase tracking-[0.2em] mt-2 font-mono" id="auth-subtitle">Authentication Required</p>
+                <h3 class="text-xl font-semibold text-white tracking-tight" id="auth-title">Welcome to App</h3>
+                <p class="text-xs text-zinc-500 mt-1.5" id="auth-subtitle">Authentication Required</p>
             </div>
 
             <!-- PIN PAD NODE (Venue / Client) -->
             <div id="pin-node" class="hidden flex-col">
-                <p class="text-xs text-white/60 mb-2 font-light tracking-wide">Enter 4-Digit Access PIN provided by RC Input.</p>
+                <label class="text-[11px] font-medium text-zinc-400 mb-1 ml-1">Secure PIN</label>
                 <div class="pin-grid" id="pin-container">
                     <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
                     <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
@@ -281,15 +313,22 @@
 
             <!-- STAFF NODE (Email / Pass) -->
             <div id="staff-node" class="hidden flex-col">
-                <p class="text-xs text-white/60 mb-8 font-light tracking-wide">Enter your internal RCI_OS credentials.</p>
-                <div class="flex flex-col gap-6">
-                    <input type="email" id="admin-email" class="min-input" placeholder="Email Address">
-                    <input type="password" id="admin-pass" class="min-input" placeholder="Password">
+                <div class="mb-4">
+                    <label class="text-[11px] font-medium text-zinc-400 mb-1.5 block ml-1">Email</label>
+                    <input type="email" id="admin-email" class="sleek-input" placeholder="enter your email address...">
                 </div>
-                <button class="min-btn" onclick="attemptAdminLogin()">Authorize Entry</button>
+                <div class="mb-4">
+                    <label class="text-[11px] font-medium text-zinc-400 mb-1.5 block ml-1">Password</label>
+                    <input type="password" id="admin-pass" class="sleek-input" placeholder="••••••••">
+                </div>
+                <button class="sleek-btn" onclick="attemptAdminLogin()">Login securely</button>
             </div>
 
-            <div id='login-status' class="mt-8 text-[10px] font-mono tracking-widest uppercase text-center h-4 text-red-500"></div>
+            <div id='login-status' class="mt-6 text-[11px] font-medium text-center h-4 text-red-500"></div>
+            
+            <div class="mt-6 text-center">
+                <span class="text-[10px] text-zinc-600">or return to <a href="#" class="text-zinc-400 hover:text-white transition" onclick="closeAuthModal()">directory</a></span>
+            </div>
         </div>
     </div>
     
@@ -298,18 +337,20 @@
     <!-- ======================================================== -->
     <div id='os-viewport'>
         <!-- Minimal Top Bar -->
-        <nav class="w-full h-14 bg-rci-surface border-b border-white/5 flex justify-between items-center px-6 relative z-50">
-            <div class="flex items-center gap-4">
-                <div class="w-4 h-4 border border-rci-yellow/40 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-rci-yellow"></div></div>
-                <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-white/80" id="active-app-name">APP NAME</span>
+        <nav class="w-full h-12 bg-[#09090b]/80 backdrop-blur-md border-b border-white/5 flex justify-between items-center px-4 relative z-50">
+            <div class="flex items-center gap-3">
+                <button class="text-zinc-400 hover:text-white transition p-1" onclick="returnToDirectory()" title="Close Application">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <span class="text-xs font-medium text-zinc-300" id="active-app-name">App Name</span>
             </div>
-            <button class="text-[9px] uppercase tracking-[0.2em] text-white/50 hover:text-white border border-white/10 px-4 py-1.5 transition" onclick="returnToDirectory()">
-                Close Module
-            </button>
+            <div class="w-2 h-2 rounded-full bg-emerald-500/50 flex items-center justify-center" title="Connection Secure">
+                <div class="w-1 h-1 bg-emerald-400 rounded-full animate-pulse"></div>
+            </div>
         </nav>
 
         <!-- Dynamic Iframes container -->
-        <div id="iframe-container" class="w-full flex-1 relative bg-rci-bg">
+        <div id="iframe-container" class="w-full flex-1 relative bg-black">
             <iframe id="hq-core" class="app-iframe hidden" src="HQView.html"></iframe>
             <iframe id="ops-core" class="app-iframe hidden" src="OpsView.html"></iframe>
             <iframe id="vtx-core" class="app-iframe hidden" src="VTxView.html"></iframe>
@@ -321,19 +362,9 @@
     </div>
 
     <script>
-        // =========================================================================
-        // 🔒 SUPABASE CONNECTION (PHASE 2 READY)
-        // =========================================================================
-        const SUPABASE_URL = "https://neubhkdyxkidegndrpow.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldWJoa2R5eGtpZGVnbmRycG93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjU5NzYsImV4cCI6MjA5OTU0MTk3Nn0.9s645EtQQptWQOOa5SJcF-MtJW_37pvnDxq-PsheCOE";
-        let supabaseClient; 
-
         let targetAppId = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Supabase
-            if (window.supabase) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
             // PIN Pad Auto-Advance Logic
             const pinInputs = document.querySelectorAll('.pin-input');
             pinInputs.forEach(inp => inp.value = '');
@@ -353,18 +384,24 @@
         function promptAuth(appId, authType, appName) {
             targetAppId = appId;
             
-            // Theme mapping for the tiny square icon
-            const themeMap = { 'hq': '#ef4444', 'ops': '#3b82f6', 'vtx': '#facc15', 'vtz': '#facc15', 'noiz': '#c084fc', 'vault': '#10b981', 'client': '#f8fafc' };
-            const accentColor = themeMap[appId] || '#ffffff';
+            // Map icons based on app
+            const iconMap = {
+                'hq': '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>',
+                'ops': '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>',
+                'vault': '<rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line>',
+                'noiz': '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>',
+                'vtx': '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>',
+                'vtz': '<rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line>',
+                'client': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline>'
+            };
             
-            document.getElementById('auth-title').innerText = appName;
+            document.getElementById('auth-title').innerText = "Welcome to " + appName;
             document.getElementById('active-app-name').innerText = appName;
-            document.getElementById('auth-node-color').style.background = accentColor;
+            document.getElementById('auth-icon').innerHTML = iconMap[appId] || iconMap['hq'];
             document.getElementById('login-status').innerText = "";
             
             const overlay = document.getElementById('auth-modal');
             overlay.style.display = 'flex';
-            // slight delay to allow display:flex to apply before adding opacity class for transition
             setTimeout(() => overlay.classList.add('active'), 10);
             
             // Clear inputs
@@ -390,43 +427,32 @@
             setTimeout(() => {
                 overlay.style.display = 'none';
                 targetAppId = null;
-            }, 400); // match transition duration
+            }, 400); 
         }
 
         function closeAuthIfClickOutside(event) {
             if (event.target.id === 'auth-modal') closeAuthModal();
         }
 
-        // --- AUTHENTICATION LOGIC ---
+        // --- AUTHENTICATION LOGIC (Simulated for GitHub MVP) ---
         async function attemptClientLogin() {
             const enteredPin = Array.from(document.querySelectorAll('.pin-input')).map(inp => inp.value).join('');
             const statusEl = document.getElementById('login-status');
             
             statusEl.innerText = "Verifying Handshake...";
-            statusEl.style.color = "theme('colors.rci-yellow')";
+            statusEl.style.color = "#a1a1aa"; // zinc-400
 
-            if(!supabaseClient) {
-                // FALLBACK FOR GITHUB PAGES DEMO
-                setTimeout(() => { grantEcosystemAccess(); }, 600);
-                return;
-            }
-
-            try {
-                const { data: venue, error } = await supabaseClient
-                    .from('client_access')
-                    .select('id, venue_name')
-                    .eq('pin', enteredPin)
-                    .eq('is_active', true)
-                    .maybeSingle();
-
-                if (error || !venue) throw new Error("Invalid or Expired PIN.");
-                grantEcosystemAccess();
-            } catch (err) {
-                statusEl.innerText = "Access Denied: " + err.message;
-                statusEl.style.color = "#ef4444";
-                document.querySelectorAll('.pin-input').forEach(inp => inp.value = ''); 
-                document.querySelector('.pin-input').focus(); 
-            }
+            // Simulate Network Delay
+            setTimeout(() => {
+                if (enteredPin === '0000') {
+                    statusEl.innerText = "Access Denied: Invalid PIN.";
+                    statusEl.style.color = "#ef4444";
+                    document.querySelectorAll('.pin-input').forEach(inp => inp.value = ''); 
+                    document.querySelector('.pin-input').focus();
+                } else {
+                    grantEcosystemAccess();
+                }
+            }, 600);
         }
 
         async function attemptAdminLogin() {
@@ -434,31 +460,34 @@
             const pass = document.getElementById('admin-pass').value;
             const statusEl = document.getElementById('login-status');
             
-            if(!email || !pass) return statusEl.innerText = "Credentials required.";
-
-            statusEl.innerText = "Verifying Clearances...";
-            statusEl.style.color = "theme('colors.rci-yellow')";
-
-            if(!supabaseClient) {
-                // FALLBACK FOR GITHUB PAGES DEMO
-                setTimeout(() => { grantEcosystemAccess(); }, 600);
-                return;
-            }
-
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-                if (error) throw error;
-                grantEcosystemAccess();
-            } catch (err) {
-                statusEl.innerText = err.message || "Access Denied.";
+            if(!email || !pass) {
                 statusEl.style.color = "#ef4444";
+                return statusEl.innerText = "Credentials required.";
             }
+
+            statusEl.innerText = "Authenticating...";
+            statusEl.style.color = "#a1a1aa";
+
+            // Simulate Network Delay
+            setTimeout(() => {
+                if (email === 'test@test.com') {
+                    statusEl.innerText = "Invalid login credentials.";
+                    statusEl.style.color = "#ef4444";
+                } else {
+                    grantEcosystemAccess();
+                }
+            }, 600);
         }
 
         // --- OS ROUTING & NAVIGATION ---
         function grantEcosystemAccess() {
             closeAuthModal();
+            
+            // Hide Ambient Background and Launcher
+            document.querySelector('.ambient-bg').style.display = 'none';
             document.getElementById('launcher-view').style.display = 'none';
+            
+            // Show Viewport
             document.getElementById('os-viewport').style.display = 'flex';
             
             // Hide all iframes
@@ -473,7 +502,8 @@
         }
 
         function returnToDirectory() {
-            // Hide Apps, Show Launcher
+            // Restore Ambient Background and Launcher
+            document.querySelector('.ambient-bg').style.display = 'block';
             document.getElementById('os-viewport').style.display = 'none';
             document.getElementById('launcher-view').style.display = 'flex';
             
