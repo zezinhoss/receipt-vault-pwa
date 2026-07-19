@@ -3,12 +3,9 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>RCI_OS | Unified Ecosystem</title>
-    
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+    <title>RCI_OS | Secure Gateway</title>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;300;400;500;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
         tailwind.config = {
@@ -16,327 +13,307 @@
             theme: {
                 extend: {
                     colors: {
-                        "industrial-black": "#050505",
+                        "industrial-black": "#0c0c0c",
+                        "industrial-charcoal": "#121212",
                         "corporate-yellow": "#fed82d",
-                        "glass-base": "rgba(20, 20, 25, 0.4)",
-                        "glass-border": "rgba(255, 255, 255, 0.06)",
+                        "gold-accent": "#fed82d",
+                        "blueprint-yellow": "rgba(254, 216, 45, 0.05)",
                     },
                     fontFamily: {
                         "sans": ["Geist", "sans-serif"],
-                        "mono": ["JetBrains Mono", "monospace"]
+                        "geist": ["Geist", "sans-serif"]
                     }
                 },
             },
         }
     </script>
-
     <style type="text/tailwindcss">
         :root {
-            --grid-color: rgba(254, 216, 45, 0.03);
-            --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            --grid-color: rgba(254, 216, 45, 0.05);
+            --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
-        
         body {
-            background-color: #050505;
+            background-color: #0c0c0c;
             background-image: 
-                radial-gradient(circle at 50% 0%, rgba(254, 216, 45, 0.05) 0%, transparent 50%),
                 linear-gradient(var(--grid-color) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
-            background-attachment: fixed;
+            background-size: 40px 40px;
         }
-
         .noise-overlay {
-            position: fixed; inset: 0; background-image: var(--noise-texture); opacity: 0.02; pointer-events: none; z-index: 1;
+            position: absolute;
+            inset: 0;
+            background-image: var(--noise-texture);
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 10;
         }
-
-        /* Glass App Nodes */
-        .app-node {
-            background: var(--glass-base);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        .blade-slot {
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.03);
+            background: #0a0a0a;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .manifest-row {
+            border-bottom: 1px solid rgba(254, 216, 45, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+        }
+        .glass-btn {
+            background: rgba(254, 216, 45, 0.02);
+            border: 1px solid rgba(254, 216, 45, 0.2);
+            transition: all 0.2s ease;
+        }
+        .glass-btn:hover {
+            background: rgba(254, 216, 45, 0.08);
+            border-color: #fed82d;
+        }
+        .input-industrial {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .input-industrial:focus {
+            border-color: #fed82d;
+            outline: none;
+            box-shadow: none;
+        }
+        .input-admin {
+            background: rgba(254, 216, 45, 0.05);
+            border: 1px solid #fed82d;
+            color: #fed82d;
+        }
+        .input-admin::placeholder {
+            color: rgba(254, 216, 45, 0.3);
+        }
+        .feature-image-matte {
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(1) brightness(0.12) contrast(1.1);
+            mix-blend-mode: soft-light;
+        }
+        .image-node-border {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .image-node-border:last-child {
+            border-bottom: none;
+        }
+        .matte-node {
+            background-color: #0e0e0e;
             position: relative;
             overflow: hidden;
         }
-        
-        .app-node::before {
-            content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top left, rgba(254, 216, 45, 0.1), transparent 70%); opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
+        * {
+            letter-spacing: 0.1em;
         }
-
-        .app-node:hover {
-            transform: translateY(-4px) scale(1.02);
-            border-color: rgba(254, 216, 45, 0.3);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(254, 216, 45, 0.05);
+        @keyframes row-flicker {
+            0%, 100% { background: rgba(254, 216, 45, 0); color: rgba(255, 255, 255, 0.7); }
+            50% { background: rgba(254, 216, 45, 0.08); color: rgba(255, 255, 255, 1); text-shadow: 0 0 8px rgba(254, 216, 45, 0.4); }
         }
-
-        .app-node:hover::before { opacity: 1; }
-
-        .app-node:hover .node-icon { color: #fed82d; transform: scale(1.1); }
-        .app-node:hover .node-title { color: #ffffff; }
-        
-        .node-icon { transition: all 0.4s ease; }
-
-        /* The Premium Auth Modal (Axes Style) */
-        .auth-modal-overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); z-index: 100;
-            display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;
+        .manifest-row-active {
+            animation: row-flicker 6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
         }
-
-        .auth-modal-box {
-            background: #0a0a0c;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            width: 100%; max-width: 420px; padding: 40px;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
-            position: relative;
-            transform: scale(0.95) translateY(10px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .auth-modal-overlay.active { display: flex; opacity: 1; }
-        .auth-modal-overlay.active .auth-modal-box { transform: scale(1) translateY(0); }
-
-        /* Glowing backdrop behind modal */
-        .auth-modal-glow {
-            position: absolute; top: -50%; left: -50%; right: -50%; bottom: -50%;
-            background: radial-gradient(circle at center, rgba(254, 216, 45, 0.08) 0%, transparent 60%);
-            pointer-events: none; z-index: -1;
-        }
-
-        /* Sleek Inputs */
-        .premium-input {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: white; font-family: 'JetBrains Mono', monospace; font-size: 13px;
-            padding: 14px 16px; border-radius: 12px; width: 100%; transition: all 0.3s ease;
-            outline: none;
-        }
-        
-        .premium-input::placeholder { color: rgba(255, 255, 255, 0.2); font-family: 'Geist', sans-serif; letter-spacing: 0.05em; }
-        .premium-input:focus { border-color: #fed82d; background: rgba(0,0,0,0.5); box-shadow: 0 0 0 2px rgba(254, 216, 45, 0.1); }
-
-        .premium-btn {
-            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white; font-weight: 500; font-size: 13px; letter-spacing: 0.05em;
-            padding: 14px; border-radius: 12px; width: 100%; cursor: pointer; transition: all 0.3s ease;
-        }
-        
-        .premium-btn:hover { background: rgba(254, 216, 45, 0.1); border-color: #fed82d; color: #fed82d; }
-
-        /* Full Page Transition */
-        #system-transition { position: fixed; inset: 0; background: #050505; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #scan-line { position:absolute; top:0; left:0; width:100%; height:2px; background:#fed82d; box-shadow:0 0 20px #fed82d; opacity:0; }
-        
-        * { letter-spacing: 0.05em; }
     </style>
 </head>
-<body class="font-sans text-white min-h-screen selection:bg-corporate-yellow selection:text-black">
+<body class="font-geist text-white min-h-screen selection:bg-corporate-yellow selection:text-black overflow-hidden font-light">
     
-    <div class="noise-overlay"></div>
+    <div id="system-transition" style="position: fixed; inset: 0; background: #0c0c0c; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div id="scan-line" style="position:absolute; top:0; left:0; width:100%; height:2px; background:#fed82d; box-shadow:0 0 20px #fed82d; opacity:0;"></div>
+        <div class="sync-text" style="color:#fed82d; font-family:monospace; font-size:10px; letter-spacing:0.8em; text-transform:uppercase;">[ NEURAL_SYNC_ACTIVE ]</div>
+    </div>
 
-    <!-- Page Content -->
-    <div class="relative z-10 max-w-7xl mx-auto px-8 py-16 min-h-screen flex flex-col justify-center">
-        
-        <!-- Header / Logo -->
-        <header class="flex items-center gap-4 mb-16 animate-[fadeIn_0.8s_ease]">
-            <!-- Your uploaded Logo -->
-            <img src="icon.png" alt="RCI_OS Logo" class="h-10 w-auto object-contain" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';">
-            
-            <!-- Fallback if icon.png isn't found locally yet -->
-            <div id="logo-fallback" style="display:none;" class="w-10 h-10 border border-corporate-yellow/40 items-center justify-center">
+    <header class="fixed top-8 left-8 z-50">
+        <div class="flex items-center gap-4">
+            <div class="w-8 h-8 border border-corporate-yellow/40 flex items-center justify-center">
                 <div class="w-4 h-4 bg-corporate-yellow"></div>
             </div>
-            
             <div class="flex flex-col">
-                <span class="text-sm font-bold tracking-[0.4em] uppercase text-white/90">RCI_OS CORE</span>
-                <span class="text-[9px] tracking-[0.3em] text-white/30 uppercase font-light">Ecosystem Directory</span>
+                <h1 class="text-sm font-normal tracking-[0.4em] uppercase text-white/90">RCI_OS CORE</h1>
+                <span class="text-[8px] tracking-[0.3em] text-white/30 uppercase font-light">Master Operating System</span>
             </div>
-        </header>
-
-        <!-- In-Your-Face Tech Motto -->
-        <section class="mb-16 animate-[fadeIn_1s_ease]">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-light tracking-[0.15em] uppercase leading-tight">
-                Where Physical Execution <br/>
-                <span class="text-corporate-yellow font-normal">Meets Neural Control.</span>
-            </h1>
-            <p class="mt-6 text-sm text-white/40 tracking-[0.1em] max-w-2xl leading-relaxed font-light">
-                The unified operating system for high-fidelity media production, cinematic automation, and industrial event logistics. <br/>Select a node to initiate secure protocol sequence.
-            </p>
-        </section>
-
-        <!-- Glass App Directory Grid -->
-        <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-[fadeIn_1.2s_ease]">
-            
-            <!-- Command HQ -->
-            <div class="app-node flex flex-col items-center justify-center p-10 cursor-pointer" onclick="openAuthModal('Command HQ', 'CommandHQ.html', 'admin')">
-                <span class="material-symbols-outlined text-4xl text-white/30 node-icon mb-5">terminal</span>
-                <span class="text-xs font-bold tracking-[0.2em] text-white/60 node-title uppercase text-center">Command HQ</span>
-            </div>
-
-            <!-- Ops Core -->
-            <div class="app-node flex flex-col items-center justify-center p-10 cursor-pointer" onclick="openAuthModal('Ops Core', 'OpsView.html', 'admin')">
-                <span class="material-symbols-outlined text-4xl text-white/30 node-icon mb-5">schema</span>
-                <span class="text-xs font-bold tracking-[0.2em] text-white/60 node-title uppercase text-center">Ops Logistics</span>
-            </div>
-
-            <!-- VTx Engine -->
-            <div class="app-node flex flex-col items-center justify-center p-10 cursor-pointer" onclick="openAuthModal('VTx Scheduler', 'VTxView.html', 'admin')">
-                <span class="material-symbols-outlined text-4xl text-white/30 node-icon mb-5">view_timeline</span>
-                <span class="text-xs font-bold tracking-[0.2em] text-white/60 node-title uppercase text-center">VTx Scheduler</span>
-            </div>
-
-            <!-- VTz Switcher -->
-            <div class="app-node flex flex-col items-center justify-center p-10 cursor-pointer" onclick="openAuthModal('VTz Switcher', 'VTzView.html', 'admin')">
-                <span class="material-symbols-outlined text-4xl text-white/30 node-icon mb-5">switch_video</span>
-                <span class="text-xs font-bold tracking-[0.2em] text-white/60 node-title uppercase text-center">VTz Switcher</span>
-            </div>
-
-            <!-- Kinetic Studio -->
-            <div class="app-node flex flex-col items-center justify-center p-10 cursor-pointer" onclick="openAuthModal('Kinetic Studio', 'login_2.html', 'admin')">
-                <span class="material-symbols-outlined text-4xl text-white/30 node-icon mb-5">memory</span>
-                <span class="text-xs font-bold tracking-[0.2em] text-white/60 node-title uppercase text-center">Kinetic Studio</span>
-            </div>
-
-            <!-- Noiz Core -->
-            <div class="app-node flex flex-col items-center justify-center p-10 cursor-pointer" onclick="openAuthModal('Noiz Engine', 'NoizView.html', 'admin')">
-                <span class="material-symbols-outlined text-4xl text-white/30 node-icon mb-5">graphic_eq</span>
-                <span class="text-xs font-bold tracking-[0.2em] text-white/60 node-title uppercase text-center">Noiz Neural</span>
-            </div>
-
-            <!-- Vault -->
-            <div class="app-node flex flex-col items-center justify-center p-10 cursor-pointer" onclick="openAuthModal('Financial Vault', 'VaultView.html', 'admin')">
-                <span class="material-symbols-outlined text-4xl text-white/30 node-icon mb-5">account_balance</span>
-                <span class="text-xs font-bold tracking-[0.2em] text-white/60 node-title uppercase text-center">Ledger Vault</span>
-            </div>
-
-            <!-- Client Portal -->
-            <div class="app-node flex flex-col items-center justify-center p-10 cursor-pointer" style="background: rgba(254, 216, 45, 0.02); border-color: rgba(254, 216, 45, 0.1);" onclick="openAuthModal('Client Portal', 'SignOffView.html', 'client')">
-                <span class="material-symbols-outlined text-4xl text-corporate-yellow/60 node-icon mb-5">vpn_key</span>
-                <span class="text-xs font-bold tracking-[0.2em] text-corporate-yellow node-title uppercase text-center">Client Gateway</span>
-            </div>
-
-        </section>
-
-    </div>
-
-    <!-- ========================================================= -->
-    <!-- SECURE AUTHENTICATION MODAL (THE "AXES" STYLE GATEWAY)    -->
-    <!-- ========================================================= -->
-    <div id="auth-modal" class="auth-modal-overlay">
-        <!-- Close trigger background -->
-        <div class="absolute inset-0 cursor-pointer" onclick="closeAuthModal()"></div>
-        
-        <div class="auth-modal-box">
-            <div class="auth-modal-glow"></div>
-            
-            <!-- Logo inside Modal -->
-            <div class="w-12 h-12 bg-black border border-white/10 rounded-xl flex items-center justify-center mb-8 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
-                <img src="icon.png" alt="Icon" class="h-6 w-auto" onerror="this.style.display='none'; document.getElementById('modal-fallback').style.display='block';">
-                <div id="modal-fallback" style="display:none;" class="w-4 h-4 bg-corporate-yellow"></div>
-            </div>
-
-            <h2 class="text-xl font-normal text-white tracking-[0.1em] mb-1">Connect to <span id="modal-app-name" class="font-bold">App</span></h2>
-            <p class="text-xs text-white/40 tracking-[0.05em] mb-8" id="modal-app-desc">Encrypted connection routing.</p>
-
-            <form id="auth-form" onsubmit="event.preventDefault(); initiateLogin();" class="space-y-4">
-                
-                <!-- Dynamic Input Area -->
-                <div id="input-area-admin" style="display: none;" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] text-white/40 uppercase tracking-[0.1em] mb-2">Email</label>
-                        <input type="email" id="input-email" class="premium-input" placeholder="enter your email address...">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-white/40 uppercase tracking-[0.1em] mb-2">Password</label>
-                        <input type="password" id="input-password" class="premium-input" placeholder="••••••••">
-                    </div>
-                </div>
-
-                <div id="input-area-client" style="display: none;">
-                    <label class="block text-[10px] text-corporate-yellow uppercase tracking-[0.1em] mb-2">Secure Venue PIN</label>
-                    <input type="text" id="input-pin" class="premium-input text-center text-xl tracking-[0.5em] text-corporate-yellow focus:border-corporate-yellow" placeholder="----" maxlength="4">
-                </div>
-
-                <button type="submit" id="auth-submit-btn" class="premium-btn mt-4">
-                    Authorize Connection
-                </button>
-                
-                <div class="pt-6 text-center">
-                    <span class="text-[9px] text-white/20 uppercase tracking-[0.1em]">or continue with SSO SAML</span>
-                </div>
-            </form>
         </div>
-    </div>
+    </header>
 
-    <!-- Screen Transition Element -->
-    <div id="system-transition">
-        <div id="scan-line"></div>
-        <div class="text-corporate-yellow font-mono text-[10px] tracking-[0.8em] uppercase">[ NEURAL_SYNC_ACTIVE ]</div>
-    </div>
+    <main class="h-screen flex w-full">
+        <aside class="w-1/4 flex-shrink-0 flex items-center px-12 border-r border-white/5 bg-black/10">
+            <div class="max-w-xs">
+                <h2 class="text-xl tracking-[0.4em] text-white/40 uppercase leading-relaxed font-light">
+                    The Neural Network <br/>
+                    <span class="text-white/60">For Live Production</span>
+                </h2>
+                <div class="mt-8 w-12 h-[1px] bg-corporate-yellow/40"></div>
+                <p class="mt-8 text-[9px] tracking-[0.3em] text-white/20 uppercase leading-loose font-light">
+                    Advanced Fleet Routing<br/>
+                    Global State Synchronization<br/>
+                    Automated Logistics Core
+                </p>
+                <p class="mt-16 text-[18px] tracking-[0.05em] text-[#FFFFFF] font-light leading-[2.2]">
+                    The future of live event execution isn't just managed—<span class="text-[#fed82d]">it's engineered.</span> RCI_OS introduces absolute zero-latency control and unified logistics.
+                </p>
+            </div>
+        </aside>
+
+        <section class="flex-grow flex items-center justify-center relative px-12 z-20">
+            <div class="relative w-full max-w-[560px]">
+                <div class="absolute -top-4 -left-4 w-12 h-12 border-t border-l border-corporate-yellow/20"></div>
+                <div class="absolute -bottom-4 -right-4 w-12 h-12 border-b border-r border-corporate-yellow/20"></div>
+                
+                <div class="blade-slot relative overflow-hidden">
+                    <div class="bg-black/60 p-12 flex flex-col gap-10">
+                        <div class="space-y-5">
+                            <h2 class="text-lg font-normal tracking-[0.25em] text-white leading-tight">
+                                WHERE PHYSICAL EXECUTION <br/>
+                                <span class="text-corporate-yellow">MEETS NEURAL CONTROL.</span>
+                            </h2>
+                            <p class="text-[14px] text-white/40 leading-relaxed max-w-md font-light tracking-[0.12em]">
+                                A unified production hub for high-fidelity event execution. Authentication required for protocol access.
+                            </p>
+                        </div>
+
+                        <div class="text-[9px] tracking-[0.2em] uppercase border-t border-white/10 font-light">
+                            <div class="manifest-row bg-white/[0.02] manifest-row-active" style="animation-delay: 0s;">
+                                <span class="w-32 text-corporate-yellow/60">COMMAND HQ:</span>
+                                <span class="text-white/70">Master Fleet & Access Provisioning</span>
+                            </div>
+                            <div class="manifest-row manifest-row-active bg-white/[0.02]" style="animation-delay: 0.3s;">
+                                <span class="w-32 text-corporate-yellow/60">OPS CORE:</span>
+                                <span class="text-white/70">Project Logistics & Roster Matrix</span>
+                            </div>
+                            <div class="manifest-row bg-white/[0.02] manifest-row-active" style="animation-delay: 0.9s;">
+                                <span class="w-32 text-corporate-yellow/60">VTX ENGINE:</span>
+                                <span class="text-white/70">Automated Screen Timeline Scheduler</span>
+                            </div>
+                            <div class="manifest-row manifest-row-active bg-white/[0.02]" style="animation-delay: 1.5s;">
+                                <span class="w-32 text-corporate-yellow/60">VTZ SWITCHER:</span>
+                                <span class="text-white/70">Zero-Latency Live Routing Override</span>
+                            </div>
+                            <div class="manifest-row bg-white/[0.02] manifest-row-active" style="animation-delay: 2.1s;">
+                                <span class="w-32 text-corporate-yellow/60">NOIZ CORE:</span>
+                                <span class="text-white/70">Neural Marketing Synthesis</span>
+                            </div>
+                            <div class="manifest-row manifest-row-active bg-white/[0.02]" style="animation-delay: 2.7s;">
+                                <span class="w-32 text-corporate-yellow/60">VAULT:</span>
+                                <span class="text-white/70">Enterprise Financial Engine</span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="flex flex-col gap-3">
+                                <label class="text-[9px] text-white/40 tracking-[0.3em] uppercase font-light">CLIENT / VENUE PORTAL</label>
+                                <!-- Transitions to the Client SignOff View -->
+                                <input onkeydown="if(event.key === 'Enter') startTransition('SignOffView.html')" class="input-industrial w-full py-4 px-5 text-[10px] tracking-[0.4em] font-light" placeholder="ENTER 4-DIGIT PIN" type="text"/>
+                            </div>
+
+                            <div id="login-area">
+                                <button id="signin-btn" onclick="revealEmailInput()" class="glass-btn w-full py-5 px-4 flex items-center justify-center gap-3 group">
+                                    <span class="text-[10px] font-normal tracking-[0.4em] uppercase text-corporate-yellow">COMMAND OVERRIDE SIGN IN</span>
+                                </button>
+
+                                <div id="email-container" class="hidden flex-col gap-3">
+                                    <label class="text-[9px] text-corporate-yellow tracking-[0.3em] uppercase font-light">ADMINISTRATOR IDENTITY</label>
+                                    <!-- Transitions to the Internal Command HQ View -->
+                                    <input id="admin-email" onkeydown="handleAdminLogin(event)" class="input-industrial input-admin w-full py-4 px-5 text-[10px] tracking-[0.4em] font-light" placeholder="ENTER_EMAIL_ID" type="email"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-white/5 flex justify-between items-center text-[8px] uppercase tracking-[0.3em] text-white/20 font-light">
+                            <div class="flex items-center gap-3">
+                                <span class="w-1.5 h-1.5 bg-corporate-yellow rounded-full"></span>
+                                <span>System Status: Optimal</span>
+                            </div>
+                            <span>Rack_ID: HQ-CORE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="w-1/3 flex-shrink-0 flex flex-col relative overflow-hidden border-l border-white/5 bg-industrial-charcoal">
+            <div class="flex-1 matte-node image-node-border">
+                <div class="noise-overlay"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-60" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCsRpvBfBPqd9NXYDIGsN_yjvlwzeflEyQDdIwAOR4pUjumLn1QF-0OuATYqOCevVxf-IQMD7N5AqraaQQoDita4p7zhzhyFfU5pID2dBWEyxiwtil-_I6qzUAc2s5MABf9zCuIT4PSkNoEj7_3P1rd1HdGYQCMQoOyCm4DJAg70RC4zl7Vygq_clHfiCwEIGKgC0smQeCecmUb8ObpKXMRwaZ2pn0GL0V1kdqFzQQbPXqJwXwSPLN_KuVou2iVhueftvLlvTs5AeE');"></div>
+                <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
+                    <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_01</span>
+                    <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">Command HQ Terminal</span>
+                </div>
+            </div>
+            <div class="flex-1 matte-node image-node-border">
+                <div class="noise-overlay"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-50" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD-V3_5vQsZNdE0tey8B3UHxcq_EMoD0D5hp92iyz9mRox01KazNqO9ZrHyXzZasJaStsZpzqOGTRDKIj-p6ZiDLXsMzzIt5nczfqmVNxgd7HIo0HbGiE1ezfoAgzcUCgmAYEvIVJCJySQTxcmQBbkCi1uahg5Sr6MWrzOBevgb_mA4S5NLSPPzpb7G0G1YqURMCazwjscaYeP1ge4ugjydrCC8cJki06DLV7LsaY83c2zo7F812aHo7Tm4nMkj7yk5IFM35lWUw30');"></div>
+                <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
+                    <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_02</span>
+                    <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">VTx / VTz Execution</span>
+                </div>
+            </div>
+            <div class="flex-1 matte-node image-node-border">
+                <div class="noise-overlay"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-45" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBbE-Rv1azKZnb4DqdoYOg0ZoidyLe1aAtjjCz72Jcb-PnnwzahY6SE5KrQv7G-TRbrni-q0DftaTLDPiOPrPoXraV30_XJEJwSfiOn4f76S95h1l7sIfTDxRhoEyZ_GyVW5VrKujnzK3nZzjeN3EZ-3yEkaDUYhJB1BVphRWGbvPkY9hK4Kk7sRxd5-ycOsp7xxVzv68emabsxESlv5sMs78r3k8kbOrlpvXOlXdubUR91VaxQQSUhLZZ8NkIDW_0_qt02d57O7WA');"></div>
+                <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
+                    <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_03</span>
+                    <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">Ops Core Logistics</span>
+                </div>
+            </div>
+            <div class="flex-1 matte-node image-node-border">
+                <div class="noise-overlay"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-40" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYMDjv6PHW6M50hlqNRv0io-vyM7R-JKWkooSo0qvIfMUZuLxRoLFQZEqcF5sc0SGcOjicgYXiUdNPq_OaYhNKQlXrSQ771SK1yR-cae94TqYtAmGxZSDV5KUOie8zDKdKw-tRReYfJ2pCv9SlU8Hk-GAXWeiDj7buMouxlJv-CiGgLf-gnxiWuJGY3PWeceF9E895xrbYPDI0mdVo630zO_wiXYSvzqRpXty0p5rMMifVdz8UyBtkr_PiYLzMDw2b8Z6BnUz1YNo');"></div>
+                <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
+                    <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_04</span>
+                    <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">Financial Ledger Vault</span>
+                </div>
+            </div>
+            <div class="flex-1 matte-node image-node-border">
+                <div class="noise-overlay"></div>
+                <div class="absolute inset-0 feature-image-matte opacity-35" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBiS-wf8-H6LglXzEh0QcPg8-DgvLCiibUOtC9NJ2iCqYh3drNoYfvmBH8G43pZhA4s4pZnmNX0oQHefWlHuxZjrSCillL4akGkTjmHLFY2ea32BpMezCuKLkMOXZZ7cDYu8qpIX0kIafSWvgVnpzjkI42UDVHR5HgJ15p5AhtiOHJjiIpGWSIMjDbb0pTFWW8kRG1N0YNvnVvmtZ-rDBFmN8j-7upZPioAwOwcXRVnB0ThwC8rt989kvfGj8bJBBrNn2zj2VsEgNI');"></div>
+                <div class="absolute top-6 left-6 z-20 flex flex-col gap-1">
+                    <span class="text-[7px] tracking-[0.4em] text-corporate-yellow uppercase font-light">NODE_05</span>
+                    <span class="text-[9px] tracking-[0.5em] text-white uppercase font-light">Noiz Neural Engine</span>
+                </div>
+                <div class="absolute bottom-6 right-6 z-20 text-right space-y-1">
+                    <p class="text-[7px] tracking-[0.3em] text-white/30 font-light">MATTE_ENVIRONMENT: ACTIVE</p>
+                    <p class="text-[7px] tracking-[0.3em] text-white/30 font-light uppercase">Atmospheric Grid Mapping</p>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <footer class="fixed bottom-8 left-8 flex justify-between items-end opacity-20 pointer-events-none z-50">
+        <div class="text-left font-light">
+            <p class="text-[8px] tracking-[0.3em] mb-1">RCI_OS v2.0.0</p>
+            <p class="text-[8px] tracking-[0.3em]">ESTABLISHED MMXXVI</p>
+        </div>
+    </footer>
+    <footer class="fixed bottom-8 right-8 text-right opacity-20 pointer-events-none z-50">
+        <div class="font-light">
+            <p class="text-[8px] tracking-[0.3em] mb-1">ENCRYPTION: AES-256-GCM</p>
+            <p class="text-[8px] tracking-[0.3em]">SUPABASE_AUTH_ACTIVE</p>
+        </div>
+    </footer>
 
     <script>
-        let targetAppUrl = "";
+        function revealEmailInput() {
+            document.getElementById('signin-btn').classList.add('hidden');
+            const container = document.getElementById('email-container');
+            container.classList.remove('hidden');
+            container.classList.add('flex');
+            document.getElementById('admin-email').focus();
+        }
 
-        // Opens the Modal and dynamically adjusts it based on App Type
-        function openAuthModal(appName, url, authType) {
-            targetAppUrl = url;
-            
-            document.getElementById('modal-app-name').innerText = appName;
-            
-            const adminArea = document.getElementById('input-area-admin');
-            const clientArea = document.getElementById('input-area-client');
-            const desc = document.getElementById('modal-app-desc');
-
-            if (authType === 'client') {
-                adminArea.style.display = 'none';
-                clientArea.style.display = 'block';
-                desc.innerText = "Client approval & review portal.";
-                // Clear inputs
-                document.getElementById('input-pin').value = '';
-                setTimeout(() => document.getElementById('input-pin').focus(), 100);
-            } else {
-                clientArea.style.display = 'none';
-                adminArea.style.display = 'block';
-                desc.innerText = "Internal staff protocol required.";
-                // Clear inputs
-                document.getElementById('input-email').value = '';
-                document.getElementById('input-password').value = '';
-                setTimeout(() => document.getElementById('input-email').focus(), 100);
+        function handleAdminLogin(event) {
+            // In Phase 2, this will hit Supabase Auth. 
+            // For now, it transitions to the CommandHQ file visually.
+            if (event.key === 'Enter') {
+                const email = event.target.value.trim();
+                if (email.length > 0) {
+                    startTransition('CommandHQ.html');
+                }
             }
-
-            const modal = document.getElementById('auth-modal');
-            modal.style.display = 'flex';
-            // Slight delay to allow display:flex to apply before adding opacity class for animation
-            setTimeout(() => { modal.classList.add('active'); }, 10);
         }
 
-        function closeAuthModal() {
-            const modal = document.getElementById('auth-modal');
-            modal.classList.remove('active');
-            setTimeout(() => { modal.style.display = 'none'; }, 300);
-        }
-
-        function initiateLogin() {
-            const btn = document.getElementById('auth-submit-btn');
-            btn.innerHTML = "Authenticating...";
-            btn.style.pointerEvents = "none";
-            btn.style.opacity = "0.7";
-
-            // Simulate Database Handshake delay
-            setTimeout(() => {
-                closeAuthModal();
-                startTransition(targetAppUrl);
-            }, 600);
-        }
-
-        // Deep contrast transition effect
         function startTransition(url) {
             const overlay = document.getElementById('system-transition');
             const scanLine = document.getElementById('scan-line');
             
+            // Dramatic contrast shift on load
             document.body.style.filter = "contrast(1.5) brightness(2) saturate(0)";
             document.body.style.transition = "filter 0.2s ease";
             
@@ -348,7 +325,7 @@
             
             setTimeout(() => { scanLine.style.top = "100%"; }, 50);
             
-            // Route to the app
+            // Route to the appropriate app
             setTimeout(() => { window.location.href = url; }, 650);
         }
     </script>
