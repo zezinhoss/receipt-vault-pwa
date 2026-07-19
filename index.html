@@ -19,7 +19,7 @@
                         'rci-bg': '#050505',
                         'rci-panel': 'rgba(15, 15, 18, 0.4)',
                         'rci-border': 'rgba(255, 255, 255, 0.08)',
-                        'rci-accent': '#fed82d' /* Brand Yellow */
+                        'rci-accent': '#facc15'
                     },
                     fontFamily: {
                         'sans': ['Geist', 'sans-serif'],
@@ -37,6 +37,8 @@
             min-height: 100vh; 
             margin: 0; 
             overflow: hidden;
+            font-family: 'Geist', sans-serif;
+            font-weight: 300;
         }
 
         /* --------------------------------------------------- */
@@ -44,9 +46,9 @@
         /* --------------------------------------------------- */
         .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #000; }
         .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.5; animation: float 20s infinite ease-in-out alternate; }
-        .orb-1 { top: -10%; left: -10%; width: 60vw; height: 60vw; background: rgba(59, 130, 246, 0.15); } /* Subdued Blue */
-        .orb-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: rgba(168, 85, 247, 0.10); } /* Subdued Purple */
-        .orb-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: rgba(254, 216, 45, 0.12); animation-delay: -5s; } /* Brand Yellow Glow */
+        .orb-1 { top: -10%; left: -10%; width: 60vw; height: 60vw; background: rgba(250, 204, 21, 0.08); } /* Gold */
+        .orb-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: rgba(250, 204, 21, 0.12); } /* Gold */
+        .orb-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: rgba(250, 204, 21, 0.1); animation-delay: -5s; } /* Gold */
 
         @keyframes float {
             0% { transform: translate(0, 0) scale(1); }
@@ -77,11 +79,16 @@
         .directory-item {
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             border-bottom: 1px solid rgba(255,255,255,0.03);
+            cursor: pointer;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         .directory-item:last-child { border-bottom: none; }
         .directory-item:hover {
             background: rgba(255, 255, 255, 0.03);
-            padding-left: 8px;
+            padding-left: 24px;
         }
         .directory-item:hover .app-icon { color: theme('colors.rci-accent'); transform: scale(1.1); }
         .directory-item:hover .app-arrow { opacity: 1; transform: translateX(4px); color: theme('colors.rci-accent'); }
@@ -100,7 +107,7 @@
         .auth-overlay.active { display: flex; opacity: 1; }
         
         .auth-panel {
-            background: #09090b; /* Very dark, almost black */
+            background: #09090b;
             border: 1px solid rgba(255,255,255,0.08);
             border-top: 1px solid rgba(255,255,255,0.15); 
             border-radius: 24px;
@@ -114,24 +121,24 @@
         /* Modal Top Glow Effect - Brand Yellow Tinted */
         .auth-panel::before {
             content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(254, 216, 45, 0.5), transparent);
+            background: linear-gradient(90deg, transparent, rgba(250, 204, 21, 0.5), transparent);
         }
 
         /* Sleek Inputs */
         .sleek-input {
             width: 100%; background: #121214; border: 1px solid rgba(255,255,255,0.05);
             color: #fff; padding: 14px 16px; font-size: 13px; outline: none; transition: 0.3s;
-            border-radius: 12px; margin-bottom: 12px;
+            border-radius: 12px; margin-bottom: 12px; font-family: 'Geist', sans-serif; font-weight: 300;
         }
-        .sleek-input:focus { border-color: theme('colors.rci-accent'); background: #18181b; box-shadow: 0 0 0 2px rgba(254, 216, 45, 0.15); }
+        .sleek-input:focus { border-color: theme('colors.rci-accent'); background: #18181b; box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.15); }
         .sleek-input::placeholder { color: #52525b; }
 
         .sleek-btn {
-            width: 100%; background: theme('colors.rci-accent'); color: #000; font-weight: 700;
+            width: 100%; background: theme('colors.rci-accent'); color: #000; font-weight: 600;
             font-size: 13px; padding: 14px; border-radius: 12px;
-            border: none; cursor: pointer; transition: 0.3s; margin-top: 8px;
+            border: none; cursor: pointer; transition: 0.3s; margin-top: 8px; font-family: 'Geist', sans-serif;
         }
-        .sleek-btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(254, 216, 45, 0.2); }
+        .sleek-btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(250, 204, 21, 0.2); }
 
         /* PIN Pad Boxes */
         .pin-grid { display: flex; gap: 10px; justify-content: center; margin: 10px 0 20px 0; }
@@ -140,13 +147,19 @@
             color: #fff; font-size: 24px; text-align: center; outline: none;
             transition: all 0.3s ease; font-family: 'JetBrains Mono', monospace; border-radius: 12px;
         }
-        .pin-box:focus { border-color: theme('colors.rci-accent'); background: #18181b; box-shadow: 0 0 0 2px rgba(254, 216, 45, 0.15); }
+        .pin-box:focus { border-color: theme('colors.rci-accent'); background: #18181b; box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.15); }
 
         /* OS Viewport Container */
         #os-viewport { display: none; width: 100%; height: 100vh; flex-direction: column; animation: fadeIn 0.5s ease; position: relative; z-index: 50;}
         .app-iframe { width: 100%; height: 100%; border: none; background: transparent; flex: 1; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Custom scrollbar for directory */
+        .directory-scroll::-webkit-scrollbar { width: 4px; }
+        .directory-scroll::-webkit-scrollbar-track { background: transparent; }
+        .directory-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        .directory-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
     </style>
 </head>
@@ -163,134 +176,211 @@
     <!-- ======================================================== -->
     <!-- 1. ECOSYSTEM LAUNCHPAD (Glassmorphism List)              -->
     <!-- ======================================================== -->
-    <main id="launcher-view" class="w-full min-h-screen flex items-center justify-center relative z-10 p-6">
+    <main id="launcher-view" class="w-full min-h-screen flex items-center justify-center relative z-10 p-0 m-0">
         
-        <div class="glass-panel w-full max-w-4xl rounded-[32px] overflow-hidden flex flex-col md:flex-row h-[80vh] max-h-[800px]">
+        <!-- Expanded Full-Canvas Glass Panel -->
+        <div class="glass-panel w-full h-full rounded-none overflow-hidden flex flex-col md:flex-row">
             
             <!-- Left Sidebar / Branding -->
-            <div class="w-full md:w-1/3 bg-black/40 border-r border-white/5 p-8 flex flex-col justify-between">
+            <div class="w-full md:w-[350px] lg:w-[400px] bg-black/40 border-r border-white/5 p-10 flex flex-col justify-between flex-shrink-0">
                 <div>
                     <!-- Brand Logo Block -->
-                    <div class="w-14 h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-6 overflow-hidden shadow-[0_0_20px_rgba(254,216,45,0.05)]">
-                        <img src="icon.png" alt="RCI Logo" class="w-8 h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"/>
+                    <div class="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-8 overflow-hidden shadow-[0_0_20px_rgba(250,204,21,0.05)]">
+                        <img src="icon.png" alt="RCI Logo" class="w-10 h-10 object-contain" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"/>
                         <!-- Fallback block if image fails to load -->
-                        <div class="hidden w-4 h-4 bg-rci-accent rounded-sm shadow-[0_0_10px_#fed82d]"></div>
+                        <div class="hidden w-5 h-5 bg-rci-accent rounded-sm shadow-[0_0_10px_#facc15]"></div>
                     </div>
                     
-                    <h1 class="text-2xl font-semibold text-white tracking-tight mb-1">RCI_OS</h1>
-                    <h2 class="text-[10px] font-semibold text-rci-accent tracking-widest uppercase mb-4 opacity-90">Where physical execution <br>meets neural control.</h2>
+                    <h1 class="text-3xl font-semibold text-white tracking-tight mb-2 uppercase">RCI_OS</h1>
+                    <h2 class="text-xs font-semibold text-rci-accent tracking-[0.2em] uppercase mb-6 opacity-90 leading-relaxed">Where physical execution <br>meets neural control.</h2>
                     
-                    <p class="text-xs text-zinc-400 font-light leading-relaxed">Select an application to authenticate and initialize your secure session.</p>
+                    <p class="text-sm text-white/50 font-light leading-relaxed max-w-[280px]">Select an application to authenticate and initialize your secure session.</p>
                 </div>
-                <div class="text-[10px] text-zinc-600 uppercase tracking-widest font-mono">
+                <div class="text-[10px] text-white/30 uppercase tracking-[0.2em] font-mono mt-12">
                     System Online • RCI_OS v2.0
                 </div>
             </div>
 
-            <!-- Right App List -->
-            <div class="w-full md:w-2/3 p-2 overflow-y-auto" style="scrollbar-width: none;">
+            <!-- Right App List (Scrollable) -->
+            <div class="w-full flex-1 p-0 overflow-y-auto directory-scroll">
                 
-                <div class="p-6">
-                    <h3 class="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-4 pl-4">Administrative Suites</h3>
+                <div class="p-10 max-w-5xl mx-auto">
                     
-                    <!-- Command HQ -->
-                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('hq', 'staff', 'Command HQ')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center app-icon text-red-500">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    <!-- Section: Administrative Suites -->
+                    <div class="mb-12">
+                        <h3 class="text-xs font-semibold text-white/40 uppercase tracking-[0.2em] mb-6 pl-4 border-b border-white/5 pb-2">Administrative Suites</h3>
+                        
+                        <!-- Ops Core -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('ops', 'staff', 'Ops Core')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center app-icon text-emerald-500 shadow-[inset_0_0_10px_rgba(16,185,129,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">Ops Core</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">Project Logistics & Roster Management</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-white">Command HQ</h4>
-                                <p class="text-xs text-zinc-500 mt-0.5">Master Fleet Node & Provisioning</p>
-                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </div>
-                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+
+                        <!-- Financial Vault -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('vault', 'staff', 'Financial Vault')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center app-icon text-amber-500 shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">Vault</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">Bookkeeping & Invoice Reconciliation</p>
+                                </div>
+                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+
+                        <!-- Noiz Core -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('noiz', 'staff', 'Noiz Core')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center app-icon text-purple-500 shadow-[inset_0_0_10px_rgba(168,85,247,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">Noiz</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">Neural Marketing & Copy Engine</p>
+                                </div>
+                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
                     </div>
 
-                    <!-- Ops Core -->
-                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('ops', 'staff', 'Ops Core')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center app-icon text-emerald-500">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <!-- Section: Live Events -->
+                    <div class="mb-12">
+                        <h3 class="text-xs font-semibold text-white/40 uppercase tracking-[0.2em] mb-6 pl-4 border-b border-white/5 pb-2">Live Events</h3>
+
+                        <!-- VTx Scheduler -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('vtx', 'venue', 'VTx Engine')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-yellow-400/10 flex items-center justify-center app-icon text-yellow-400 shadow-[inset_0_0_10px_rgba(250,204,21,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">VTx</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">Automated Screen Timeline</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-white">Ops Core</h4>
-                                <p class="text-xs text-zinc-500 mt-0.5">Project Logistics & Roster Management</p>
-                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </div>
-                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+
+                        <!-- VTz Switcher -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('vtz', 'venue', 'VTz Switcher')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center app-icon text-blue-500 shadow-[inset_0_0_10px_rgba(59,130,246,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">VTz</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">Live Override Desk</p>
+                                </div>
+                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
                     </div>
 
-                    <!-- Financial Vault -->
-                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('vault', 'staff', 'Financial Vault')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center app-icon text-amber-500">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                    <!-- Section: Client Portal -->
+                    <div class="mb-12">
+                        <h3 class="text-xs font-semibold text-white/40 uppercase tracking-[0.2em] mb-6 pl-4 border-b border-white/5 pb-2">Client Portal</h3>
+
+                        <!-- Manuscript -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('manuscript', 'venue', 'Manuscript')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center app-icon text-orange-500 shadow-[inset_0_0_10px_rgba(249,115,22,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">Manuscript</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">Project Briefs & Documentation</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-white">Financial Vault</h4>
-                                <p class="text-xs text-zinc-500 mt-0.5">Bookkeeping & Invoice Reconciliation</p>
-                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </div>
-                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+
+                        <!-- SignOff -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('signoff', 'venue', 'SignOff')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-slate-300/10 flex items-center justify-center app-icon text-slate-300 shadow-[inset_0_0_10px_rgba(203,213,225,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">SignOff</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">Secure Review & Approval Portal</p>
+                                </div>
+                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
                     </div>
 
-                    <!-- Noiz Core -->
-                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('noiz', 'staff', 'Noiz Core')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center app-icon text-purple-500">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-white">Noiz Core</h4>
-                                <p class="text-xs text-zinc-500 mt-0.5">Neural Marketing & Copy Engine</p>
-                            </div>
+                    <!-- Section: Kinetic Studio -->
+                    <div class="mb-12">
+                        <div class="pl-4 mb-6 border-b border-white/5 pb-2">
+                            <h3 class="text-xs font-semibold text-rci-accent uppercase tracking-[0.2em] mb-1">KINETIC STUDIO</h3>
+                            <p class="text-[10px] text-white/30 uppercase tracking-[0.1em] font-light">A unified production hub for high-fidelity media production.</p>
                         </div>
-                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </div>
 
-                    <h3 class="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mt-10 mb-4 pl-4">Live Event & Client Nodes</h3>
-
-                    <!-- VTx Scheduler -->
-                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('vtx', 'venue', 'VTx Engine')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-yellow-400/10 flex items-center justify-center app-icon text-yellow-400">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                        <!-- Visuals -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('kinetic', 'staff', 'Kinetic Studio - Visuals')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center app-icon text-cyan-500 shadow-[inset_0_0_10px_rgba(6,182,212,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">Visuals</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">High-Fidelity Video & Image Gen-AI</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-white">VTx Scheduler</h4>
-                                <p class="text-xs text-zinc-500 mt-0.5">Automated Screen Timeline</p>
-                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </div>
-                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </div>
 
-                    <!-- VTz Switcher -->
-                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('vtz', 'venue', 'VTz Switcher')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center app-icon text-blue-500">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                        <!-- Upscaling -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('kinetic', 'staff', 'Kinetic Studio - Upscaling')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center app-icon text-indigo-500 shadow-[inset_0_0_10px_rgba(99,102,241,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">Upscaling</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">4K Cinematic Refinement</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-white">VTz Switcher</h4>
-                                <p class="text-xs text-zinc-500 mt-0.5">Live Override Desk</p>
-                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </div>
-                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </div>
 
-                    <!-- Client Vault -->
-                    <div class="directory-item rounded-xl p-4 cursor-pointer flex items-center justify-between" onclick="promptAuth('client', 'venue', 'Client Vault')">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-slate-300/10 flex items-center justify-center app-icon text-slate-300">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <!-- Audio -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('kinetic', 'staff', 'Kinetic Studio - Audio')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center app-icon text-rose-500 shadow-[inset_0_0_10px_rgba(244,63,94,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">Audio</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">Intelligent 3-Pass Sound FX</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-medium text-white">Client Vault</h4>
-                                <p class="text-xs text-zinc-500 mt-0.5">Secure Sign-Off Portal</p>
-                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </div>
-                        <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+
+                        <!-- Voice -->
+                        <div class="directory-item rounded-xl" onclick="promptAuth('kinetic', 'staff', 'Kinetic Studio - Voice')">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center app-icon text-teal-500 shadow-[inset_0_0_10px_rgba(20,184,166,0.1)]">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-medium text-white tracking-wide">Voice</h4>
+                                    <p class="text-xs text-white/40 mt-1 font-light">Speech Synthesis (TTS)</p>
+                                </div>
+                            </div>
+                            <svg class="app-arrow w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
                     </div>
 
                 </div>
@@ -311,12 +401,12 @@
                     <svg id="auth-icon" class="relative z-10" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
                 </div>
                 <h3 class="text-xl font-semibold text-white tracking-tight" id="auth-title">Welcome to App</h3>
-                <p class="text-xs text-zinc-500 mt-1.5" id="auth-subtitle">Authentication Required</p>
+                <p class="text-xs text-zinc-500 mt-1.5 font-light" id="auth-subtitle">Authentication Required</p>
             </div>
 
             <!-- PIN PAD NODE (Venue / Client) -->
             <div id="pin-node" class="hidden flex-col">
-                <label class="text-[11px] font-medium text-zinc-400 mb-1 ml-1">Secure PIN</label>
+                <label class="text-[10px] font-medium text-zinc-400 mb-2 ml-1 uppercase tracking-widest">Secure PIN</label>
                 <div class="pin-grid" id="pin-container">
                     <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
                     <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
@@ -328,20 +418,20 @@
             <!-- STAFF NODE (Email / Pass) -->
             <div id="staff-node" class="hidden flex-col">
                 <div class="mb-4">
-                    <label class="text-[11px] font-medium text-zinc-400 mb-1.5 block ml-1">Email</label>
+                    <label class="text-[10px] font-medium text-zinc-400 mb-2 block ml-1 uppercase tracking-widest">Email</label>
                     <input type="email" id="admin-email" class="sleek-input" placeholder="enter your email address...">
                 </div>
                 <div class="mb-4">
-                    <label class="text-[11px] font-medium text-zinc-400 mb-1.5 block ml-1">Password</label>
+                    <label class="text-[10px] font-medium text-zinc-400 mb-2 block ml-1 uppercase tracking-widest">Password</label>
                     <input type="password" id="admin-pass" class="sleek-input" placeholder="••••••••">
                 </div>
                 <button class="sleek-btn" onclick="attemptAdminLogin()">Login securely</button>
             </div>
 
-            <div id='login-status' class="mt-6 text-[11px] font-medium text-center h-4 text-red-500"></div>
+            <div id='login-status' class="mt-6 text-[11px] font-medium text-center h-4 text-red-500 font-light"></div>
             
             <div class="mt-6 text-center">
-                <span class="text-[10px] text-zinc-600">or return to <a href="#" class="text-zinc-400 hover:text-white transition" onclick="closeAuthModal()">directory</a></span>
+                <span class="text-[10px] text-zinc-600 font-light">or return to <a href="#" class="text-zinc-400 hover:text-white transition" onclick="closeAuthModal()">directory</a></span>
             </div>
         </div>
     </div>
@@ -356,7 +446,7 @@
                 <button class="text-zinc-400 hover:text-white transition p-1" onclick="returnToDirectory()" title="Close Application">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
-                <span class="text-xs font-medium text-zinc-300" id="active-app-name">App Name</span>
+                <span class="text-xs font-medium text-zinc-300 tracking-wide" id="active-app-name">App Name</span>
             </div>
             <div class="w-2 h-2 rounded-full bg-emerald-500/50 flex items-center justify-center" title="Connection Secure">
                 <div class="w-1 h-1 bg-emerald-400 rounded-full animate-pulse"></div>
@@ -365,13 +455,21 @@
 
         <!-- Dynamic Iframes container -->
         <div id="iframe-container" class="w-full flex-1 relative bg-black">
+            <!-- App Iframes -->
             <iframe id="hq-core" class="app-iframe hidden" src="HQView.html"></iframe>
             <iframe id="ops-core" class="app-iframe hidden" src="OpsView.html"></iframe>
             <iframe id="vtx-core" class="app-iframe hidden" src="VTxView.html"></iframe>
             <iframe id="vtz-core" class="app-iframe hidden" src="VTzView.html"></iframe>
             <iframe id="noiz-core" class="app-iframe hidden" src="NoizView.html"></iframe>
             <iframe id="vault-core" class="app-iframe hidden" src="VaultView.html"></iframe>
-            <iframe id="client-core" class="app-iframe hidden" src="SignOffView.html"></iframe>
+            <iframe id="signoff-core" class="app-iframe hidden" src="SignOffView.html"></iframe>
+            
+            <!-- Placeholder for apps not yet implemented in HTML -->
+            <div id="placeholder-core" class="app-iframe hidden flex flex-col items-center justify-center bg-[#050505] text-white">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="theme('colors.rci-accent')" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-4 opacity-50"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                <h2 class="text-xl font-light tracking-widest text-zinc-400 uppercase mb-2">Module Initializing</h2>
+                <p class="text-xs text-zinc-600 font-mono tracking-widest">Awaiting deployment...</p>
+            </div>
         </div>
     </div>
 
@@ -398,7 +496,7 @@
         function promptAuth(appId, authType, appName) {
             targetAppId = appId;
             
-            // Map icons based on app
+            // Map icons based on app (matching the directory icons)
             const iconMap = {
                 'hq': '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>',
                 'ops': '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>',
@@ -406,7 +504,9 @@
                 'noiz': '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>',
                 'vtx': '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>',
                 'vtz': '<rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line>',
-                'client': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline>'
+                'manuscript': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline>',
+                'signoff': '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
+                'kinetic': '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline>' // Generic icon for Kinetic nodes
             };
             
             document.getElementById('auth-title').innerText = "Welcome to " + appName;
@@ -454,7 +554,7 @@
             const statusEl = document.getElementById('login-status');
             
             statusEl.innerText = "Verifying Handshake...";
-            statusEl.style.color = "#a1a1aa"; // zinc-400
+            statusEl.style.color = "#a1a1aa";
 
             // Simulate Network Delay
             setTimeout(() => {
@@ -508,11 +608,12 @@
             const iframes = document.querySelectorAll('.app-iframe');
             iframes.forEach(iframe => iframe.classList.add('hidden'));
 
-            // Show target iframe
-            if(targetAppId) {
-                const targetIframe = document.getElementById(targetAppId + '-core');
-                if(targetIframe) targetIframe.classList.remove('hidden');
+            // Show target iframe (or placeholder if it doesn't exist yet)
+            let targetIframe = document.getElementById(targetAppId + '-core');
+            if(!targetIframe) {
+                targetIframe = document.getElementById('placeholder-core');
             }
+            if(targetIframe) targetIframe.classList.remove('hidden');
         }
 
         function returnToDirectory() {
