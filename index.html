@@ -1,297 +1,277 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>RCI_OS | Ecosystem</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Premium Fonts: Geist (for sleek sans) & JetBrains Mono (for tech details) -->
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;300;400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- 🔌 LOAD LIBRARIES -->
+    <!-- Tailwind CSS & Supabase -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 'rci-yellow': '#fed82d', 'rci-bg': '#050505', 'rci-surface': '#0a0a0c' },
+                    fontFamily: { 'sans': ['Geist', 'sans-serif'], 'mono': ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+
     <style>
-        :root {
-            --theme-primary: #facc15;
-            --theme-bg-gradient: radial-gradient(circle at top center, #1a1a1a 0%, #030303 100%);
+        body { 
+            background-color: theme('colors.rci-bg'); 
+            color: #fff; 
+            min-height: 100vh; 
+            margin: 0; 
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at top center, rgba(254, 216, 45, 0.03) 0%, transparent 70%);
         }
-
-        body { font-family:'Nunito', sans-serif; background:#030303; background-image: var(--theme-bg-gradient); color:#fff; min-height: 100vh; margin:0; transition: all 0.5s ease; overflow-x: hidden; }
         
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        /* Subtle Cinematic Noise Overlay */
+        .noise-overlay {
+            position: fixed; inset: 0; z-index: 50; pointer-events: none; opacity: 0.02;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Typography Driven List Hover Effects */
+        .directory-row {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .directory-row:hover {
+            background: linear-gradient(90deg, rgba(254, 216, 45, 0.05) 0%, transparent 100%);
+            padding-left: 20px;
+            border-color: theme('colors.rci-yellow');
+        }
+        .directory-row:hover .row-title { color: theme('colors.rci-yellow'); }
+        .directory-row:hover .row-arrow { transform: translateX(10px); opacity: 1; color: theme('colors.rci-yellow'); }
+        .row-arrow { transition: all 0.4s ease; opacity: 0.3; }
+
+        /* Sleek Modal Authentication Panel */
+        .auth-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); 
+            z-index: 100; display: none; align-items: center; justify-content: center; 
+            opacity: 0; transition: opacity 0.4s ease;
+        }
+        .auth-overlay.active { display: flex; opacity: 1; }
         
-        .mono { font-family: 'JetBrains Mono', monospace; }
-
-        /* Modern App Card Styling (Inspired by streaming UI) */
-        .app-card {
-            background: rgba(15, 15, 20, 0.6);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 24px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 160px;
+        .auth-panel {
+            background: theme('colors.rci-surface'); border: 1px solid rgba(255,255,255,0.05);
+            padding: 40px; width: 100%; max-width: 440px; position: relative;
+            transform: translateY(20px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .auth-overlay.active .auth-panel { transform: translateY(0); }
 
-        .app-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        /* Minimalist Inputs */
+        .min-input {
+            width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2);
+            color: #fff; padding: 12px 0; font-size: 14px; outline: none; transition: 0.3s; font-family: 'Geist', sans-serif;
+            border-radius: 0;
         }
+        .min-input:focus { border-bottom-color: theme('colors.rci-yellow'); }
+        .min-input::placeholder { color: rgba(255,255,255,0.3); }
 
-        .app-card:hover {
-            transform: scale(1.02) translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 20px var(--hover-color, rgba(250, 204, 21, 0.2));
-            border-color: var(--hover-color, rgba(250, 204, 21, 0.5));
-            z-index: 10;
+        .min-btn {
+            width: 100%; background: theme('colors.rci-yellow'); color: #000; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.2em; font-size: 11px; padding: 16px;
+            border: none; cursor: pointer; transition: 0.3s; margin-top: 24px;
         }
+        .min-btn:hover { background: #fff; }
 
-        .app-card:hover::before { opacity: 1; }
-
-        .app-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            transition: transform 0.3s ease;
-            background: var(--icon-bg);
-            color: var(--icon-color);
-            border: 1px solid var(--icon-border);
+        /* PIN Pad Boxes */
+        .pin-grid { display: flex; gap: 12px; justify-content: center; margin: 30px 0; }
+        .pin-box {
+            width: 55px; height: 65px; background: transparent; border: 1px solid rgba(255,255,255,0.2);
+            color: theme('colors.rci-yellow'); font-size: 28px; text-align: center; outline: none;
+            transition: all 0.3s ease; font-family: 'JetBrains Mono', monospace; border-radius: 4px;
         }
+        .pin-box:focus { border-color: theme('colors.rci-yellow'); background: rgba(254, 216, 45, 0.05); }
 
-        .app-card:hover .app-icon { transform: scale(1.1); }
-
-        .app-title { font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; transition: color 0.3s;}
-        .app-card:hover .app-title { color: var(--hover-color, #facc15); }
+        /* OS Viewport Container */
+        #os-viewport { display: none; width: 100%; height: 100vh; flex-direction: column; animation: fadeIn 0.5s ease; }
+        .app-iframe { width: 100%; height: 100%; border: none; background: transparent; flex: 1; }
         
-        .app-desc { font-size: 12px; color: #94a3b8; line-height: 1.5; font-weight: 400; }
-
-        /* Suite Headers */
-        .suite-header {
-            font-size: 11px;
-            font-weight: 800;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .suite-header::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
-
-        /* Modal & Form Styling */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 9999; display: none; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;}
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .auth-panel {
-            background: rgba(10, 10, 10, 0.95);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 32px;
-            width: 100%;
-            max-width: 400px;
-            position: relative;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
-        }
-
-        /* PIN PAD STYLING */
-        .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
-        .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.6); border:1px solid rgba(255, 255, 255, 0.1); border-radius:8px; color: var(--theme-primary); font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; font-family:'JetBrains Mono', monospace; -webkit-text-security: disc; }
-        .pin-box:focus { border-color: var(--theme-primary); box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.8); }
-
-        .hq-input { background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; padding: 12px 16px; border-radius: 8px; font-family: 'Nunito'; outline: none; width: 100%; box-sizing: border-box; transition: 0.3s; margin-bottom: 12px;}
-        .hq-input:focus { border-color: var(--theme-primary); background: rgba(0, 0, 0, 0.8); }
-
-        .hq-btn { background: var(--theme-primary); color: #000; font-weight: 800; border: none; border-radius: 8px; padding: 14px 20px; cursor: pointer; width: 100%; box-sizing: border-box; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; font-size: 12px; }
-        .hq-btn:hover { box-shadow: 0 0 20px rgba(250, 204, 21, 0.4); transform: translateY(-2px);}
-
-        /* OS SIDEBAR (Post-Login) */
-        #os-sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 80px; background: rgba(10, 10, 10, 0.9); border-right: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); display: none; flex-direction: column; align-items: center; padding: 20px 0; z-index: 9000; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; white-space: nowrap; box-shadow: 10px 0 30px rgba(0,0,0,0.5);}
-        #os-sidebar:hover { width: 240px; align-items: flex-start; }
-        
-        .sidebar-brand { display: flex; align-items: center; padding: 0 20px; margin-bottom: 40px; cursor: pointer; width: 100%; box-sizing: border-box;}
-        .sidebar-brand img { width: 40px; height: 40px; object-fit: contain; min-width: 40px;}
-        .sidebar-brand span { margin-left: 15px; font-weight: 800; font-size: 14px; color: #fff; letter-spacing: 1px; opacity: 0; transition: opacity 0.2s; }
-        #os-sidebar:hover .sidebar-brand span { opacity: 1; transition-delay: 0.1s;}
-
-        .sidebar-item { display: flex; align-items: center; width: 100%; padding: 15px 20px; color: #94a3b8; cursor: pointer; transition: all 0.2s; box-sizing: border-box; position: relative; border-left: 3px solid transparent;}
-        .sidebar-item:hover { color: #f8fafc; background: rgba(255,255,255,0.03); }
-        .sidebar-item.active { border-left-color: var(--theme-primary); color: var(--theme-primary); background: linear-gradient(90deg, rgba(250, 204, 21, 0.1) 0%, transparent 100%); }
-        
-        .sidebar-icon { width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; min-width: 40px; border-radius: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;}
-        .sidebar-item:hover .sidebar-icon { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
-        .sidebar-label { margin-left: 15px; font-weight: 600; font-size: 13px; opacity: 0; transition: opacity 0.2s; letter-spacing: 0.5px;}
-        #os-sidebar:hover .sidebar-label { opacity: 1; transition-delay: 0.1s;}
-
-        /* IFRAME APP CONTAINERS */
-        #app-view { display: none; width: 100%; height: 100vh; padding-left: 80px; box-sizing: border-box; animation: fadeIn 0.4s ease;}
-        .app-iframe-container { width: 100%; height: 100%; background: transparent; }
-        .app-iframe-container iframe { width: 100%; height: 100%; border: none; background: transparent; }
-
+        /* Hide scrollbar for the main directory but allow scrolling */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
 <body>
-    
-    <!-- 📱 OS DIRECTORY LAUNCHER (Minimalist App Grid) -->
-    <div id="launcher-view" class="w-full max-w-[1400px] mx-auto px-8 py-16 relative z-10">
+    <div class="noise-overlay"></div>
+
+    <!-- ======================================================== -->
+    <!-- 1. ECOSYSTEM DIRECTORY (The "Eloqwnt" Style List)        -->
+    <!-- ======================================================== -->
+    <main id="launcher-view" class="w-full min-h-screen flex flex-col items-center py-16 px-6 md:px-12 relative z-10">
         
         <!-- Header -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-4">
+        <header class="w-full max-w-6xl flex justify-between items-end mb-24 border-b border-white/10 pb-8">
             <div>
-                <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-[0.2em] uppercase">RCI_OS</h1>
-                <p class="text-sm text-slate-400 mt-2 tracking-widest uppercase font-bold">Ecosystem Application Hub</p>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-6 h-6 border border-rci-yellow/40 flex items-center justify-center"><div class="w-2.5 h-2.5 bg-rci-yellow"></div></div>
+                    <span class="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50">RC INPUT / RCI_OS</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-light uppercase tracking-[0.2em] text-white">Ecosystem <br><span class="text-white/40">Directory</span></h1>
             </div>
-            <div class="flex items-center gap-2 text-[10px] font-bold text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded border border-emerald-500/20">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
-                System Online
+            <div class="hidden md:flex flex-col items-end">
+                <span class="text-[9px] text-white/30 uppercase tracking-[0.3em] mb-1">System Status</span>
+                <span class="text-xs text-rci-yellow font-mono uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-rci-yellow animate-pulse"></span> Online
+                </span>
             </div>
-        </div>
+        </header>
 
-        <!-- Suite A: Command & Security -->
-        <div class="mb-16">
-            <div class="suite-header">Security & Portals</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <div class="app-card" style="--hover-color: #ef4444; --icon-bg: rgba(239, 68, 68, 0.1); --icon-color: #ef4444; --icon-border: rgba(239, 68, 68, 0.2);" onclick="promptAuth('hq', 'staff', 'Command HQ', '#ef4444')">
-                    <div>
-                        <div class="app-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        </div>
-                        <h3 class="app-title">Command HQ</h3>
-                        <p class="app-desc">Master administrative terminal. Manage database sync, internal roster, and active venue PINs.</p>
-                    </div>
-                </div>
-                
-                <div class="app-card" style="--hover-color: #f8fafc; --icon-bg: rgba(248, 250, 252, 0.1); --icon-color: #f8fafc; --icon-border: rgba(248, 250, 252, 0.2);" onclick="promptAuth('client', 'venue', 'Client Portal', '#f8fafc')">
-                    <div>
-                        <div class="app-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        </div>
-                        <h3 class="app-title">Client Vault</h3>
-                        <p class="app-desc">Secure external gateway for frame-accurate video review, feedback logging, and digital sign-off.</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Suite B: Live Production -->
-        <div class="mb-16">
-            <div class="suite-header">Live Production</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <div class="app-card" style="--hover-color: #facc15; --icon-bg: rgba(250, 204, 21, 0.1); --icon-color: #facc15; --icon-border: rgba(250, 204, 21, 0.2);" onclick="promptAuth('vtx', 'venue', 'VTx Engine', '#facc15')">
-                    <div>
-                        <div class="app-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                        </div>
-                        <h3 class="app-title">VTx Engine</h3>
-                        <p class="app-desc">Multi-node automated timeline scheduler. Cues up media across venue screens based on strict timecodes.</p>
-                    </div>
-                </div>
-
-                <div class="app-card" style="--hover-color: #3b82f6; --icon-bg: rgba(59, 130, 246, 0.1); --icon-color: #3b82f6; --icon-border: rgba(59, 130, 246, 0.2);" onclick="promptAuth('vtz', 'venue', 'VTz Switcher', '#3b82f6')">
-                    <div>
-                        <div class="app-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        </div>
-                        <h3 class="app-title">VTz Switcher</h3>
-                        <p class="app-desc">Zero-latency manual override control. Intercept screens to cut to live cameras or urgent announcements.</p>
-                    </div>
-                </div>
-
-                <div class="app-card" style="--hover-color: #10b981; --icon-bg: rgba(16, 185, 129, 0.1); --icon-color: #10b981; --icon-border: rgba(16, 185, 129, 0.2);" onclick="promptAuth('ops', 'staff', 'Ops Core', '#10b981')">
-                    <div>
-                        <div class="app-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                        </div>
-                        <h3 class="app-title">Ops Core</h3>
-                        <p class="app-desc">Event logistics planner. Manages gig milestones, internal/freelance crew rosters, and availability matrices.</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Suite C: Growth & Finance -->
-        <div class="mb-16">
-            <div class="suite-header">Growth & Finance</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <div class="app-card" style="--hover-color: #c084fc; --icon-bg: rgba(192, 132, 252, 0.1); --icon-color: #c084fc; --icon-border: rgba(192, 132, 252, 0.2);" onclick="promptAuth('noiz', 'staff', 'Noiz Core', '#c084fc')">
-                    <div>
-                        <div class="app-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                        </div>
-                        <h3 class="app-title">Noiz Core</h3>
-                        <p class="app-desc">Neural marketing engine. Converts technical project briefs into automated B2B blog articles and outreach copy.</p>
-                    </div>
-                </div>
-
-                <div class="app-card" style="--hover-color: #14b8a6; --icon-bg: rgba(20, 184, 166, 0.1); --icon-color: #14b8a6; --icon-border: rgba(20, 184, 166, 0.2);" onclick="promptAuth('vault', 'staff', 'Financial Vault', '#14b8a6')">
-                    <div>
-                        <div class="app-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline></svg>
-                        </div>
-                        <h3 class="app-title">Financial Vault</h3>
-                        <p class="app-desc">Enterprise bookkeeping hub. Direct Moloni API integration for live invoicing, SAF-T exports, and expense OCR.</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Suite D: Local GPU Compute -->
-        <div>
-            <div class="suite-header">Local GPU Compute</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <div class="app-card opacity-60 hover:opacity-100" style="--hover-color: #f97316; --icon-bg: rgba(249, 115, 22, 0.1); --icon-color: #f97316; --icon-border: rgba(249, 115, 22, 0.2);" onclick="alert('Kinetic Studio is a local Python environment. It cannot be launched from the cloud portal without a secure tunnel to your RTX workstation.')">
-                    <div>
-                        <div class="app-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                        </div>
-                        <h3 class="app-title">Kinetic Studio</h3>
-                        <p class="app-desc">Offline neural factory (Evolve / Foley). Requires direct tunnel to local RTX hardware environment.</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-
-    <!-- 🔐 CREDENTIAL NODE MODAL -->
-    <div id="auth-modal" class="modal-overlay">
-        <div class="auth-panel">
-            <button class="absolute top-4 right-4 text-slate-500 hover:text-white transition" onclick="closeAuthModal()">✕</button>
+        <!-- The List -->
+        <div class="w-full max-w-6xl flex flex-col border-t border-white/10">
             
-            <div class="text-center mb-8 mt-2">
-                <h3 class="text-lg font-extrabold text-white tracking-[0.2em] uppercase mb-1" id="auth-title">App Name</h3>
-                <p class="text-[10px] text-slate-400 uppercase tracking-widest" id="auth-subtitle">Secure Authentication Gateway</p>
+            <!-- App Row: Command HQ -->
+            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('hq', 'staff', 'Command HQ')">
+                <div class="flex items-baseline gap-6 md:gap-12">
+                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">01</span>
+                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Command HQ</h2>
+                </div>
+                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Master Fleet Node</span>
+                        <span class="text-[9px] text-red-500 uppercase tracking-[0.2em] font-bold mt-1.5">Staff Clearance</span>
+                    </div>
+                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <!-- App Row: Client Vault -->
+            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('client', 'venue', 'Client Vault')">
+                <div class="flex items-baseline gap-6 md:gap-12">
+                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">02</span>
+                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Client Vault</h2>
+                </div>
+                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">External Portal</span>
+                        <span class="text-[9px] text-white/30 uppercase tracking-[0.2em] font-bold mt-1.5">4-Digit PIN Access</span>
+                    </div>
+                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <!-- App Row: Ops Core -->
+            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('ops', 'staff', 'Ops Core')">
+                <div class="flex items-baseline gap-6 md:gap-12">
+                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">03</span>
+                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Ops Core</h2>
+                </div>
+                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Logistics & Crewing</span>
+                        <span class="text-[9px] text-blue-400 uppercase tracking-[0.2em] font-bold mt-1.5">Staff Clearance</span>
+                    </div>
+                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <!-- App Row: VTx Scheduler -->
+            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('vtx', 'venue', 'VTx Engine')">
+                <div class="flex items-baseline gap-6 md:gap-12">
+                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">04</span>
+                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">VTx Scheduler</h2>
+                </div>
+                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Timeline Automation</span>
+                        <span class="text-[9px] text-white/30 uppercase tracking-[0.2em] font-bold mt-1.5">4-Digit PIN Access</span>
+                    </div>
+                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <!-- App Row: VTz Switcher -->
+            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('vtz', 'venue', 'VTz Switcher')">
+                <div class="flex items-baseline gap-6 md:gap-12">
+                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">05</span>
+                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">VTz Switcher</h2>
+                </div>
+                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Live Override Desk</span>
+                        <span class="text-[9px] text-white/30 uppercase tracking-[0.2em] font-bold mt-1.5">4-Digit PIN Access</span>
+                    </div>
+                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <!-- App Row: Noiz Core -->
+            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('noiz', 'staff', 'Noiz Core')">
+                <div class="flex items-baseline gap-6 md:gap-12">
+                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">06</span>
+                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Noiz Core</h2>
+                </div>
+                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Neural Marketing</span>
+                        <span class="text-[9px] text-purple-400 uppercase tracking-[0.2em] font-bold mt-1.5">Staff Clearance</span>
+                    </div>
+                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <!-- App Row: Financial Vault -->
+            <div class="directory-row group cursor-pointer border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4" onclick="promptAuth('vault', 'staff', 'Financial Vault')">
+                <div class="flex items-baseline gap-6 md:gap-12">
+                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">07</span>
+                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Financial Vault</h2>
+                </div>
+                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">Bookkeeping Hub</span>
+                        <span class="text-[9px] text-emerald-400 uppercase tracking-[0.2em] font-bold mt-1.5">Staff Clearance</span>
+                    </div>
+                    <svg class="row-arrow w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <!-- App Row: Kinetic Studio (Disabled on Web) -->
+            <div class="directory-row group cursor-not-allowed border-b border-white/10 py-8 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-50">
+                <div class="flex items-baseline gap-6 md:gap-12">
+                    <span class="text-xs text-white/30 font-mono tracking-widest w-6">08</span>
+                    <h2 class="row-title text-2xl md:text-4xl font-light uppercase tracking-[0.15em] transition-colors">Kinetic Studio</h2>
+                </div>
+                <div class="flex items-center justify-between md:justify-end gap-12 md:w-1/3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-white/40 uppercase tracking-[0.2em] font-light">AI Media Factory</span>
+                        <span class="text-[9px] text-orange-400 uppercase tracking-[0.2em] font-bold mt-1.5">Local RTX Executable Only</span>
+                    </div>
+                    <svg class="row-arrow w-6 h-6 opacity-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- 2. AUTHENTICATION OVERLAY MODAL                          -->
+    <!-- ======================================================== -->
+    <div id="auth-modal" class="auth-overlay" onclick="closeAuthIfClickOutside(event)">
+        <div class="auth-panel" id="auth-panel-content">
+            <button class="absolute top-6 right-6 text-white/40 hover:text-white transition" onclick="closeAuthModal()">✕</button>
+            
+            <div class="mb-10">
+                <div class="w-10 h-10 border border-white/10 flex items-center justify-center mb-6">
+                    <div class="w-3 h-3 bg-white" id="auth-node-color"></div>
+                </div>
+                <h3 class="text-2xl font-light uppercase tracking-[0.15em] text-white" id="auth-title">Application</h3>
+                <p class="text-[10px] text-white/40 uppercase tracking-[0.2em] mt-2 font-mono" id="auth-subtitle">Authentication Required</p>
             </div>
 
             <!-- PIN PAD NODE (Venue / Client) -->
-            <div id="pin-node" class="hidden flex-col items-center">
-                <p class="text-xs text-slate-400 mb-6 text-center">Enter 4-Digit Access PIN</p>
-                <div class="pin-container" id="pin-container">
+            <div id="pin-node" class="hidden flex-col">
+                <p class="text-xs text-white/60 mb-2 font-light tracking-wide">Enter 4-Digit Access PIN provided by RC Input.</p>
+                <div class="pin-grid" id="pin-container">
                     <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
                     <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
                     <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
@@ -300,68 +280,44 @@
             </div>
 
             <!-- STAFF NODE (Email / Pass) -->
-            <div id="staff-node" class="hidden flex-col items-center">
-                <p class="text-xs text-slate-400 mb-4 text-center">Internal Staff Credentials Required</p>
-                <input type="email" id="admin-email" class="hq-input" placeholder="Email Address">
-                <input type="password" id="admin-pass" class="hq-input" placeholder="Password">
-                <button class="hq-btn mt-4" onclick="attemptAdminLogin()">Authorize Access</button>
+            <div id="staff-node" class="hidden flex-col">
+                <p class="text-xs text-white/60 mb-8 font-light tracking-wide">Enter your internal RCI_OS credentials.</p>
+                <div class="flex flex-col gap-6">
+                    <input type="email" id="admin-email" class="min-input" placeholder="Email Address">
+                    <input type="password" id="admin-pass" class="min-input" placeholder="Password">
+                </div>
+                <button class="min-btn" onclick="attemptAdminLogin()">Authorize Entry</button>
             </div>
 
-            <div id='login-status' class="mt-6 text-xs font-bold text-center h-4 text-red-500"></div>
+            <div id='login-status' class="mt-8 text-[10px] font-mono tracking-widest uppercase text-center h-4 text-red-500"></div>
         </div>
     </div>
     
-    <!-- 🗂️ OS SIDEBAR DOCK (Hidden initially) -->
-    <nav id="os-sidebar">
-        <div class="sidebar-brand" onclick="returnToHome()">
-            <div class="w-8 h-8 rounded border border-yellow-400/30 flex items-center justify-center text-yellow-400 font-bold min-w-[32px]">OS</div>
-            <span>ECOSYSTEM</span>
-        </div>
-        
-        <div class="w-full px-5 text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-2 mt-4">System</div>
-        <div class="sidebar-item" id="nav-hq" onclick="launchApp('hq')">
-            <div class="sidebar-icon" style="color: #ef4444;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
-            <span class="sidebar-label">COMMAND HQ</span>
-        </div>
-        <div class="sidebar-item" id="nav-client" onclick="launchApp('client')">
-            <div class="sidebar-icon" style="color: #f8fafc;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
-            <span class="sidebar-label">CLIENT VAULT</span>
-        </div>
+    <!-- ======================================================== -->
+    <!-- 3. OS APPLICATION VIEWPORT (Iframes)                     -->
+    <!-- ======================================================== -->
+    <div id='os-viewport'>
+        <!-- Minimal Top Bar -->
+        <nav class="w-full h-14 bg-rci-surface border-b border-white/5 flex justify-between items-center px-6 relative z-50">
+            <div class="flex items-center gap-4">
+                <div class="w-4 h-4 border border-rci-yellow/40 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-rci-yellow"></div></div>
+                <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-white/80" id="active-app-name">APP NAME</span>
+            </div>
+            <button class="text-[9px] uppercase tracking-[0.2em] text-white/50 hover:text-white border border-white/10 px-4 py-1.5 transition" onclick="returnToDirectory()">
+                Close Module
+            </button>
+        </nav>
 
-        <div class="w-full px-5 text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-2 mt-4">Production</div>
-        <div class="sidebar-item" id="nav-ops" onclick="launchApp('ops')">
-            <div class="sidebar-icon" style="color: #10b981;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></div>
-            <span class="sidebar-label">OPS CORE</span>
+        <!-- Dynamic Iframes container -->
+        <div id="iframe-container" class="w-full flex-1 relative bg-rci-bg">
+            <iframe id="hq-core" class="app-iframe hidden" src="HQView.html"></iframe>
+            <iframe id="ops-core" class="app-iframe hidden" src="OpsView.html"></iframe>
+            <iframe id="vtx-core" class="app-iframe hidden" src="VTxView.html"></iframe>
+            <iframe id="vtz-core" class="app-iframe hidden" src="VTzView.html"></iframe>
+            <iframe id="noiz-core" class="app-iframe hidden" src="NoizView.html"></iframe>
+            <iframe id="vault-core" class="app-iframe hidden" src="VaultView.html"></iframe>
+            <iframe id="client-core" class="app-iframe hidden" src="SignOffView.html"></iframe>
         </div>
-        <div class="sidebar-item" id="nav-vtx" onclick="launchApp('vtx')">
-            <div class="sidebar-icon" style="color: #facc15;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></div>
-            <span class="sidebar-label">VTx SCHEDULER</span>
-        </div>
-        <div class="sidebar-item" id="nav-vtz" onclick="launchApp('vtz')">
-            <div class="sidebar-icon" style="color: #3b82f6;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
-            <span class="sidebar-label">VTz SWITCHER</span>
-        </div>
-
-        <div class="w-full px-5 text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-2 mt-4">Business</div>
-        <div class="sidebar-item" id="nav-noiz" onclick="launchApp('noiz')">
-            <div class="sidebar-icon" style="color: #c084fc;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-            <span class="sidebar-label">NOIZ CORE</span>
-        </div>
-        <div class="sidebar-item" id="nav-vault" onclick="launchApp('vault')">
-            <div class="sidebar-icon" style="color: #14b8a6;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline></svg></div>
-            <span class="sidebar-label">FINANCIAL VAULT</span>
-        </div>
-    </nav>
-
-    <!-- 💻 APP VIEW CONTAINER (Hidden initially) -->
-    <div id='app-view'>
-        <div id="hq-core" class="app-iframe-container" style="display:none;"><iframe src="HQView.html"></iframe></div>
-        <div id="ops-core" class="app-iframe-container" style="display:none;"><iframe src="OpsView.html"></iframe></div>
-        <div id="vtx-core" class="app-iframe-container" style="display:none;"><iframe src="VTxView.html"></iframe></div>
-        <div id="vtz-core" class="app-iframe-container" style="display:none;"><iframe src="VTzView.html"></iframe></div>
-        <div id="noiz-core" class="app-iframe-container" style="display:none;"><iframe src="NoizView.html"></iframe></div>
-        <div id="vault-core" class="app-iframe-container" style="display:none;"><iframe src="VaultView.html"></iframe></div>
-        <div id="client-core" class="app-iframe-container" style="display:none;"><iframe src="SignOffView.html"></iframe></div>
     </div>
 
     <script>
@@ -393,14 +349,23 @@
             });
         });
 
-        // --- GATEWAY UI LOGIC ---
-        function promptAuth(appId, authType, appName, themeColor) {
+        // --- DIRECTORY & MODAL LOGIC ---
+        function promptAuth(appId, authType, appName) {
             targetAppId = appId;
-            document.documentElement.style.setProperty('--theme-primary', themeColor || '#facc15');
+            
+            // Theme mapping for the tiny square icon
+            const themeMap = { 'hq': '#ef4444', 'ops': '#3b82f6', 'vtx': '#facc15', 'vtz': '#facc15', 'noiz': '#c084fc', 'vault': '#10b981', 'client': '#f8fafc' };
+            const accentColor = themeMap[appId] || '#ffffff';
             
             document.getElementById('auth-title').innerText = appName;
+            document.getElementById('active-app-name').innerText = appName;
+            document.getElementById('auth-node-color').style.background = accentColor;
             document.getElementById('login-status').innerText = "";
-            document.getElementById('auth-modal').style.display = 'flex';
+            
+            const overlay = document.getElementById('auth-modal');
+            overlay.style.display = 'flex';
+            // slight delay to allow display:flex to apply before adding opacity class for transition
+            setTimeout(() => overlay.classList.add('active'), 10);
             
             // Clear inputs
             document.querySelectorAll('.pin-input').forEach(inp => inp.value = '');
@@ -411,17 +376,25 @@
             if (authType === 'staff') {
                 document.getElementById('pin-node').style.display = 'none';
                 document.getElementById('staff-node').style.display = 'flex';
-                document.getElementById('admin-email').focus();
+                setTimeout(() => document.getElementById('admin-email').focus(), 100);
             } else {
                 document.getElementById('staff-node').style.display = 'none';
                 document.getElementById('pin-node').style.display = 'flex';
-                document.querySelector('.pin-input').focus();
+                setTimeout(() => document.querySelector('.pin-input').focus(), 100);
             }
         }
 
         function closeAuthModal() {
-            document.getElementById('auth-modal').style.display = 'none';
-            targetAppId = null;
+            const overlay = document.getElementById('auth-modal');
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                targetAppId = null;
+            }, 400); // match transition duration
+        }
+
+        function closeAuthIfClickOutside(event) {
+            if (event.target.id === 'auth-modal') closeAuthModal();
         }
 
         // --- AUTHENTICATION LOGIC ---
@@ -429,12 +402,12 @@
             const enteredPin = Array.from(document.querySelectorAll('.pin-input')).map(inp => inp.value).join('');
             const statusEl = document.getElementById('login-status');
             
-            statusEl.innerText = "Verifying Token...";
-            statusEl.style.color = "var(--theme-primary)";
+            statusEl.innerText = "Verifying Handshake...";
+            statusEl.style.color = "theme('colors.rci-yellow')";
 
             if(!supabaseClient) {
                 // FALLBACK FOR GITHUB PAGES DEMO
-                setTimeout(() => { unlockEcosystem(); }, 600);
+                setTimeout(() => { grantEcosystemAccess(); }, 600);
                 return;
             }
 
@@ -447,7 +420,7 @@
                     .maybeSingle();
 
                 if (error || !venue) throw new Error("Invalid or Expired PIN.");
-                unlockEcosystem();
+                grantEcosystemAccess();
             } catch (err) {
                 statusEl.innerText = "Access Denied: " + err.message;
                 statusEl.style.color = "#ef4444";
@@ -464,18 +437,18 @@
             if(!email || !pass) return statusEl.innerText = "Credentials required.";
 
             statusEl.innerText = "Verifying Clearances...";
-            statusEl.style.color = "var(--theme-primary)";
+            statusEl.style.color = "theme('colors.rci-yellow')";
 
             if(!supabaseClient) {
                 // FALLBACK FOR GITHUB PAGES DEMO
-                setTimeout(() => { unlockEcosystem(); }, 600);
+                setTimeout(() => { grantEcosystemAccess(); }, 600);
                 return;
             }
 
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
                 if (error) throw error;
-                unlockEcosystem();
+                grantEcosystemAccess();
             } catch (err) {
                 statusEl.innerText = err.message || "Access Denied.";
                 statusEl.style.color = "#ef4444";
@@ -483,40 +456,31 @@
         }
 
         // --- OS ROUTING & NAVIGATION ---
-        function unlockEcosystem() {
+        function grantEcosystemAccess() {
             closeAuthModal();
             document.getElementById('launcher-view').style.display = 'none';
-            document.getElementById('os-sidebar').style.display = 'flex';
-            document.getElementById('app-view').style.display = 'block';
-            document.body.style.background = '#000'; // Darken base for apps
+            document.getElementById('os-viewport').style.display = 'flex';
             
-            if(targetAppId) launchApp(targetAppId);
+            // Hide all iframes
+            const iframes = document.querySelectorAll('.app-iframe');
+            iframes.forEach(iframe => iframe.classList.add('hidden'));
+
+            // Show target iframe
+            if(targetAppId) {
+                const targetIframe = document.getElementById(targetAppId + '-core');
+                if(targetIframe) targetIframe.classList.remove('hidden');
+            }
         }
 
-        function launchApp(appId) {
-            const containers = document.querySelectorAll('.app-iframe-container');
-            containers.forEach(c => c.style.display = 'none');
-            
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            if(document.getElementById('nav-' + appId)) document.getElementById('nav-' + appId).classList.add('active');
-
-            // Apply specific app theme color to sidebar accent
-            const themeMap = { 'hq': '#ef4444', 'ops': '#10b981', 'vtx': '#facc15', 'vtz': '#3b82f6', 'noiz': '#c084fc', 'vault': '#14b8a6', 'client': '#f8fafc' };
-            if(themeMap[appId]) document.documentElement.style.setProperty('--theme-primary', themeMap[appId]);
-
-            const targetIframe = document.getElementById(appId + '-core');
-            if(targetIframe) targetIframe.style.display = 'block';
-        }
-
-        function returnToHome() {
+        function returnToDirectory() {
             // Hide Apps, Show Launcher
-            document.getElementById('app-view').style.display = 'none';
-            document.getElementById('os-sidebar').style.display = 'none';
-            document.getElementById('launcher-view').style.display = 'block';
+            document.getElementById('os-viewport').style.display = 'none';
+            document.getElementById('launcher-view').style.display = 'flex';
             
-            // Reset Theme
-            document.documentElement.style.setProperty('--theme-primary', '#facc15');
-            document.body.style.background = '#030303';
+            // Hide all iframes
+            const iframes = document.querySelectorAll('.app-iframe');
+            iframes.forEach(iframe => iframe.classList.add('hidden'));
+            
             targetAppId = null;
         }
     </script>
