@@ -1,456 +1,472 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'>
-    <title>RC Input - Command Center</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCI | Secure Client Portal</title>
     
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#facc15">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- 🔌 LOAD LIBRARIES (Using ultra-reliable jsdelivr) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 🔌 SUPABASE CLIENT (For Phase 2 Data Sync) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- 🚨 GLOBAL CRASH DETECTOR -->
-    <script>
-        window.onerror = function(message, source, lineno, colno, error) {
-            var statusEl = document.getElementById('login-status');
-            if(statusEl) {
-                statusEl.innerText = "SYSTEM CRASH: " + message + " (Line " + lineno + ")";
-                statusEl.style.color = "#ef4444";
-            }
-            return true;
-        };
-    </script>
 
     <style>
         :root {
-            --theme-primary: #facc15;
-            --theme-secondary: #3b82f6;
-            --theme-bg-gradient: radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%);
+            --bg-base: #030303;
+            --bg-gradient: radial-gradient(circle at top left, #1e293b 0%, #030303 100%);
+            --panel-bg: rgba(15, 20, 30, 0.6);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent: #facc15; 
+            --accent-hover: #eab308;
+            --text-primary: #f8fafc;
         }
 
-        .marketing-theme {
-            --theme-primary: #c084fc;
-            --theme-secondary: #2dd4bf;
-            --theme-bg-gradient: radial-gradient(circle at top left, #1e1b4b 0%, #0a0a0a 60%);
-        }
+        body { font-family: 'Nunito', sans-serif; background-color: var(--bg-base); background-image: var(--bg-gradient); color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; }
 
-        body { font-family:'Nunito', sans-serif; background:#0a0a0a; background-image: var(--theme-bg-gradient); color:#fff; padding:20px; display:flex; flex-direction: column; justify-content:center; align-items:center; min-height:90vh; margin:0; transition: all 0.5s ease; overflow-x: hidden;}
+        .glass-panel { background: var(--panel-bg); border: 1px solid var(--border-color); backdrop-filter: blur(24px); border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        .hq-input { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px 16px; font-size: 13px; outline: none; width: 100%; border-radius: 8px; transition: all 0.3s ease; }
+        .hq-input:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.8); }
 
-        .glass-panel { background:rgba(30,30,30,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); box-shadow:0 25px 50px rgba(0,0,0,0.5); text-align:center; box-sizing:border-box; transition: all 0.4s ease; z-index: 10;}
-        
-        #login-wrapper { width:100%; max-width:360px; }
-        
-        h3 { color: var(--theme-primary); font-size:16px; font-weight:700; letter-spacing:2px; margin-top:0; margin-bottom:6px; display:flex; align-items:center; gap:8px; transition: color 0.4s; justify-content: center;}
-        p { color:#888; font-size:13px; font-weight:300; margin-bottom:25px; }
-        
-        /* 🛡️ PIN PAD FIX: Uses text type but visually hides characters to stop password managers */
-        .pin-container { display:flex; gap:12px; justify-content:center; margin-bottom:10px; }
-        .pin-box { width:50px; height:60px; background:rgba(0, 0, 0, 0.4); border:1px solid rgba(255, 255, 255, 0.1); border-radius:12px; color: var(--theme-primary); font-size:24px; text-align:center; outline:none; transition:all 0.3s ease; font-family:'Nunito', sans-serif; -webkit-text-security: disc; }
-        .pin-box:focus { border-color: var(--theme-primary); box-shadow:0 0 15px rgba(250, 204, 21, 0.2); background:rgba(0, 0, 0, 0.6); }
+        .hq-btn { background: var(--accent); color: #000; border: 1px solid transparent; padding: 12px 24px; font-weight: 800; cursor: pointer; border-radius: 8px; transition: all 0.2s ease; display: inline-flex; justify-content: center; align-items: center; text-transform: uppercase; letter-spacing: 0.5px; font-size: 12px; }
+        .hq-btn:hover { background: var(--accent-hover); box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4); }
+        .hq-btn-outline { background: transparent; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.2); padding: 12px 24px; font-weight: 700; cursor: pointer; border-radius: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; }
+        .hq-btn-outline:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.4); }
 
-        .main-container { width: 100%; max-width: 1400px; display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; padding-left: 80px; box-sizing: border-box; transition: padding-left 0.3s ease;}
+        /* Video Player Overrides */
+        .video-container { position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid var(--border-color); }
+        video { width: 100%; display: block; outline: none; }
+        .custom-controls { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 20px 15px 10px; display: flex; align-items: center; gap: 15px; opacity: 0; transition: opacity 0.3s; }
+        .video-container:hover .custom-controls { opacity: 1; }
+        .progress-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; cursor: pointer; position: relative; }
+        .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; pointer-events: none; }
         
+        .feedback-item { border-left: 3px solid transparent; transition: all 0.2s; }
+        .feedback-item:hover { background: rgba(255,255,255,0.02); border-left-color: var(--accent); }
+
+        /* Signature Canvas */
+        #signature-pad { background: rgba(255,255,255,0.95); border-radius: 8px; border: 2px dashed rgba(255,255,255,0.2); cursor: crosshair; touch-action: none; width: 100%; height: 150px; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; animation: fadeIn 0.2s ease;}
+        .modal-box { background: rgba(15, 20, 30, 0.95); border: 1px solid var(--border-color); border-radius: 12px; width: 90%; max-width: 400px; padding: 24px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* OS SIDEBAR */
-        #os-sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 80px; background: rgba(10, 10, 10, 0.8); border-right: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: none; flex-direction: column; align-items: center; padding: 20px 0; z-index: 9000; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; white-space: nowrap; box-shadow: 10px 0 30px rgba(0,0,0,0.5);}
-        #os-sidebar:hover { width: 240px; align-items: flex-start; }
-        
-        .sidebar-brand { display: flex; align-items: center; padding: 0 20px; margin-bottom: 40px; cursor: pointer; width: 100%; box-sizing: border-box;}
-        .sidebar-brand img { width: 40px; height: 40px; object-fit: contain; min-width: 40px;}
-        .sidebar-brand span { margin-left: 15px; font-weight: 800; font-size: 14px; color: #fff; letter-spacing: 1px; opacity: 0; transition: opacity 0.2s; }
-        #os-sidebar:hover .sidebar-brand span { opacity: 1; transition-delay: 0.1s;}
-
-        .sidebar-item { display: flex; align-items: center; width: 100%; padding: 15px 20px; color: #94a3b8; cursor: pointer; transition: all 0.2s; box-sizing: border-box; position: relative; border-left: 3px solid transparent;}
-        .sidebar-item:hover { color: #f8fafc; background: rgba(255,255,255,0.03); }
-        .sidebar-item.active { border-left-color: var(--theme-primary); color: var(--theme-primary); background: linear-gradient(90deg, rgba(250, 204, 21, 0.1) 0%, transparent 100%); }
-        
-        .sidebar-icon { width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; min-width: 40px; border-radius: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease;}
-        .sidebar-item:hover .sidebar-icon { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
-        .sidebar-label { margin-left: 15px; font-weight: 600; font-size: 13px; opacity: 0; transition: opacity 0.2s; letter-spacing: 0.5px;}
-        #os-sidebar:hover .sidebar-label { opacity: 1; transition-delay: 0.1s;}
-
-        /* SPLASH SCREEN */
-        #os-splash { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100vh; position: relative; padding-left: 80px; box-sizing: border-box; animation: fadeIn 0.8s ease;}
-        .splash-logo-bg { position: absolute; width: 60vw; max-width: 800px; opacity: 0.05; pointer-events: none; top: 50%; left: calc(50% + 40px); transform: translate(-50%, -50%); filter: grayscale(100%) contrast(1000%);}
-        .splash-content { position: relative; z-index: 10; text-align: center; }
-        .splash-manifesto { font-size: 42px; font-weight: 800; letter-spacing: 2px; color: #f8fafc; margin-bottom: 10px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
-        .splash-sub { font-size: 14px; color: #94a3b8; font-weight: 300; letter-spacing: 1px; }
-
-        /* IFRAME APP CONTAINERS */
-        .app-iframe-container { width: 100%; height: 90vh; border-radius: 12px; overflow: hidden; background: transparent; }
-        .app-iframe-container iframe { width: 100%; height: 100%; border: none; background: transparent; }
-        
-        /* Enterprise Toast Notification System */
-        .toast-notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            z-index: 9999;
-            animation: slideUp 0.3s ease forwards;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        @media (max-width: 768px) {
-            body { align-items: flex-start; padding: 15px; }
-            .main-container { padding-left: 0; }
-            #os-splash { padding-left: 0; }
-            #os-sidebar { display: none !important; }
-            .splash-logo-bg { left: 50%; }
-        }
+        /* Toast */
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 12px 24px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 2000; opacity: 0; pointer-events: none; transition: all 0.3s ease; transform: translate(-50%, 20px); }
+        .toast.show { opacity: 1; transform: translate(-50%, 0); }
     </style>
 </head>
-<body>
-    
-    <!-- LOGIN SCREEN -->
-    <div class='glass-panel' id='login-wrapper'>
-        <div id='login-view'>
-            <h3>SECURE VAULT</h3>
-            <p id="login-subtitle">Restricted Venue Access</p>
+<body class="p-4 md:p-8 flex justify-center" onload="initSignOff()">
+
+    <div class="max-w-[1400px] w-full flex flex-col gap-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-white/10 pb-5 gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="w-8 h-8 rounded bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-yellow-500 font-bold">RC</div>
+                    <h1 class="text-2xl font-extrabold text-white tracking-wide uppercase">CLIENT VAULT</h1>
+                </div>
+                <p class="text-[11px] text-slate-400 tracking-widest uppercase font-bold mt-2">Project: <span class="text-white">WebSummit 2026 Intro (v2.1)</span></p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <div class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Status</div>
+                    <div class="text-xs text-yellow-400 font-bold uppercase tracking-wider flex items-center gap-2 justify-end">
+                        <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Awaiting Approval
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- CLIENT PIN PAD (Using 'text' to defeat autofill, and 'data-lpignore' for LastPass) -->
-            <div class="pin-container" id="pin-container">
-                <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
-                <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
-                <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
-                <input type="text" class="pin-box pin-input" maxlength="1" inputmode="numeric" autocomplete="off" data-lpignore="true">
+            <!-- Left Column: Media Player -->
+            <div class="lg:col-span-7 flex flex-col gap-6">
+                <div class="glass-panel p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-sm font-bold text-white uppercase tracking-wide">Media Review Viewport</h2>
+                        <a href="#" class="text-[10px] text-slate-400 hover:text-white uppercase font-bold tracking-wider flex items-center gap-1">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Download Proxy
+                        </a>
+                    </div>
+                    
+                    <!-- Custom Video Player -->
+                    <div class="video-container shadow-2xl">
+                        <!-- Using a placeholder video from a reliable source -->
+                        <video id="client-video" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" playsinline></video>
+                        
+                        <div class="custom-controls">
+                            <button id="play-pause-btn" class="text-white hover:text-yellow-400 transition outline-none" onclick="togglePlay()">
+                                <svg id="icon-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                <svg id="icon-pause" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                            </button>
+                            
+                            <div class="progress-bar" id="progress-container" onclick="seekVideo(event)">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            
+                            <div class="mono text-xs text-white font-bold" id="time-display">00:00.000</div>
+                            
+                            <button class="text-white hover:text-yellow-400 transition outline-none" onclick="toggleMute()">
+                                <svg id="icon-vol" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                            </button>
+                            <button class="text-white hover:text-yellow-400 transition outline-none" onclick="toggleFullscreen()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 border-t-2 border-yellow-500">
+                    <h2 class="text-lg font-bold text-white mb-2 uppercase tracking-wide">Final Project Sign-Off</h2>
+                    <p class="text-xs text-slate-400 mb-6">By signing below, you approve the final render. Further revisions after sign-off will incur a new versioning fee as per the MSA.</p>
+                    
+                    <div class="flex flex-col gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Authorized Signatory Name</label>
+                            <input type="text" id="signer-name" class="hq-input" placeholder="e.g. Jane Doe">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Digital Signature</label>
+                                <button class="text-[10px] text-slate-500 hover:text-white uppercase font-bold" onclick="clearSignature()">Clear Canvas</button>
+                            </div>
+                            <!-- HTML5 Canvas for drawing signature -->
+                            <canvas id="signature-pad"></canvas>
+                        </div>
+
+                        <div class="flex items-start gap-3 mt-2">
+                            <input type="checkbox" id="legal-agree" class="mt-1 accent-yellow-500 cursor-pointer">
+                            <label for="legal-agree" class="text-[11px] text-slate-300 leading-relaxed cursor-pointer">
+                                I confirm that I am an authorized representative. I have reviewed the media in its entirety and authorize RCI_OS to finalize and deliver the master files.
+                            </label>
+                        </div>
+
+                        <button class="hq-btn w-full mt-4 py-4 text-sm" id="approve-btn" onclick="submitApproval()">APPROVE & FINALIZE</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- ADMIN EMAIL/PASS -->
-            <div id="admin-container" style="display:none; flex-direction:column; gap:10px; margin-bottom:15px; align-items:center;">
-                <input type="email" id="admin-email" placeholder="Staff Email" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; padding:12px; width:90%; box-sizing:border-box; font-family:'Nunito'; outline:none;">
-                <input type="password" id="admin-pass" placeholder="Password" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; padding:12px; width:90%; box-sizing:border-box; font-family:'Nunito'; outline:none;">
-                <button onclick="attemptAdminLogin()" style="background:var(--theme-primary); color:#000; font-weight:800; border:none; border-radius:8px; padding:12px 20px; cursor:pointer; width:90%; box-sizing:border-box; font-family:'Nunito'; margin-top:5px; transition: 0.2s;">AUTHORIZE</button>
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                
+                <div class="glass-panel p-6 bg-slate-900/40">
+                    <h2 class="text-sm font-bold text-white mb-4 uppercase tracking-wide">Frame-Accurate Feedback</h2>
+                    
+                    <div class="flex flex-col gap-3">
+                        <div class="flex gap-2">
+                            <button class="bg-black/60 border border-white/10 text-yellow-400 px-3 py-2 rounded-lg mono text-xs font-bold hover:bg-black/80 transition flex items-center gap-2" onclick="captureTimestamp()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span id="captured-time-label">00:00.000</span>
+                            </button>
+                        </div>
+                        <textarea id="feedback-input" class="hq-input h-24 resize-none" placeholder="Type revision request here for this specific timestamp..."></textarea>
+                        <button class="hq-btn-outline w-full" onclick="addFeedbackNote()">Submit Revision Note</button>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-0 flex-1 flex flex-col overflow-hidden">
+                    <div class="p-4 border-b border-white/10 bg-black/20">
+                        <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Active Revision Log</h3>
+                    </div>
+                    
+                    <!-- Feedback List Container -->
+                    <div id="feedback-list" class="flex-1 overflow-y-auto max-h-[500px] p-2 flex flex-col gap-1">
+                        <!-- Pre-populated examples -->
+                        <div class="feedback-item p-3 rounded cursor-pointer" onclick="jumpToTime(12.5)">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-1.5 py-0.5 rounded text-[10px] mono font-bold">00:12.500</span>
+                                <span class="text-[9px] text-slate-500 uppercase font-bold">Carlos R.</span>
+                            </div>
+                            <p class="text-xs text-slate-300">Color grade on the wide shot is a bit too cool. Warm it up by 5%.</p>
+                        </div>
+
+                        <div class="feedback-item p-3 rounded cursor-pointer" onclick="jumpToTime(45.2)">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-1.5 py-0.5 rounded text-[10px] mono font-bold">00:45.200</span>
+                                <span class="text-[9px] text-slate-500 uppercase font-bold">Jane Doe</span>
+                            </div>
+                            <p class="text-xs text-slate-300">Lower the music bed here, Foley is getting drowned out during dialogue.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-
-            <div id='login-status' style='margin-top:15px;color:#ef4444;font-size:13px;font-weight:bold;height:16px;'></div>
-
-            <!-- TOGGLE BUTTON -->
-            <button id="toggle-login-btn" onclick="toggleLoginMode()" style="background:transparent; border:none; color:#888; font-size:10px; text-transform:uppercase; letter-spacing:1px; cursor:pointer; margin-top:15px; transition: 0.2s; position: relative; z-index: 50;">Switch to Internal Staff Login</button>
-        </div>
-    </div>
-    
-    <!-- OS SIDEBAR DOCK -->
-    <nav id="os-sidebar">
-        <div class="sidebar-brand" onclick="returnToHome()">
-            <img src="icon.png" alt="RC Logo" style="filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));" onerror="this.style.display='none'">
-            <span>COMMAND CENTER</span>
-        </div>
-        <div class="sidebar-category"><span>Production</span></div>
-        <div class="sidebar-item" id="nav-ops" onclick="launchApp('ops')">
-            <div class="sidebar-icon" style="color: #10b981;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg></div>
-            <span class="sidebar-label">OPS CORE</span>
-        </div>
-        <div class="sidebar-item" onclick="showToast('Kinetic Studio OS is currently offline or deploying.')">
-            <div class="sidebar-icon" style="color: #f87171;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
-            <span class="sidebar-label">KINETIC</span>
-        </div>
-        <div class="sidebar-item" id="nav-vtx" onclick="launchApp('vtx')">
-            <div class="sidebar-icon" style="color: #facc15;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></div>
-            <span class="sidebar-label">VTx</span>
-        </div>
-        <div class="sidebar-item" id="nav-vtz" onclick="launchApp('vtz')">
-            <div class="sidebar-icon" style="color: #3b82f6;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
-            <span class="sidebar-label">VTz</span>
-        </div>
-        <div class="sidebar-category"><span>Marketing</span></div>
-        <div class="sidebar-item" id="nav-noiz" onclick="launchApp('noiz')">
-            <div class="sidebar-icon" style="color: #c084fc;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-            <span class="sidebar-label">NOIZ</span>
-        </div>
-        <div class="sidebar-category"><span>Finance</span></div>
-        <div class="sidebar-item" id="nav-vault" onclick="launchApp('vault')">
-            <div class="sidebar-icon" style="color: #facc15;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
-            <span class="sidebar-label">VAULT</span>
-        </div>
-    </nav>
-
-    <!-- NEW SPLASH SCREEN -->
-    <div id="os-splash">
-        <img src="icon.png" alt="Ghost Logo" class="splash-logo-bg" onerror="this.style.display='none'">
-        <div class="splash-content">
-            <div class="splash-manifesto">Production. Marketing. Finance.</div>
-            <div class="splash-sub">Select an operational environment to launch.</div>
         </div>
     </div>
 
-    <!-- APP VIEW CONTAINER -->
-    <div id='app-view' class="main-container">
-        <div id="ops-core" class="app-iframe-container" style="display:none;"><iframe src="OpsView.html"></iframe></div>
-        <div id="vtx-core" class="app-iframe-container" style="display:none;"><iframe src="VTxView.html"></iframe></div>
-        <div id="vtz-core" class="app-iframe-container" style="display:none;"><iframe src="VTzView.html"></iframe></div>
-        <div id="noiz-core" class="app-iframe-container" style="display:none;"><iframe src="NoizView.html"></iframe></div>
-        <div id="vault-core" class="app-iframe-container" style="display:none;"><iframe src="VaultView.html"></iframe></div>
+    <!-- Custom Notice Modal -->
+    <div class="modal-overlay" id="portal-modal">
+        <div class="modal-box">
+            <h3 class="text-lg font-bold text-white uppercase tracking-widest mb-2" id="portal-modal-title">System Notice</h3>
+            <p class="text-sm text-slate-400 mb-6" id="portal-modal-msg">Message goes here.</p>
+            <div class="flex justify-center gap-4" id="portal-modal-actions">
+                <button class="hq-btn" onclick="closePortalModal()">Acknowledge</button>
+            </div>
+        </div>
     </div>
+
+    <div id="sys-toast" class="toast">Action Completed</div>
 
     <script>
-        // =========================================================================
-        // 🔒 SUPABASE CONNECTION (REPLACING GOOGLE APPS SCRIPT)
-        // =========================================================================
-        const SUPABASE_URL = "https://neubhkdyxkidegndrpow.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ldWJoa2R5eGtpZGVnbmRycG93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NjU5NzYsImV4cCI6MjA5OTU0MTk3Nn0.9s645EtQQptWQOOa5SJcF-MtJW_37pvnDxq-PsheCOE";
+        // --- 1. VIDEO PLAYER LOGIC ---
+        const video = document.getElementById('client-video');
+        const playBtnIcon = document.getElementById('icon-play');
+        const pauseBtnIcon = document.getElementById('icon-pause');
+        const timeDisplay = document.getElementById('time-display');
+        const progressBar = document.getElementById('progress-fill');
+        const progressContainer = document.getElementById('progress-container');
+        let capturedTime = 0;
 
-        let supabaseClient; // Renamed to avoid collision with CDN object
-        var currentActiveApp = null;
-        var currentPin = "";
-        let isAdminMode = false;
-
-        // Ensure DOM is fully loaded before attaching events
-        document.addEventListener('DOMContentLoaded', function() {
+        function initSignOff() {
+            initSignaturePad();
             
-            // 1. Initialize Supabase
-            try {
-                if (window.supabase) {
-                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                    console.log("Supabase Client Initialized Successfully");
-                } else {
-                    document.getElementById('login-status').innerText = "Database connection offline (CDN blocked).";
-                }
-            } catch (err) {
-                console.error(err);
-            }
-
-            // 2. Setup PIN Pad Listeners
-            const pinInputs = document.querySelectorAll('.pin-input');
-            
-            // Force clear fields on load (defeats password managers)
-            pinInputs.forEach(inp => inp.value = '');
-            if(pinInputs.length > 0) pinInputs[0].focus();
-
-            pinInputs.forEach((input, index) => {
-                input.addEventListener('input', (e) => {
-                    // Auto-advance
-                    if(e.target.value.length === 1 && index < pinInputs.length - 1) {
-                        pinInputs[index + 1].focus();
-                    }
-                    // Trigger login check if full
-                    if(Array.from(pinInputs).every(inp => inp.value.length === 1)) {
-                        attemptClientLogin();
-                    }
-                });
+            // Format time continuously
+            video.addEventListener('timeupdate', () => {
+                timeDisplay.innerText = formatTime(video.currentTime);
+                const progress = (video.currentTime / video.duration) * 100;
+                progressBar.style.width = `${progress}%`;
                 
-                input.addEventListener('keydown', (e) => {
-                    if(e.key === 'Backspace' && e.target.value === '' && index > 0) {
-                        pinInputs[index - 1].focus();
-                    }
-                });
+                // If paused, keep capture timestamp in sync
+                if(video.paused) {
+                    document.getElementById('captured-time-label').innerText = formatTime(video.currentTime);
+                    capturedTime = video.currentTime;
+                }
             });
-        });
 
-        // --- ENTERPRISE TOAST NOTIFICATION (Replaces native alert) ---
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification';
-            toast.innerText = message;
-            document.body.appendChild(toast);
+            video.addEventListener('ended', () => {
+                playBtnIcon.classList.remove('hidden');
+                pauseBtnIcon.classList.add('hidden');
+            });
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            const ms = Math.floor((seconds % 1) * 1000).toString().padStart(3, '0');
+            return `${m}:${s}.${ms}`;
+        }
+
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+                playBtnIcon.classList.add('hidden');
+                pauseBtnIcon.classList.remove('hidden');
+            } else {
+                video.pause();
+                playBtnIcon.classList.remove('hidden');
+                pauseBtnIcon.classList.add('hidden');
+                // Auto capture time when pausing
+                captureTimestamp();
+            }
+        }
+
+        function seekVideo(e) {
+            const rect = progressContainer.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            video.currentTime = pos * video.duration;
+            if(video.paused) captureTimestamp();
+        }
+
+        function toggleMute() {
+            video.muted = !video.muted;
+            const icon = document.getElementById('icon-vol');
+            if(video.muted) {
+                icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>';
+            } else {
+                icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.querySelector('.video-container').requestFullscreen().catch(err => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // --- 2. FEEDBACK LOGIC ---
+        function captureTimestamp() {
+            video.pause();
+            playBtnIcon.classList.remove('hidden');
+            pauseBtnIcon.classList.add('hidden');
+            capturedTime = video.currentTime;
+            document.getElementById('captured-time-label').innerText = formatTime(capturedTime);
+            document.getElementById('feedback-input').focus();
+        }
+
+        function jumpToTime(sec) {
+            video.currentTime = sec;
+            video.pause();
+            playBtnIcon.classList.remove('hidden');
+            pauseBtnIcon.classList.add('hidden');
+            captureTimestamp();
+        }
+
+        function addFeedbackNote() {
+            const input = document.getElementById('feedback-input');
+            const note = input.value.trim();
+            if(!note) return showToast("Please enter a revision note.");
+
+            const list = document.getElementById('feedback-list');
+            const timeStr = formatTime(capturedTime);
             
-            // Remove after 3 seconds
+            const html = `
+                <div class="feedback-item p-3 rounded cursor-pointer border-l-yellow-500 bg-white/5" onclick="jumpToTime(${capturedTime})">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-1.5 py-0.5 rounded text-[10px] mono font-bold">${timeStr}</span>
+                        <span class="text-[9px] text-slate-500 uppercase font-bold">Client</span>
+                    </div>
+                    <p class="text-xs text-slate-300">${note}</p>
+                </div>
+            `;
+            
+            list.insertAdjacentHTML('afterbegin', html);
+            input.value = '';
+            showToast("Revision Note Logged");
+        }
+
+        // --- 3. DIGITAL SIGNATURE LOGIC ---
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+
+        function initSignaturePad() {
+            // Setup canvas bounds
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000000'; // Black ink on white bg
+
+            // Mouse Events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch Events (Mobile support)
+            canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
+            canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+            
+            if(e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+            
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault(); // Prevent scrolling while signing
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouchStart(e) {
+            if (e.touches.length === 1) {
+                e.preventDefault();
+                startDrawing(e);
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (e.touches.length === 1) {
+                e.preventDefault();
+                draw(e);
+            }
+        }
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function isCanvasBlank() {
+            const blank = document.createElement('canvas');
+            blank.width = canvas.width;
+            blank.height = canvas.height;
+            return canvas.toDataURL() === blank.toDataURL();
+        }
+
+        // --- 4. SUBMISSION LOGIC ---
+        function submitApproval() {
+            const name = document.getElementById('signer-name').value.trim();
+            const agreed = document.getElementById('legal-agree').checked;
+            
+            if(!name) return showModal("Validation Error", "Please enter the authorized signatory name.");
+            if(isCanvasBlank()) return showModal("Validation Error", "Please provide a digital signature.");
+            if(!agreed) return showModal("Validation Error", "You must check the legal agreement box to finalize.");
+
+            const btn = document.getElementById('approve-btn');
+            btn.innerText = "Processing Encryption...";
+            btn.classList.add('opacity-50', 'pointer-events-none');
+
+            // Simulate Supabase API latency
             setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(100px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+                showModal("Sign-Off Complete", `Thank you ${name}. The document has been cryptographically signed and logged. Master renders will now be compiled and delivered to your portal vault.`, true);
+            }, 1500);
         }
 
-        // --- LOGIN & AUTHENTICATION LOGIC ---
-        function getEnteredPin() {
-            const pinInputs = document.querySelectorAll('.pin-input');
-            return Array.from(pinInputs).map(inp => inp.value).join('');
+        // --- UI HELPERS ---
+        function showToast(msg) {
+            const t = document.getElementById('sys-toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        function toggleLoginMode() {
-            isAdminMode = !isAdminMode;
-            document.getElementById('pin-container').style.display = isAdminMode ? 'none' : 'flex';
-            document.getElementById('admin-container').style.display = isAdminMode ? 'flex' : 'none';
-            document.getElementById('login-subtitle').innerText = isAdminMode ? "Internal Staff Portal" : "Restricted Venue Access";
-            document.getElementById('toggle-login-btn').innerText = isAdminMode ? "Switch to Venue PIN Access" : "Switch to Internal Staff Login";
-            document.getElementById('login-status').innerText = ""; 
-        }
-
-        async function attemptClientLogin() {
-            const enteredPin = getEnteredPin();
-            const statusEl = document.getElementById('login-status');
-            const pinInputs = document.querySelectorAll('.pin-input');
+        function showModal(title, msg, isSuccess = false) {
+            document.getElementById('portal-modal-title').innerText = title;
+            document.getElementById('portal-modal-title').className = `text-lg font-bold uppercase tracking-widest mb-2 ${isSuccess ? 'text-green-500' : 'text-white'}`;
+            document.getElementById('portal-modal-msg').innerText = msg;
             
-            statusEl.innerText = "Querying Live Database...";
-            statusEl.style.color = "#facc15";
-            pinInputs.forEach(inp => inp.classList.add('opacity-50', 'pointer-events-none'));
-
-            if(!supabaseClient) {
-                statusEl.innerText = "Database not connected.";
-                return;
+            const actions = document.getElementById('portal-modal-actions');
+            if(isSuccess) {
+                actions.innerHTML = `<button class="hq-btn bg-green-500 hover:bg-green-600 text-black" onclick="location.reload()">Return to Dashboard</button>`;
+            } else {
+                actions.innerHTML = `<button class="hq-btn" onclick="closePortalModal()">Acknowledge</button>`;
             }
-
-            try {
-                // Perform Supabase Query on the client_access table
-                const currentTime = new Date().toISOString();
-                
-                const { data: venue, error } = await supabaseClient
-                    .from('client_access')
-                    .select('id, venue_name, expires_at')
-                    .eq('pin', enteredPin)
-                    .eq('is_active', true)
-                    .maybeSingle(); // Returns 1 row if matched, or null
-
-                pinInputs.forEach(inp => inp.classList.remove('opacity-50', 'pointer-events-none'));
-
-                if (error) throw error;
-
-                if (venue) {
-                    // Success! Store PIN in memory and unlock limited apps
-                    currentPin = enteredPin;
-                    unlockApp(['vtx', 'vtz', 'vault']); // Clients get limited access
-                } else {
-                    // Fail! No active PIN matched
-                    statusEl.innerText = "Access Denied. Invalid or Expired PIN.";
-                    statusEl.style.color = "#ef4444";
-                    pinInputs.forEach(inp => inp.value = ''); 
-                    pinInputs[0].focus(); 
-                }
-
-            } catch (err) {
-                pinInputs.forEach(inp => inp.classList.remove('opacity-50', 'pointer-events-none'));
-                statusEl.innerText = "Database Error: " + err.message;
-                statusEl.style.color = "#ef4444";
-            }
+            document.getElementById('portal-modal').style.display = 'flex';
         }
 
-        async function attemptAdminLogin() {
-            const email = document.getElementById('admin-email').value;
-            const pass = document.getElementById('admin-pass').value;
-            const statusEl = document.getElementById('login-status');
-            
-            if(!email || !pass) {
-                statusEl.innerText = "Email and Password required.";
-                return;
-            }
-
-            statusEl.innerText = "Authenticating with Postgres Auth...";
-            statusEl.style.color = "#facc15";
-
-            try {
-                // Talk to Supabase Native Auth instead of Google Sheets
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: pass
-                });
-
-                if (error) throw error;
-
-                if (data.session) {
-                    // Admin gets all apps
-                    unlockApp(['ops', 'vtx', 'vtz', 'noiz', 'vault']);
-                }
-
-            } catch (err) {
-                statusEl.innerText = err.message || "Access Denied.";
-                statusEl.style.color = "#ef4444";
-            }
-        }
-
-        // --- OS ROUTING & NAVIGATION ---
-        function unlockApp(allowedApps) {
-            document.getElementById('login-wrapper').style.display = 'none';
-            document.getElementById('os-sidebar').style.display = 'flex';
-            document.getElementById('os-splash').style.display = 'flex';
-            document.body.style.alignItems = 'center';
-            document.body.style.justifyContent = 'center';
-
-            // Filter sidebar based on permissions array
-            if (allowedApps) {
-                document.querySelectorAll('.sidebar-item').forEach(item => {
-                    const appId = item.id.replace('nav-', '');
-                    item.style.display = allowedApps.includes(appId) ? 'flex' : 'none';
-                });
-            }
-        }
-
-        function launchApp(appId) {
-            if(currentActiveApp === appId) return;
-            currentActiveApp = appId;
-            
-            var splash = document.getElementById('os-splash');
-            var appView = document.getElementById('app-view');
-            var ops = document.getElementById('ops-core');
-            var vtx = document.getElementById('vtx-core');
-            var vtz = document.getElementById('vtz-core');
-            var noiz = document.getElementById('noiz-core');
-            var vault = document.getElementById('vault-core');
-            var body = document.body;
-
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            if(document.getElementById('nav-' + appId)) {
-                document.getElementById('nav-' + appId).classList.add('active');
-            }
-
-            splash.style.display = 'none';
-            appView.style.display = 'flex';
-            body.style.alignItems = 'center';
-            body.style.justifyContent = 'flex-start';
-
-            ops.style.display = 'none';
-            vtx.style.display = 'none';
-            vtz.style.display = 'none';
-            noiz.style.display = 'none';
-            vault.style.display = 'none';
-            body.classList.remove('marketing-theme');
-            
-            if (appId === 'ops') {
-                document.documentElement.style.setProperty('--theme-primary', '#10b981');
-                document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top center, #022c22 0%, #0a0a0a 60%)');
-                ops.style.display = 'block';
-            } else if (appId === 'vtx') {
-                document.documentElement.style.setProperty('--theme-primary', '#facc15');
-                document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
-                vtx.style.display = 'block';
-            } else if (appId === 'vtz') {
-                document.documentElement.style.setProperty('--theme-primary', '#3b82f6');
-                document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top left, #1e3a8a 0%, #0a0a0a 60%)');
-                vtz.style.display = 'block';
-            } else if (appId === 'noiz') {
-                body.classList.add('marketing-theme');
-                noiz.style.display = 'block';
-            } else if (appId === 'vault') {
-                document.documentElement.style.setProperty('--theme-primary', '#facc15');
-                document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
-                vault.style.display = 'block';
-            }
-        }
-
-        function returnToHome() {
-            var splash = document.getElementById('os-splash');
-            var appView = document.getElementById('app-view');
-            var body = document.body;
-
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-
-            appView.style.display = 'none';
-            splash.style.display = 'flex';
-            body.classList.remove('marketing-theme');
-            document.documentElement.style.setProperty('--theme-primary', '#facc15');
-            document.documentElement.style.setProperty('--theme-bg-gradient', 'radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%)');
-            
-            body.style.alignItems = 'center';
-            body.style.justifyContent = 'center';
-            currentActiveApp = null;
+        function closePortalModal() {
+            document.getElementById('portal-modal').style.display = 'none';
+            const btn = document.getElementById('approve-btn');
+            btn.innerText = "APPROVE & FINALIZE";
+            btn.classList.remove('opacity-50', 'pointer-events-none');
         }
     </script>
 </body>
