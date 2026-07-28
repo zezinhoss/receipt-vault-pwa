@@ -6,6 +6,7 @@
   <title>Vault Scanner</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   
+  <!-- CRITICAL: Link to your GitHub manifest for OS Share Target -->
   <link rel="manifest" href="manifest.json">
   
   <style>
@@ -97,16 +98,16 @@
 
   <script>
     // ========================================================
-    // CRITICAL: PASTE YOUR DEPLOYED APPS SCRIPT WEB APP URL HERE
+    // CRITICAL: POINTING TO YOUR DEPLOYED GAS WEB APP URL
     // ========================================================
-    const GAS_API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyKDcWrorTdZq3zBPZ9u7O1f7Vun5Lgs8sWN2tcflZe1cvEdy2m-aZQlBdvE2A0TSpdCA/exec";
 
     var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto', isDigital=false, isCash=false;
     
-    // Register Service Worker for PWA Share Target
+    // Register Service Worker for PWA Share Target from GitHub
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(reg => {
-        console.log('SW Registered');
+        console.log('SW Registered successfully');
       }).catch(err => console.error('SW Error:', err));
     }
 
@@ -129,11 +130,12 @@
       });
     });
 
+    // Helper function to call the GAS doPost API securely without CORS preflight blocks
     async function callBackendAPI(actionName, payloadData) {
       try {
         const response = await fetch(GAS_API_URL, {
           method: 'POST',
-          // Using text/plain prevents CORS preflight errors with Google Apps Script
+          // Using text/plain is a standard GAS workaround to prevent CORS preflight OPTIONS errors
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: actionName, data: payloadData })
         });
@@ -155,7 +157,7 @@
           cachedPin = pin;
           document.getElementById('login-view').style.display = 'none';
           document.getElementById('app-view').style.display = 'block';
-          checkForSharedFiles();
+          checkForSharedFiles(); // Trigger Service worker check
         } else {
           document.getElementById('login-status').innerText = 'Invalid Access PIN';
           document.getElementById('login-status').style.color = '#ef4444';
@@ -174,12 +176,13 @@
       }
     }
 
+    // Listen for files passed from the GitHub SW.js
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data && event.data.file) {
         setStatus('Shared file detected!', 'success');
         const dt = new DataTransfer();
         dt.items.add(event.data.file);
-        handleFile({ files: dt.files });
+        handleFile({ files: dt.files }); // Mock the input element structure
       }
     });
 
@@ -281,7 +284,7 @@
 
       try {
         const responseStr = await callBackendAPI('processSecureReceipt', payload);
-        const res = JSON.parse(responseStr);
+        const res = JSON.parse(responseStr); // The backend returns a stringified JSON inside its response
         if(res.status === 'success'){
           finalizeUpload(cachedFullImgSrc, res.data, cachedPin);
         } else {
