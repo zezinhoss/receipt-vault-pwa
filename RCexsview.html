@@ -7,8 +7,8 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   
-  <!-- CRITICAL: Link to your GitHub manifest for OS Share Target -->
-  <link rel="manifest" href="manifest.json">
+  <!-- CRITICAL: Link to your GitHub manifest using a relative path -->
+  <link rel="manifest" href="./manifest.json">
   
   <style>
     body { font-family: 'Inter', sans-serif; background: #0a0a0a; background-image: radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%); color: #fff; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh; margin: 0; }
@@ -37,7 +37,6 @@
   </style>
 </head>
 <body>
-  
   <div class='glass-panel'>
     
     <div id='login-view'>
@@ -106,10 +105,10 @@
 
     var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto', isDigital=false, isCash=false;
     
-    // Register Service Worker for PWA Share Target from GitHub
+    // Register Service Worker using a relative path for GitHub Pages
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(reg => {
-        console.log('SW Registered successfully');
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        console.log('SW Registered successfully:', reg);
       }).catch(err => console.error('SW Error:', err));
     }
 
@@ -132,12 +131,11 @@
       });
     });
 
-    // Helper function to call the GAS doPost API securely without CORS preflight blocks
+    // Helper function to call the GAS doPost API securely
     async function callBackendAPI(actionName, payloadData) {
       try {
         const response = await fetch(GAS_API_URL, {
           method: 'POST',
-          // Using text/plain is a standard GAS workaround to prevent CORS preflight OPTIONS errors
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: actionName, data: payloadData })
         });
@@ -178,7 +176,7 @@
       }
     }
 
-    // Listen for files passed from the GitHub SW.js
+    // Listen for files passed from sw.js
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data && event.data.file) {
         setStatus('Shared file detected!', 'success');
@@ -286,7 +284,7 @@
 
       try {
         const responseStr = await callBackendAPI('processSecureReceipt', payload);
-        const res = JSON.parse(responseStr); // The backend returns a stringified JSON inside its response
+        const res = JSON.parse(responseStr); 
         if(res.status === 'success'){
           finalizeUpload(cachedFullImgSrc, res.data, cachedPin);
         } else {
