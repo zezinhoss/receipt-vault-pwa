@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <title>Vault</title>
   
-  <!-- Critical Android/iOS Naming & Theme Meta Tags -->
   <meta name="application-name" content="Vault">
   <meta name="apple-mobile-web-app-title" content="Vault">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#facc15">
   
-  <!-- Absolute Root Path for Custom Domain Manifest -->
   <link rel="manifest" href="/manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   
@@ -88,29 +86,30 @@
       
       <div id='inputContainer'>
         <label class='btn btn-primary'>Open Camera
-          <input type='file' accept='image/jpeg,image/png,image/tiff' capture='environment' onchange='handleFile(this)'>
+          <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
         </label>
         <label class='btn'>Open Gallery
-          <input type='file' accept='image/jpeg,image/png,image/tiff,image/webp,application/pdf' onchange='handleFile(this)'>
+          <!-- FIXED: Broadened accept attribute to explicitly target PDF and images on Android -->
+          <input type='file' accept='image/*,application/pdf,.pdf' onchange='handleFile(this)'>
         </label>
       </div>
       
+      <!-- ADDED: Dedicated upload button to hold the process -->
+      <button id='uploadBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Upload Document</button>
+      
       <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Try Again</button>
       <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
+      
       <div class='preview-zone'><img id='preview' src='' alt='Preview'></div>
       <div id='status'>Awaiting Document...</div>
     </div>
   </div>
 
   <script>
-    // ========================================================
-    // EXTERNAL GAS API ENDPOINT
-    // ========================================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyKDcWrorTdZq3zBPZ9u7O1f7Vun5Lgs8sWN2tcflZe1cvEdy2m-aZQlBdvE2A0TSpdCA/exec";
 
     var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto', isDigital=false, isCash=false;
     
-    // Register Service Worker from the Absolute Root
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then(reg => {
         console.log('SW Registered successfully:', reg);
@@ -143,7 +142,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: actionName, data: payloadData })
         });
-        return await response.json();
+        return await response.json(); // Automatically parses the JSON
       } catch (e) {
         throw new Error("Network connection failed.");
       }
@@ -161,7 +160,7 @@
           cachedPin = pin;
           document.getElementById('login-view').style.display = 'none';
           document.getElementById('app-view').style.display = 'block';
-          checkForSharedFiles(); // Check if file was queued by OS
+          checkForSharedFiles();
         } else {
           document.getElementById('login-status').innerText = 'Invalid Access PIN';
           document.getElementById('login-status').style.color = '#ef4444';
@@ -219,23 +218,26 @@
         if(btn){ btn.style.display='block'; btn.disabled=false; btn.style.opacity='1'; }
     }
 
+    // FIXED: The handleFile function no longer calls runAPI() automatically.
+    // It now displays the Upload button, allowing the user to select toggles first.
     function handleFile(inputEl){
       if(!inputEl.files.length) return;
-      cachedForcedMonth = document.getElementById('monthOverride').value;
       document.getElementById('inputContainer').style.display='none';
-      disableButtons();
       var file = inputEl.files[0];
       var mimeType = file.type;
       setStatus('Compacting asset...','loading');
       
-      if(mimeType === 'application/pdf'){
+      if(mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')){
         var reader = new FileReader();
         reader.onload = function(e){
           cachedBase64 = e.target.result.split(',')[1];
           cachedFullImgSrc = e.target.result;
-          cachedMimeType = mimeType;
+          cachedMimeType = 'application/pdf';
           document.getElementById('preview').style.display = 'none';
-          runAPI();
+          
+          // Display the new Upload Button
+          document.getElementById('uploadBtn').style.display = 'block';
+          setStatus('Asset ready. Confirm options and upload.', 'success');
         };
         reader.readAsDataURL(file);
       } else {
@@ -257,13 +259,17 @@
             cachedMimeType = 'image/jpeg';
             document.getElementById('preview').src = dataUrl;
             document.getElementById('preview').style.display = 'inline-block';
-            runAPI();
+            
+            // Display the new Upload Button
+            document.getElementById('uploadBtn').style.display = 'block';
+            setStatus('Asset ready. Confirm options and upload.', 'success');
           };
           img.onerror = function(){
             cachedBase64 = e.target.result.split(',')[1];
             cachedFullImgSrc = e.target.result;
             cachedMimeType = mimeType;
-            runAPI();
+            document.getElementById('uploadBtn').style.display = 'block';
+            setStatus('Asset ready. Confirm options and upload.', 'success');
           };
           img.src = e.target.result;
         };
@@ -272,8 +278,12 @@
     }
 
     async function runAPI(){
+      // Pull the forced month exactly at the moment the upload button is clicked
+      cachedForcedMonth = document.getElementById('monthOverride').value;
+      
       setStatus('Transmitting... Safe to pocket your phone! 🚀','loading');
       document.getElementById('retryBtn').style.display='none';
+      document.getElementById('uploadBtn').style.display='none'; // Hide the upload button
       disableButtons();
       
       const payload = {
@@ -286,8 +296,9 @@
       };
 
       try {
-        const responseStr = await callBackendAPI('processSecureReceipt', payload);
-        const res = JSON.parse(responseStr); 
+        // FIXED: Removed the secondary JSON.parse(). callBackendAPI already parses it.
+        const res = await callBackendAPI('processSecureReceipt', payload);
+        
         if(res.status === 'success'){
           finalizeUpload(cachedFullImgSrc, res.data, cachedPin);
         } else {
@@ -313,8 +324,8 @@
       };
 
       try {
-        const responseStr = await callBackendAPI('saveFinalData', payload);
-        const r = JSON.parse(responseStr);
+        // FIXED: Removed the secondary JSON.parse().
+        const r = await callBackendAPI('saveFinalData', payload);
         if(r.status === 'success'){
           setStatus('Success!<br>' + r.file, 'success');
           enableButtons();
@@ -331,13 +342,26 @@
     }
 
     function resetForm(){
+      // Clear visual inputs and hide buttons
       setStatus('Awaiting Document...','');
       document.getElementById('preview').style.display='none';
       document.getElementById('preview').src='';
       document.querySelectorAll('input[type=file]').forEach(i => i.value='');
       document.getElementById('retryBtn').style.display='none';
       document.getElementById('newBtn').style.display='none';
+      document.getElementById('uploadBtn').style.display='none';
       document.getElementById('inputContainer').style.display='block';
+      
+      // Reset Toggles to defaults so they don't carry over to the next scan
+      isDigital = false;
+      document.getElementById('btn-digital').classList.remove('active');
+      document.getElementById('text-digital').innerText = 'Digital?';
+      
+      isCash = false;
+      document.getElementById('btn-cash').classList.remove('active');
+      document.getElementById('text-cash').innerText = 'In Cash?';
+      
+      document.getElementById('monthOverride').value = 'auto';
     }
   </script>
 </body>
