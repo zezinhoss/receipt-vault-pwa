@@ -89,12 +89,12 @@
           <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
         </label>
         <label class='btn'>Open Gallery
-          <!-- FIXED: Broadened accept attribute to explicitly target PDF and images on Android -->
+          <!-- EXPANDED ACCEPT ATTRIBUTE FOR ANDROID PDF SUPPORT -->
           <input type='file' accept='image/*,application/pdf,.pdf' onchange='handleFile(this)'>
         </label>
       </div>
       
-      <!-- ADDED: Dedicated upload button to hold the process -->
+      <!-- THE NEW DEDICATED UPLOAD BUTTON -->
       <button id='uploadBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Upload Document</button>
       
       <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Try Again</button>
@@ -142,7 +142,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: actionName, data: payloadData })
         });
-        return await response.json(); // Automatically parses the JSON
+        return await response.json(); 
       } catch (e) {
         throw new Error("Network connection failed.");
       }
@@ -218,8 +218,6 @@
         if(btn){ btn.style.display='block'; btn.disabled=false; btn.style.opacity='1'; }
     }
 
-    // FIXED: The handleFile function no longer calls runAPI() automatically.
-    // It now displays the Upload button, allowing the user to select toggles first.
     function handleFile(inputEl){
       if(!inputEl.files.length) return;
       document.getElementById('inputContainer').style.display='none';
@@ -235,7 +233,7 @@
           cachedMimeType = 'application/pdf';
           document.getElementById('preview').style.display = 'none';
           
-          // Display the new Upload Button
+          // DISPLAY UPLOAD BUTTON INSTEAD OF AUTO-RUNNING
           document.getElementById('uploadBtn').style.display = 'block';
           setStatus('Asset ready. Confirm options and upload.', 'success');
         };
@@ -260,7 +258,7 @@
             document.getElementById('preview').src = dataUrl;
             document.getElementById('preview').style.display = 'inline-block';
             
-            // Display the new Upload Button
+            // DISPLAY UPLOAD BUTTON INSTEAD OF AUTO-RUNNING
             document.getElementById('uploadBtn').style.display = 'block';
             setStatus('Asset ready. Confirm options and upload.', 'success');
           };
@@ -278,12 +276,11 @@
     }
 
     async function runAPI(){
-      // Pull the forced month exactly at the moment the upload button is clicked
       cachedForcedMonth = document.getElementById('monthOverride').value;
       
       setStatus('Transmitting... Safe to pocket your phone! 🚀','loading');
       document.getElementById('retryBtn').style.display='none';
-      document.getElementById('uploadBtn').style.display='none'; // Hide the upload button
+      document.getElementById('uploadBtn').style.display='none'; 
       disableButtons();
       
       const payload = {
@@ -296,7 +293,7 @@
       };
 
       try {
-        // FIXED: Removed the secondary JSON.parse(). callBackendAPI already parses it.
+        // Removed JSON.parse() since callBackendAPI already returns a parsed JSON object.
         const res = await callBackendAPI('processSecureReceipt', payload);
         
         if(res.status === 'success'){
@@ -324,7 +321,7 @@
       };
 
       try {
-        // FIXED: Removed the secondary JSON.parse().
+        // Removed JSON.parse() to fix the [object Object] error.
         const r = await callBackendAPI('saveFinalData', payload);
         if(r.status === 'success'){
           setStatus('Success!<br>' + r.file, 'success');
@@ -342,7 +339,6 @@
     }
 
     function resetForm(){
-      // Clear visual inputs and hide buttons
       setStatus('Awaiting Document...','');
       document.getElementById('preview').style.display='none';
       document.getElementById('preview').src='';
@@ -352,7 +348,6 @@
       document.getElementById('uploadBtn').style.display='none';
       document.getElementById('inputContainer').style.display='block';
       
-      // Reset Toggles to defaults so they don't carry over to the next scan
       isDigital = false;
       document.getElementById('btn-digital').classList.remove('active');
       document.getElementById('text-digital').innerText = 'Digital?';
