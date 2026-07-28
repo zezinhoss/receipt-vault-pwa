@@ -3,12 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <title>Vault Scanner</title>
+  <title>Vault</title>
   
+  <!-- Critical Android/iOS Naming & Theme Meta Tags -->
+  <meta name="application-name" content="Vault">
+  <meta name="apple-mobile-web-app-title" content="Vault">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#facc15">
+  
+  <!-- Absolute Root Path for Custom Domain Manifest -->
+  <link rel="manifest" href="/manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  
-  <!-- CRITICAL: Link to your GitHub manifest using a relative path -->
-  <link rel="manifest" href="./manifest.json">
   
   <style>
     body { font-family: 'Inter', sans-serif; background: #0a0a0a; background-image: radial-gradient(circle at top right, #2a2a2a 0%, #0a0a0a 60%); color: #fff; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh; margin: 0; }
@@ -99,15 +104,15 @@
 
   <script>
     // ========================================================
-    // CRITICAL: POINTING TO YOUR DEPLOYED GAS WEB APP URL
+    // EXTERNAL GAS API ENDPOINT
     // ========================================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyKDcWrorTdZq3zBPZ9u7O1f7Vun5Lgs8sWN2tcflZe1cvEdy2m-aZQlBdvE2A0TSpdCA/exec";
 
     var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto', isDigital=false, isCash=false;
     
-    // Register Service Worker using a relative path for GitHub Pages
+    // Register Service Worker from the Absolute Root
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').then(reg => {
+      navigator.serviceWorker.register('/sw.js').then(reg => {
         console.log('SW Registered successfully:', reg);
       }).catch(err => console.error('SW Error:', err));
     }
@@ -131,7 +136,6 @@
       });
     });
 
-    // Helper function to call the GAS doPost API securely
     async function callBackendAPI(actionName, payloadData) {
       try {
         const response = await fetch(GAS_API_URL, {
@@ -157,7 +161,7 @@
           cachedPin = pin;
           document.getElementById('login-view').style.display = 'none';
           document.getElementById('app-view').style.display = 'block';
-          checkForSharedFiles(); // Trigger Service worker check
+          checkForSharedFiles(); // Check if file was queued by OS
         } else {
           document.getElementById('login-status').innerText = 'Invalid Access PIN';
           document.getElementById('login-status').style.color = '#ef4444';
@@ -176,13 +180,12 @@
       }
     }
 
-    // Listen for files passed from sw.js
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data && event.data.file) {
         setStatus('Shared file detected!', 'success');
         const dt = new DataTransfer();
         dt.items.add(event.data.file);
-        handleFile({ files: dt.files }); // Mock the input element structure
+        handleFile({ files: dt.files }); 
       }
     });
 
