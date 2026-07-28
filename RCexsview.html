@@ -40,8 +40,8 @@
   </style>
 </head>
 <body>
+
   <div class='glass-panel'>
-    
     <div id='login-view'>
       <h3>SECURE VAULT</h3>
       <p>Restricted Access</p>
@@ -90,12 +90,12 @@
           <input type='file' accept='image/jpeg,image/png,image/tiff' capture='environment' onchange='handleFile(this)'>
         </label>
         <label class='btn'>Open Gallery
-          <!-- The strictly defined accept rule allows PDFs -->
+          <!-- Explicit PDF and image formats allowing native picker to see documents -->
           <input type='file' accept='image/jpeg,image/png,image/tiff,image/webp,application/pdf,.pdf' onchange='handleFile(this)'>
         </label>
       </div>
       
-      <!-- The upload triggers manually so you have time to set the toggles above -->
+      <!-- The upload holds manually so you have time to set toggles above -->
       <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Upload Document</button>
       <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
       
