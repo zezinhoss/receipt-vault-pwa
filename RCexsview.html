@@ -86,18 +86,14 @@
       
       <div id='inputContainer'>
         <label class='btn btn-primary'>Open Camera
-          <input type='file' accept='image/*' capture='environment' onchange='handleFile(this)'>
+          <input type='file' accept='image/jpeg,image/png,image/tiff' capture='environment' onchange='handleFile(this)'>
         </label>
         <label class='btn'>Open Gallery
-          <!-- EXPANDED ACCEPT ATTRIBUTE FOR ANDROID PDF SUPPORT -->
-          <input type='file' accept='image/*,application/pdf,.pdf' onchange='handleFile(this)'>
+          <input type='file' accept='image/jpeg,image/png,image/tiff,image/webp,application/pdf,.pdf' onchange='handleFile(this)'>
         </label>
       </div>
       
-      <!-- THE NEW DEDICATED UPLOAD BUTTON -->
-      <button id='uploadBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Upload Document</button>
-      
-      <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Try Again</button>
+      <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Upload Document</button>
       <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
       
       <div class='preview-zone'><img id='preview' src='' alt='Preview'></div>
@@ -106,14 +102,15 @@
   </div>
 
   <script>
+    // PASTE YOUR EXACT GOOGLE APPS SCRIPT WEB APP URL HERE:
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyKDcWrorTdZq3zBPZ9u7O1f7Vun5Lgs8sWN2tcflZe1cvEdy2m-aZQlBdvE2A0TSpdCA/exec";
 
     var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto', isDigital=false, isCash=false;
     
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then(reg => {
-        console.log('SW Registered successfully:', reg);
-      }).catch(err => console.error('SW Error:', err));
+        console.log('SW Registered');
+      }).catch(err => console.error('SW Error', err));
     }
 
     const pinBoxes = document.querySelectorAll('.pin-box');
@@ -135,6 +132,7 @@
       });
     });
 
+    // HIGH-SPEED FETCH ROUTINE (Bypasses CORS preflight by using text/plain)
     async function callBackendAPI(actionName, payloadData) {
       try {
         const response = await fetch(GAS_API_URL, {
@@ -232,9 +230,7 @@
           cachedFullImgSrc = e.target.result;
           cachedMimeType = 'application/pdf';
           document.getElementById('preview').style.display = 'none';
-          
-          // DISPLAY UPLOAD BUTTON INSTEAD OF AUTO-RUNNING
-          document.getElementById('uploadBtn').style.display = 'block';
+          document.getElementById('retryBtn').style.display = 'block';
           setStatus('Asset ready. Confirm options and upload.', 'success');
         };
         reader.readAsDataURL(file);
@@ -257,16 +253,14 @@
             cachedMimeType = 'image/jpeg';
             document.getElementById('preview').src = dataUrl;
             document.getElementById('preview').style.display = 'inline-block';
-            
-            // DISPLAY UPLOAD BUTTON INSTEAD OF AUTO-RUNNING
-            document.getElementById('uploadBtn').style.display = 'block';
+            document.getElementById('retryBtn').style.display = 'block';
             setStatus('Asset ready. Confirm options and upload.', 'success');
           };
           img.onerror = function(){
             cachedBase64 = e.target.result.split(',')[1];
             cachedFullImgSrc = e.target.result;
             cachedMimeType = mimeType;
-            document.getElementById('uploadBtn').style.display = 'block';
+            document.getElementById('retryBtn').style.display = 'block';
             setStatus('Asset ready. Confirm options and upload.', 'success');
           };
           img.src = e.target.result;
@@ -280,7 +274,6 @@
       
       setStatus('Transmitting... Safe to pocket your phone! 🚀','loading');
       document.getElementById('retryBtn').style.display='none';
-      document.getElementById('uploadBtn').style.display='none'; 
       disableButtons();
       
       const payload = {
@@ -293,7 +286,6 @@
       };
 
       try {
-        // Removed JSON.parse() since callBackendAPI already returns a parsed JSON object.
         const res = await callBackendAPI('processSecureReceipt', payload);
         
         if(res.status === 'success'){
@@ -321,7 +313,6 @@
       };
 
       try {
-        // Removed JSON.parse() to fix the [object Object] error.
         const r = await callBackendAPI('saveFinalData', payload);
         if(r.status === 'success'){
           setStatus('Success!<br>' + r.file, 'success');
@@ -345,7 +336,6 @@
       document.querySelectorAll('input[type=file]').forEach(i => i.value='');
       document.getElementById('retryBtn').style.display='none';
       document.getElementById('newBtn').style.display='none';
-      document.getElementById('uploadBtn').style.display='none';
       document.getElementById('inputContainer').style.display='block';
       
       isDigital = false;
