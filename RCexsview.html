@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <title>Vault</title>
+  <title>Vault Scanner</title>
   
+  <!-- OS Naming Overrides to force the app to be named "Vault" -->
   <meta name="application-name" content="Vault">
   <meta name="apple-mobile-web-app-title" content="Vault">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -57,6 +58,7 @@
     <div id='app-view' style='display:none;'>
       <h3>EXPENSE SCAN</h3>
       <p>Document Ingestion</p>
+      
       <div class="input-group">
         <select id='monthOverride'>
           <option value='auto'>Auto Month</option>
@@ -89,10 +91,12 @@
           <input type='file' accept='image/jpeg,image/png,image/tiff' capture='environment' onchange='handleFile(this)'>
         </label>
         <label class='btn'>Open Gallery
+          <!-- Explicitly asking Android/iOS to accept PDF documents and standard web images -->
           <input type='file' accept='image/jpeg,image/png,image/tiff,image/webp,application/pdf,.pdf' onchange='handleFile(this)'>
         </label>
       </div>
       
+      <!-- The upload triggers manually so you have time to set the toggles above -->
       <button id='retryBtn' class='btn btn-primary' style='display:none;' onclick='runAPI()'>Upload Document</button>
       <button id='newBtn' class='btn' style='display:none;' onclick='resetForm()'>Scan Another</button>
       
@@ -102,17 +106,21 @@
   </div>
 
   <script>
-    // PASTE YOUR EXACT GOOGLE APPS SCRIPT WEB APP URL HERE:
+    // ==========================================
+    // REQUIRED: PASTE YOUR APPS SCRIPT URL HERE
+    // ==========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyKDcWrorTdZq3zBPZ9u7O1f7Vun5Lgs8sWN2tcflZe1cvEdy2m-aZQlBdvE2A0TSpdCA/exec";
 
-    var cachedBase64='', cachedFullImgSrc='', cachedMimeType='', cachedPin='', cachedForcedMonth='auto', isDigital=false, isCash=false;
+    var cachedBase64 = '', cachedFullImgSrc = '', cachedMimeType = '', cachedPin = '', cachedForcedMonth = 'auto', isDigital = false, isCash = false;
     
+    // Background Service Worker for Native App & OS Share Sheet Registration
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then(reg => {
-        console.log('SW Registered');
-      }).catch(err => console.error('SW Error', err));
+        console.log('SW Registered successfully');
+      }).catch(err => console.error('SW Registration Failed', err));
     }
 
+    // Auto-advancing PIN Pad
     const pinBoxes = document.querySelectorAll('.pin-box');
     var rawPin = ['','','',''];
     pinBoxes.forEach((box,index) => {
@@ -132,7 +140,7 @@
       });
     });
 
-    // HIGH-SPEED FETCH ROUTINE (Bypasses CORS preflight by using text/plain)
+    // High-speed API router (bypasses standard CORS preflight using text/plain)
     async function callBackendAPI(actionName, payloadData) {
       try {
         const response = await fetch(GAS_API_URL, {
@@ -171,6 +179,7 @@
       }
     }
 
+    // Checking if the app was launched by sharing a file from the OS
     function checkForSharedFiles() {
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({ action: 'get-shared-file' });
@@ -216,6 +225,7 @@
         if(btn){ btn.style.display='block'; btn.disabled=false; btn.style.opacity='1'; }
     }
 
+    // Core function to read the image/PDF and compress it using the HTML5 Canvas Engine
     function handleFile(inputEl){
       if(!inputEl.files.length) return;
       document.getElementById('inputContainer').style.display='none';
@@ -224,22 +234,25 @@
       setStatus('Compacting asset...','loading');
       
       if(mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')){
+        // PDFs bypass the canvas and are ingested raw directly
         var reader = new FileReader();
         reader.onload = function(e){
           cachedBase64 = e.target.result.split(',')[1];
           cachedFullImgSrc = e.target.result;
           cachedMimeType = 'application/pdf';
           document.getElementById('preview').style.display = 'none';
-          document.getElementById('retryBtn').style.display = 'block';
-          setStatus('Asset ready. Confirm options and upload.', 'success');
+          document.getElementById('retryBtn').style.display = 'block'; // Shows Upload Button
+          setStatus('Asset ready. Confirm options and press Upload.', 'success');
         };
         reader.readAsDataURL(file);
       } else {
+        // High-performance image compactor
         var reader = new FileReader();
         reader.onload = function(e){
           var img = new Image();
           img.onload = function(){
             var canvas = document.createElement('canvas');
+            // 2400px Golden resolution maximum cap
             var maxW = 2400, maxH = 2400, w = img.width, h = img.height;
             if(w > maxW || h > maxH){
               if(w > h){ h *= maxW / w; w = maxW; }
@@ -247,21 +260,23 @@
             }
             canvas.width = w; canvas.height = h;
             canvas.getContext('2d').drawImage(img,0,0,w,h);
+            
+            // Compacting to 90% JPEG quality
             var dataUrl = canvas.toDataURL('image/jpeg', 0.90);
             cachedBase64 = dataUrl.split(',')[1];
             cachedFullImgSrc = dataUrl;
             cachedMimeType = 'image/jpeg';
             document.getElementById('preview').src = dataUrl;
             document.getElementById('preview').style.display = 'inline-block';
-            document.getElementById('retryBtn').style.display = 'block';
-            setStatus('Asset ready. Confirm options and upload.', 'success');
+            document.getElementById('retryBtn').style.display = 'block'; // Shows Upload Button
+            setStatus('Asset ready. Confirm options and press Upload.', 'success');
           };
           img.onerror = function(){
             cachedBase64 = e.target.result.split(',')[1];
             cachedFullImgSrc = e.target.result;
             cachedMimeType = mimeType;
             document.getElementById('retryBtn').style.display = 'block';
-            setStatus('Asset ready. Confirm options and upload.', 'success');
+            setStatus('Asset ready. Confirm options and press Upload.', 'success');
           };
           img.src = e.target.result;
         };
@@ -338,6 +353,7 @@
       document.getElementById('newBtn').style.display='none';
       document.getElementById('inputContainer').style.display='block';
       
+      // Reset Toggles
       isDigital = false;
       document.getElementById('btn-digital').classList.remove('active');
       document.getElementById('text-digital').innerText = 'Digital?';
