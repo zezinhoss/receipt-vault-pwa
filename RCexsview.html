@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <title>Vault Scanner</title>
   
-  <!-- OS Naming Overrides to force the app to be named "Vault" -->
   <meta name="application-name" content="Vault">
   <meta name="apple-mobile-web-app-title" content="Vault">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -91,7 +90,7 @@
           <input type='file' accept='image/jpeg,image/png,image/tiff' capture='environment' onchange='handleFile(this)'>
         </label>
         <label class='btn'>Open Gallery
-          <!-- Explicitly asking Android/iOS to accept PDF documents and standard web images -->
+          <!-- The strictly defined accept rule allows PDFs -->
           <input type='file' accept='image/jpeg,image/png,image/tiff,image/webp,application/pdf,.pdf' onchange='handleFile(this)'>
         </label>
       </div>
@@ -161,8 +160,8 @@
       document.getElementById('login-status').style.color = '#facc15';
       
       try {
-        const isValid = await callBackendAPI('verifyPin', { pin: pin });
-        if(isValid){
+        const res = await callBackendAPI('verifyPin', { pin: pin });
+        if(res){
           cachedPin = pin;
           document.getElementById('login-view').style.display = 'none';
           document.getElementById('app-view').style.display = 'block';
@@ -179,7 +178,6 @@
       }
     }
 
-    // Checking if the app was launched by sharing a file from the OS
     function checkForSharedFiles() {
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({ action: 'get-shared-file' });
@@ -333,7 +331,8 @@
           setStatus('Success!<br>' + r.file, 'success');
           enableButtons();
         } else {
-          setStatus('Archive Error: ' + r.error, 'error');
+          // THIS DISPLAYS THE DUPLICATE UPLOAD RED TEXT
+          setStatus('Archive Error: ' + r.error, 'error'); 
           document.getElementById('retryBtn').style.display = 'block';
           enableButtons();
         }
