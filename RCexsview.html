@@ -112,6 +112,22 @@
 
     var cachedBase64 = '', cachedFullImgSrc = '', cachedMimeType = '', cachedPin = '', cachedForcedMonth = 'auto', isDigital = false, isCash = false;
     
+    // --- START 5-MINUTE PIN CHECK ---
+    const storedPin = localStorage.getItem('vaultPin');
+    const storedTime = localStorage.getItem('vaultPinTime');
+    // Check if we have a PIN and if less than 5 minutes (300,000 milliseconds) has passed
+    if (storedPin && storedTime && (Date.now() - parseInt(storedTime) < 300000)) {
+      cachedPin = storedPin;
+      document.getElementById('login-view').style.display = 'none';
+      document.getElementById('app-view').style.display = 'block';
+      checkForSharedFiles();
+    } else {
+      // If more than 5 mins, clear out the old data
+      localStorage.removeItem('vaultPin');
+      localStorage.removeItem('vaultPinTime');
+    }
+    // --- END 5-MINUTE PIN CHECK ---
+
     // Background Service Worker for Native App & OS Share Sheet Registration
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then(reg => {
@@ -163,6 +179,13 @@
         const res = await callBackendAPI('verifyPin', { pin: pin });
         if(res){
           cachedPin = pin;
+          
+          // --- START SAVE 5-MINUTE PIN LOGIC ---
+          // Save the PIN and the current time to the phone's memory
+          localStorage.setItem('vaultPin', pin);
+          localStorage.setItem('vaultPinTime', Date.now().toString());
+          // --- END SAVE 5-MINUTE PIN LOGIC ---
+
           document.getElementById('login-view').style.display = 'none';
           document.getElementById('app-view').style.display = 'block';
           checkForSharedFiles();
